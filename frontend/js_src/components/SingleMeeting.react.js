@@ -38,7 +38,10 @@ var SingleMeeting = React.createClass({
 
             $(this.refs['meeting'].getDOMNode()).draggable({
                 revert: "invalid",
-                containment: this._owner.getMeetingContainer()
+                containment: this._owner.getMeetingContainer(),
+                stop: function(event, ui) {
+                    ui.helper.css('left', '');
+                }
 
             })
             .on('mousedown', function() {

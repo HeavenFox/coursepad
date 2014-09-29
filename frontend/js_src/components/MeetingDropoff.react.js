@@ -10,7 +10,7 @@ var MeetingDropoff = React.createClass({
     componentDidMount: function() {
         var self = this;
         $(this.refs['dropoff'].getDOMNode()).droppable({drop: function(event, ui) {
-            self.onDropped(ui.draggable.data('nbr'))
+            self.onDropped(ui.draggable.attr('data-nbr'))
 
         }});
     },
