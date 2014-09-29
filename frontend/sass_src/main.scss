@@ -1,0 +1,263 @@
+@mixin no-user-interaction {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+$topbar-height : 70px;
+$leftbar-width-collapsed : 40px;
+
+
+$calendar-element-width: 120px;
+$calendar-element-gutter: 20px;
+
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 300;
+    background-color: #2B2B2B;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+#main {
+    position: absolute;
+    top: $topbar-height;
+    left: $leftbar-width-collapsed;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+
+}
+
+header {
+    margin: 0 0 0 $leftbar-width-collapsed;
+    padding: 0;
+
+    height: $topbar-height;
+
+    color: white;
+}
+
+#logo {
+    width: 170px;
+    height: $topbar-height;
+    margin: 0 0 0 10px;
+    background-image: url('../img/logo.png');
+
+        background-repeat: no-repeat;
+        background-position: center;
+    @media print,
+       (-o-min-device-pixel-ratio: 5/4),
+       (-webkit-min-device-pixel-ratio: 1.25),
+       (min-resolution: 120dpi) {
+        background-image: url('../img/logo@2x.png');
+        background-size: 50% 50%;
+    }
+
+    float: left;
+}
+
+#topnav {
+    float: right;
+}
+
+$cal-time-width: 70px;
+
+#calendar {
+    width: 70%;
+    height: 100%;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    float: left;
+}
+
+#utilities {
+    width: 30%;
+    float: right;
+}
+
+.cal-inner {
+    position: relative;
+    margin-top: 20px;
+}
+
+.cal-meetings {
+    margin-left: $cal-time-width;
+    padding-left: 10px;
+    margin-right: 10px;
+}
+
+.cal-meetings-inner {
+    margin: 0 auto 0 auto;
+    position: relative;
+    width: 4 * $calendar-element-gutter + 5 * $calendar-element-width;
+}
+
+.cal-stripe {
+    height: 62px;
+    padding-top: 3px;
+}
+
+.cal-time {
+    color: #7E7E7E;
+    font-size: 18px;
+    text-align: right;
+    width: $cal-time-width;
+}
+
+.cal-stripes {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    @include no-user-interaction;
+}
+
+.cal-stripe.odd {
+    background-color: #FAFAFA;
+}
+
+.calele {
+    width: $calendar-element-width;
+    position: absolute;
+    z-index: 2;
+}
+
+.calele-m {
+    left: 0;
+}
+
+.calele-t {
+    left: $calendar-element-gutter + $calendar-element-width;
+}
+
+.calele-w {
+    left: 2 * $calendar-element-gutter + 2 * $calendar-element-width;
+}
+
+.calele-r {
+    left: 3 * $calendar-element-gutter + 3 * $calendar-element-width;
+}
+
+.calele-f {
+    left: 4 * $calendar-element-gutter + 4 * $calendar-element-width;
+}
+
+.calele-s {
+    left: 5 * $calendar-element-gutter + 5 * $calendar-element-width;
+}
+
+.meeting {
+}
+
+.meeting p {
+    margin: 0;
+    text-align: center;
+}
+
+p.meeting-title {
+    font-size: 14px;
+    margin: 3px 0 3px 0;
+}
+
+p.meeting-time, p.meeting-loc {
+    font-size: 10px;
+}
+
+.meeting.pearl {
+    background-color: rgba(234, 224, 200, 0.75);
+}
+.meeting.pink {
+    background-color: rgba(234, 205, 200, 0.75);
+}
+.meeting.purple {
+    background-color: rgba(234, 200, 223, 0.75);
+}
+.meeting.lavender {
+    background-color: rgba(221, 200, 234, 0.75);
+}
+.meeting.blue {
+    background-color: rgba(200, 201, 234, 0.75);
+}
+.meeting.cyan {
+    background-color: rgba(200, 234, 234, 0.75);
+}
+.meeting.applegreen {
+    background-color: rgba(200, 234, 217, 0.75);
+}
+.meeting.green {
+    background-color: rgba(205, 234, 200, 0.75);
+}
+.meeting.beryl {
+    background-color: rgba(221, 234, 200, 0.75);
+}
+.meeting.yellow {
+    background-color: rgba(229, 234, 200, 0.75);
+}
+
+.meeting.mutable {
+    @include no-user-interaction;
+}
+
+.meeting.mutable:hover, .meeting.mutable *:hover, {
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+    cursor: grab;
+}
+
+.meeting.mutable:hover {
+    border: 2px solid black;
+    margin: -2px;
+}
+
+.meeting.mutable:active,
+.meeting.mutable:active *,
+.meeting.mutable.ui-draggable-dragging:hover,
+.meeting.mutable.ui-draggable-dragging:hover * {
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+    cursor: grabbing;
+    z-index: 4;
+}
+
+.mtdropoff {
+    border: 2px dashed #AEAEAE;
+    background-color: rgba(250, 250, 250, 0.95);
+    margin: -2px;
+
+
+    z-index: 3;
+    color: #949494;
+    text-align: center;
+}
+
+.mtdropoff p {
+}
+
+.mtdropoff-inner {
+    display: inline-block;
+  vertical-align: middle;
+  width: 100%;
+}
+
+
+.mtdropoff:before {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+
+p.mtdropoff-time {
+    font-size: 11px;
+}
