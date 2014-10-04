@@ -258,6 +258,76 @@ p.meeting-time, p.meeting-loc {
   vertical-align: middle;
 }
 
-p.mtdropoff-time {
-    font-size: 11px;
+.mtdropoff p {
+    font-size: 10px;
+    margin: 2px;
+}
+
+
+/* Search */
+#topsearch {
+    margin-left: 180px;
+    margin-right: 250px;
+}
+
+#topsearch input {
+    width: calc(100% - 50px);
+    max-width: 450px;
+
+    border: 1px solid black;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 300;
+    padding: 5px;
+    margin-left: 50px;
+    margin-top: ($topbar-height - 30px) / 2;
+}
+
+.ui-autocomplete {
+    position: absolute;
+    list-style: none;
+    background-color: white;
+    padding: 5px 0 5px 0;
+    z-index: 10;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.ui-autocomplete .ui-menu-item {
+    padding: 5px;
+}
+
+.ui-autocomplete .ui-menu-item.ui-state-focus {
+    background-color: #eee;
+}
+
+.ui-autocomplete .ui-menu-item p {
+    font-size: 14px;
+    margin: 0;
+    text-overflow: ellipsis;
+}
+
+.ui-autocomplete .ui-menu-item p em {
+    font-style: normal;
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+
+#loading {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 100px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;;
+    background-color: white;
+    border: 1px solid #ccc;
+    margin: -15px 0 0 -50px;
+    z-index: 99;
+}
+
+.hidden {
+    display: none;
 }

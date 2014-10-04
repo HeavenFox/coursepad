@@ -1,6 +1,10 @@
 module.exports = {
 	db: function(path) {
-		return 'http://coursepadtest.me/static/data/' + path;
+        if (PROD) {
+            return 'http://coursepad.github.io/static/data/' + path;
+        } else {
+            return 'http://coursepadtest.me/static/data/' + path;
+        }
 	}
 
 }

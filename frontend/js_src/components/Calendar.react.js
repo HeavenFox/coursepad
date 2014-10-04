@@ -33,13 +33,19 @@ var Calendar = React.createClass({
     },
 
     componentDidMount: function() {
-        schedules.on('ready', this._onScheduleChange);
         schedules.on('change', this._onScheduleChange);
+        schedules.on('readystatechange', this._onScheduleReadyStateChange);
     },
 
     componentWillUnmount: function() {
-        schedules.off('ready', this._onScheduleChange);
-        schedules.off('chane', this._onScheduleChange);
+        schedules.off('change', this._onScheduleChange);
+        schedules.off('readystatechange', this._onScheduleReadyStateChange);
+    },
+
+    _onScheduleReadyStateChange: function() {
+        if (schedules.ready) {
+            this._onScheduleChange();
+        }
     },
 
     _onScheduleChange: function() {

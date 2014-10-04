@@ -19,10 +19,9 @@
     <body>
         <header>
             <div id="logo"></div>
-            <div id="topsearch">
-                <input type="search" placeholder="Search for Courses (eg. CS3110, Intro to Programming, ...)" />
-            </div>
             <div id="topnav">Jingsi</div>
+            <div id="topsearch">
+            </div>
         </header>
         <div id="sidebar"></div>
         <div id="main">
@@ -33,12 +32,13 @@
             </div>
 
         </div>
+        <div id="loading hidden">Loading...</div>
 
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/react/0.11.2/react.js"></script>
-        <script src="js/vendor/jquery-ui.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>
-        <script>window.jQuery || document.write('<script src="js/vendor/react-0.11.2.min.js"><\/script>')</script>
+        <script>window.React || document.write('<script src="js/vendor/react-0.11.2.min.js"><\/script>')</script>
+        <script src="js/vendor/jquery-ui.min.js"></script>
         <script src="js/main.js"></script>
 
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->

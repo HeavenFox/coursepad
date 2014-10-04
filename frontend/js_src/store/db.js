@@ -36,7 +36,9 @@ function update(terms) {
 
 				}
 
-				if (!oldMeta || )
+				if (!oldMeta) {
+					
+				}
 
 
 

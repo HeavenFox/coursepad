@@ -35,6 +35,7 @@ var MeetingDropoff = React.createClass({
             {meetings.map(function(item) {
                 return <p className="mtdropoff-time">{item}</p>;
             })}
+            <p className="mtdropoff-loc">{this.props['location']}</p>
             </div>
         </div>;
 
