@@ -33,14 +33,14 @@ function CourseComponent(parent, type, obj) {
     }, this);
 }
 
+var SECTION_PRIORITY = ['LEC', 'SEM', 'IND', 'DIS', 'LAB'];
+
 function Course(obj) {
     this.id = obj['id'];
     this.number = obj['nbr'];
     this.subject = obj['sub'];
     this.title = obj['title'];
-    this.units = obj['units'] || [0];
-    // this.minUnits = obj['units'][0];
-    // this.maxUnits = obj['units'][1] || obj['units'][0];
+    this.units = obj['unit'] || [0];
 
     this.sections = {};
     for (var type in obj['secs']) {
@@ -50,6 +50,45 @@ function Course(obj) {
             }, this);
         }
     }
+};
+
+Course.prototype.getNumber = function() {
+    return this.subject + ' ' + this.number;
+};
+
+Course.prototype.getPrimarySectionType = function() {
+    for (var i=0; i < SECTION_PRIORITY.length; i++) {
+        if (this.sections.hasOwnProperty(SECTION_PRIORITY[i])) {
+            return SECTION_PRIORITY[i];
+        }
+    }
+    for (var type in this.sections) {
+        if (this.sections.hasOwnProperty(type)) {
+            return type;
+        }
+    }
+};
+
+Course.prototype.getNumberOfTypes = function() {
+    var number = 0;
+    for (var type in this.sections) {
+        if (this.sections.hasOwnProperty(type)) {
+            number++;
+        }
+    }
+    return number;
+};
+
+Course.prototype.getAllSections = function() {
+    var all = [];
+
+    for (var type in this.sections) {
+        if (this.sections.hasOwnProperty(type)) {
+            all.push.apply(all, this.sections[type]);
+        }
+    }
+
+    return all;
 };
 
 Course.prototype.findSectionByNumber = function(number) {
@@ -64,6 +103,6 @@ Course.prototype.findSectionByNumber = function(number) {
         }
     }
     return null;
-}
+};
 
 module.exports = Course;

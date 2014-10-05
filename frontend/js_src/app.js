@@ -4,6 +4,7 @@ var meta = require('./store/meta.js');
 
 var Calendar = require('./components/Calendar.react.js');
 var SearchBar = require('./components/SearchBar.react.js');
+var Sidebar = require('./components/Sidebar.react.js');
 var termdb = require('./store/termdb.js');
 
 var schedules = require('./store/schedules.js');
@@ -12,6 +13,7 @@ var schedules = require('./store/schedules.js');
 
 React.renderComponent(Calendar(), document.getElementById('calendar'));
 React.renderComponent(SearchBar(), document.getElementById('topsearch'));
+React.renderComponent(Sidebar(), document.getElementById('utilities'));
 
 function initCurrentTerm() {
     var currentTerm = meta.getSelectedTerm();

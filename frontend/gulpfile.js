@@ -2,7 +2,7 @@ var gulp = require('gulp');
 var webpack = require('gulp-webpack');
 var jsx = require('gulp-jsx');
 var uglify = require('gulp-uglify');
-var sass = require('gulp-sass');
+var sass = require('gulp-ruby-sass');
 var insert = require('gulp-insert');
 
 var DEV = false;
@@ -45,7 +45,7 @@ gulp.task('js', function() {
 
 gulp.task('css', function() {
     var sassConf = {
-        outputStyle: DEV ? 'nested' : 'compressed'
+        style: DEV ? 'nested' : 'compressed'
     };
     gulp.src('sass_src/**/*.scss')
         .pipe(sass(sassConf))

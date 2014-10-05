@@ -107,7 +107,7 @@ Schedule.prototype.addCluster = function(cluster) {
         }
     }
 
-    this.colorMapping[cluster[0].subject + cluster[0].number] = (function(){
+    this.colorMapping[cluster[0].getNumber()] = (function(){
         for (var i=0; i < palette.length; i++) {
             color = palette[i];
             found = false;
@@ -161,7 +161,7 @@ Schedule.prototype.getStoreKey = function() {
 };
 
 Schedule.prototype.getColorForCourse = function(subject, number) {
-    return this.colorMapping[subject + number];
+    return this.colorMapping[subject + ' ' + number];
 };
 
 Schedule.prototype.serializeSections = function() {
@@ -261,6 +261,9 @@ Schedule.prototype.getBasicInfo = function() {
 
     visibleSections.forEach(function(section) {
         section.meetings.forEach(function(meeting) {
+            if (!meeting.startTime || !meeting.endTime) {
+                return;
+            }
             totalHours += datetime.bitmaskToDay(meeting.pattern).length * 
                              (datetime.timeStringToHour(meeting.endTime)
                               - datetime.timeStringToHour(meeting.startTime));

@@ -10,6 +10,7 @@
 $topbar-height : 70px;
 $leftbar-width-collapsed : 40px;
 
+$right-column-width: 300px;
 
 $calendar-element-width: 120px;
 $calendar-element-gutter: 20px;
@@ -23,26 +24,12 @@ body {
 html, body {
     margin: 0;
     padding: 0;
-    height: 100%;
-    overflow: hidden;
-}
-
-#main {
-    position: absolute;
-    top: $topbar-height;
-    left: $leftbar-width-collapsed;
-    right: 0;
-    bottom: 0;
-    background-color: white;
-
 }
 
 header {
     margin: 0 0 0 $leftbar-width-collapsed;
     padding: 0;
-
     height: $topbar-height;
-
     color: white;
 }
 
@@ -69,18 +56,21 @@ header {
     float: right;
 }
 
+#main {
+    margin-left: $leftbar-width-collapsed;
+    background-color: white;
+}
+
+
 $cal-time-width: 70px;
 
 #calendar {
-    width: 70%;
-    height: 100%;
-    overflow-y: scroll;
-    -webkit-overflow-scrolling: touch;
     float: left;
+    width: calc(100% - #{$right-column-width});
 }
 
 #utilities {
-    width: 30%;
+    width: $right-column-width;
     float: right;
 }
 
@@ -114,12 +104,6 @@ $cal-time-width: 70px;
 }
 
 .cal-stripes {
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     @include no-user-interaction;
 }
 
@@ -174,35 +158,21 @@ p.meeting-time, p.meeting-loc {
     font-size: 10px;
 }
 
-.meeting.pearl {
-    background-color: rgba(234, 224, 200, 0.75);
-}
-.meeting.pink {
-    background-color: rgba(234, 205, 200, 0.75);
-}
-.meeting.purple {
-    background-color: rgba(234, 200, 223, 0.75);
-}
-.meeting.lavender {
-    background-color: rgba(221, 200, 234, 0.75);
-}
-.meeting.blue {
-    background-color: rgba(200, 201, 234, 0.75);
-}
-.meeting.cyan {
-    background-color: rgba(200, 234, 234, 0.75);
-}
-.meeting.applegreen {
-    background-color: rgba(200, 234, 217, 0.75);
-}
-.meeting.green {
-    background-color: rgba(205, 234, 200, 0.75);
-}
-.meeting.beryl {
-    background-color: rgba(221, 234, 200, 0.75);
-}
-.meeting.yellow {
-    background-color: rgba(229, 234, 200, 0.75);
+$palette: ("pearl" : rgba(234, 224, 200, 0.75),
+"pink" : rgba(234, 205, 200, 0.75),
+"purple" : rgba(234, 200, 223, 0.75),
+"lavender" : rgba(221, 200, 234, 0.75),
+"blue" : rgba(200, 201, 234, 0.75),
+"cyan" : rgba(200, 234, 234, 0.75),
+"applegreen" : rgba(200, 234, 217, 0.75),
+"green" : rgba(205, 234, 200, 0.75),
+"beryl" : rgba(221, 234, 200, 0.75),
+"yellow" : rgba(229, 234, 200, 0.75));
+
+@each $name, $color in $palette {
+    .meeting.#{$name} {
+        background-color: $color;
+    }
 }
 
 .meeting.mutable {
@@ -291,6 +261,9 @@ p.meeting-time, p.meeting-loc {
     border: 1px solid #ccc;
     border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+    max-height: 500px;
+    overflow: scroll;
 }
 
 .ui-autocomplete .ui-menu-item {
@@ -313,6 +286,39 @@ p.meeting-time, p.meeting-loc {
     text-decoration: underline;
 }
 
+footer {
+    color: #aaa;
+    font-size: 12px;
+    text-align: right;
+    padding: 5px;
+    margin-top: 5px;
+}
+
+.basic-info-container {
+
+}
+
+.basic-info {
+    display: inline-block;
+    width: 80px;
+    margin: 5px;
+    text-align: center;
+}
+
+.basic-info-value {
+    font-size: 24px;
+    font-weight: 400;
+    margin: 3px;
+}
+
+.basic-info:first-child {
+    margin-left: 20px;
+}
+
+.basic-info-title {
+    font-size: 12px;
+    margin: 3px;
+}
 
 #loading {
     position: fixed;
@@ -331,3 +337,31 @@ p.meeting-time, p.meeting-loc {
 .hidden {
     display: none;
 }
+
+.basket-item {
+    padding: 5px;
+    margin: 10px;
+}
+
+.basket-item .content-buttons {
+    float: right;
+    margin-left: 5px;
+}
+
+.basket-item .content {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.basket-item .content.level-2 {
+    margin: 5px 0 5px 12px;
+}
+
+@each $name, $color in $palette {
+    .basket-item.#{$name} {
+        border-left: 3px solid $color;
+    }
+}
+
+@import 'jquery-ui';

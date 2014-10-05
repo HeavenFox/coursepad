@@ -17,10 +17,18 @@ currentTermDB = new TermDatabase();
  * @return {Promise}
  */
 TermDatabase.prototype.getCoursesBySubjectAndNumber = function(subject, number) {
+    var resolvedCourses;
     return indexeddb.queryAllByIndex('roster', 'course', IDBKeyRange.only([this.term, subject, number])).then(function(courses) {
         return courses.map(function(c) {
             return new Course(c);
         });
+    }).then(function(courses) {
+        resolvedCourses = courses;
+
+        return [];
+    }).then(function(professors) {
+
+        return resolvedCourses;
     });
 }
 

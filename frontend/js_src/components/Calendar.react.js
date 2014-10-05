@@ -74,6 +74,9 @@ var Calendar = React.createClass({
         var singleMeetings = [];
         var days = "MTWRFSU";
         meetings.forEach(function(meeting) {
+            if (!meeting.startTime || !meeting.endTime) {
+                return;
+            }
             var startHour = datetime.timeStringToHour(meeting.startTime);
             var length = datetime.timeStringToHour(meeting.endTime) - startHour;
             var time = meeting.startTime + ' \u2013 ' + meeting.endTime;
