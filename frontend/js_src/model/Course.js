@@ -1,3 +1,5 @@
+var datetime = require('../utils/datetime.js');
+
 function Meeting(parent, obj) {
     this.startTime = obj['st'];
     this.endTime = obj['et'];
@@ -7,6 +9,11 @@ function Meeting(parent, obj) {
     this.building = obj['bldg'];
     this.room = obj['rm'];
     this.professors = obj['profs'];
+
+    if (this.startTime)
+        this.startTimeHrs = datetime.timeStringToHour(this.startTime);
+    if (this.endTime)
+        this.endTimeHrs = datetime.timeStringToHour(this.endTime);
 
     this.parent = parent;
 }

@@ -9,6 +9,8 @@ var termdb = require('./store/termdb.js');
 
 var schedules = require('./store/schedules.js');
 
+var magic = require('./magic/magic.js');
+
 
 
 React.renderComponent(Calendar(), document.getElementById('calendar'));
