@@ -343,19 +343,55 @@ footer {
     margin: 10px;
 }
 
+.basket-item.invisible {
+    color: #aaa;
+}
+
 .basket-item .content-buttons {
     float: right;
     margin-left: 5px;
 }
 
 .basket-item .content {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.basket-item .content-title {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin-right: 0px;
+}
+
+.basket-item .content > .content-buttons {
+    display: none;
+}
+
+.basket-item .content:hover > .content-buttons {
+    display: block;
+}
+
+.basket-item .content:hover > .content-title {
+    margin-right: 30px;
 }
 
 .basket-item .content.level-2 {
     margin: 5px 0 5px 12px;
+}
+
+.selected-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 3px;
+    margin-left: -10px;
+}
+.selected-indicator.selectable {
+    background-color: gray;
+    cursor: pointer;
+}
+
+.selected-indicator.selected {
+    background-color: green;
 }
 
 @each $name, $color in $palette {

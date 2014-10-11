@@ -47,49 +47,73 @@ function Schedule() {
     this.sections = [];
 
     this.ready = false;
+
+    this.hidden = {};
 }
 
-Schedule.prototype.addDemoData = function() {
-    var ctermdb = termdb.getCurrentTermDB();
-    // var math1110 = ctermdb.getCoursesBySubjectAndNumber('MATH', 1110);
-    // var math4310 = ctermdb.getCoursesBySubjectAndNumber('MATH', 4310);
-    // var math2930 = ctermdb.getCoursesBySubjectAndNumber('MATH', 2930);
-
-    // this.index = 0;
-
-    // this.basket = [math1110, math4310, math2930];
-    // this.sections = [math1110[0].sections['LEC'][0],
-    //                  math4310[0].sections['LEC'][0],
-    //                  math2930[0].sections['LEC'][0],
-    //                  math2930[0].sections['DIS'][0]];
-
-    store.emit('ready');
+Schedule.prototype.setVisibility = function(sectionId, val) {
+    this.hidden[sectionId] = !val;
+    store.emit('change');
 }
 
-Schedule.prototype.getMeetings = function() {
+Schedule.prototype.toggleVisibility = function(sectionId) {
+    this.setVisibility(sectionId, !this.getVisibility(sectionId));
+}
+
+Schedule.prototype.getVisibility = function(sectionId) {
+    return !this.hidden[sectionId];
+}
+
+Schedule.prototype.getVisibleMeetings = function() {
     var meetings = [];
-    this.sections.forEach(function(section) {
+    this.getVisibleSections().forEach(function(section) {
         meetings.push.apply(meetings, section.meetings);
     });
 
     return meetings;
 };
 
-Schedule.prototype.changeSection = function(fromNumber, toNumber) {
+
+Schedule.prototype.changeSection = function(toNumber, fromNumber) {
+    var toSection;
     var fromIndex;
-    for (fromIndex = 0; fromIndex < this.sections.length; fromIndex++) {
-        if (this.sections[fromIndex].number == fromNumber) {
-            break;
+
+    if (fromNumber === undefined) {
+        for (var i=0; i < this.basket.length; i++) {
+            for (var j=0; j < this.basket[i].length; j++) {
+                toSection = this.basket[i][j].findSectionByNumber(toNumber);
+                if (toSection) break;
+            }
+        }
+        if (!toSection) return false;
+        var sections = toSection.parent.sections[toSection.type];
+        for (fromIndex = 0; fromIndex < this.sections.length; fromIndex++) {
+            if (sections.indexOf(this.sections[fromIndex]) > -1) {
+                break;
+            }
+        }
+        
+        if (fromIndex === this.sections.length) {
+            return false;
+        }
+    } else {
+        for (fromIndex = 0; fromIndex < this.sections.length; fromIndex++) {
+            if (this.sections[fromIndex].number == fromNumber) {
+                break;
+            }
+        }
+
+        if (fromIndex === this.sections.length) {
+            return false;
+        }
+
+        toSection = this.sections[fromIndex].parent.findSectionByNumber(toNumber);
+        if (!toSection) {
+            return false;
         }
     }
-    if (fromIndex === this.sections.length) {
-        return false;
-    }
 
-    var toSection = this.sections[fromIndex].parent.findSectionByNumber(toNumber);
-    if (!toSection) {
-        return false;
-    }
+
 
     this.sections[fromIndex] = toSection;
 
@@ -236,8 +260,30 @@ Schedule.prototype.load = function() {
     });
 }
 
+Schedule.prototype.getSelectedCourseIdsHash = function() {
+    var result = Object.create(null);
+
+    this.sections.forEach(function(section) {
+        result[section.parent.id] = true;
+    })
+
+    return result;
+}
+
+Schedule.prototype.getSelectedSectionIdsHash = function() {
+    var result = Object.create(null);
+
+    this.sections.forEach(function(section) {
+        result[section.number] = true;
+    })
+
+    return result;
+}
+
 Schedule.prototype.getVisibleSections = function() {
-    return this.sections;
+    return this.sections.filter(function(section) {
+        return !this.hidden[section.parent.getNumber()];
+    }, this);
 }
 
 Schedule.prototype.getBasicInfo = function() {

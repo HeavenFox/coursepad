@@ -3,6 +3,12 @@
  */
 var schedules = require('../../store/schedules.js');
 
+var SelectionIndicator = React.createClass({
+    render: function() {
+        return <div className={'selected-indicator' + (this.props['selected'] ? ' selected' : '') + (this.props.action ? ' selectable' : '')} onClick={this.props.action}> </div>
+    }
+});
+
 var Basket = React.createClass({
     componentWillMount: function() {
         schedules.on('readystatechange', this._onReadyStateChange);
@@ -26,45 +32,85 @@ var Basket = React.createClass({
     _update: function() {
         this.setState({clusters: schedules.getCurrentSchedule().basket,
                        sections: schedules.getCurrentSchedule().sections,
-                       visibility: schedules.getCurrentSchedule().courseVisibility,
-                       expansion: {}});
+                       hidden: schedules.getCurrentSchedule().hidden});
     },
 
     getInitialState: function() {
-        return {clusters: [], sections: [], visibility: {}};
+        return {clusters: [], sections: [], hidden: {}, expansion: {}};
     },
+
+    _toggleExpansion: function(identifier) {
+        var expansionState = this.state['expansion'];
+        expansionState[identifier] = !expansionState[identifier];
+        this.setState({expansion: expansionState});
+    },
+
+    _toggleVisibility: function(courseNumber) {
+        schedules.getCurrentSchedule().toggleVisibility(courseNumber);
+    },
+
+    _changeSectionTo: function(sectionId) {
+        schedules.getCurrentSchedule().changeSection(sectionId);
+    },
+
+
     render: function() {
-        var clusters = this.state.clusters.map(function(cluster) {
-            var number = cluster[0].getNumber();
-            var clusterItems = [];
-            var className = schedules.getCurrentSchedule().getColorForCourse(cluster[0].subject, cluster[0].number);
+        var self = this;
+        var clusters = null;
+        var currentSchedule = schedules.getCurrentSchedule();
+        if (currentSchedule) {
+            var selectedSections = currentSchedule.getSelectedSectionIdsHash();
+            var selectedCourses = currentSchedule.getSelectedCourseIdsHash();
 
-            if (cluster.length === 1) {
-                var sections = cluster[0].getAllSections();
-                clusterItems = sections.map(function(section) {
-                    return <div className="content level-2">{section.type + ' ' + section.sec}</div>
+            clusters = this.state.clusters.map(function(cluster) {
+                var number = cluster[0].getNumber();
+                var clusterItems = null;
+                var className = currentSchedule.getColorForCourse(cluster[0].subject, cluster[0].number);
 
-                });
+                var clusterVisible = !this.state.hidden[number];
 
-            } else {
-                clusterItems = cluster.map(function(course) {
-                    return <div className="content level-2">{course.subject + ' ' + course.number}</div>
+                if (!clusterVisible) {
+                    className += ' invisible';
+                }
 
-                });
+                function listOfSections(sections) {
+                    return sections.map(function(section) {
+                        return <div className="content level-2"><SelectionIndicator selected={selectedSections[section.number]} action={self._changeSectionTo.bind(this, section.number)} />{section.type + ' ' + section.sec}</div>
+                    }, this);
+                }
 
-            }
+                if (this.state['expansion'][number]) {
+                    if (cluster.length === 1) {
+                        var sections = cluster[0].getAllSections();
+                        clusterItems = listOfSections(sections);
 
+                    } else {
+                        clusterItems = cluster.map(function(course) {
+                            var sections = course.getAllSections();
+                            var sectionsDom = null;
+                            if (sections.length > 1) {
+                                sectionsDom = listOfSections(sections);
+                            }
+                            return <div className="content level-2"><SelectionIndicator selected={selectedCourses[course.id]} />{course.subject + ' ' + course.number}{sectionsDom}</div>
 
-            return <div className={"basket-item " + className}>
-                <div className="content">
-                    <div className="content-buttons">M V E</div>
-                {number + ": "}
-                <span className="content-title">{cluster[0].title}</span>
-                </div>
-                {clusterItems}
-            </div> 
+                        });
 
-        });
+                    }
+                }
+
+                return <div className={"basket-item " + className}>
+                    <div className="content">
+                        <div className="content-buttons">M <a href="javascript:;" onClick={this._toggleVisibility.bind(this, number)}>V</a> <a href="javascript:;" onClick={(function() {
+                            this._toggleExpansion(number);
+                        }).bind(this)}>E</a></div>
+                    <div className="content-title">{number + ": "}{cluster[0].title}</div>
+                    </div>
+                    {clusterItems}
+                </div> 
+
+            }, this);
+        }
+
 
         return <div className="basket">
         {clusters}

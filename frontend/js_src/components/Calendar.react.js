@@ -102,7 +102,7 @@ var Calendar = React.createClass({
     },
 
     setSchedule: function(schedule) {
-        var meetings = schedule.getMeetings();
+        var meetings = schedule.getVisibleMeetings();
         
         var singleMeetings = this._splitMeetings(meetings);
 

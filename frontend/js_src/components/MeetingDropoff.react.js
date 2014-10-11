@@ -12,14 +12,15 @@ var MeetingDropoff = React.createClass({
         $(this.refs['dropoff'].getDOMNode()).droppable({drop: function(event, ui) {
             self.onDropped(ui.draggable.attr('data-nbr'))
 
-        }});
+        },
+        greedy: true});
     },
 
     onDropped: function(fromClassNumber) {
         console.log(fromClassNumber);
         console.log(this.props['nbr']);
 
-        schedules.getCurrentSchedule().changeSection(fromClassNumber, this.props['nbr']);
+        schedules.getCurrentSchedule().changeSection(this.props['nbr'], fromClassNumber);
 
     },
 
