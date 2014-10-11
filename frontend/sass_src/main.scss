@@ -197,7 +197,7 @@ $palette: ("pearl" : rgba(234, 224, 200, 0.75),
     cursor: -moz-grabbing;
     cursor: -webkit-grabbing;
     cursor: grabbing;
-    z-index: 4;
+    z-index: 5;
 }
 
 .mtdropoff {
@@ -206,7 +206,7 @@ $palette: ("pearl" : rgba(234, 224, 200, 0.75),
     margin: -2px;
 
 
-    z-index: 3;
+    z-index: 4;
     color: #949494;
     text-align: center;
 }
@@ -220,6 +220,20 @@ $palette: ("pearl" : rgba(234, 224, 200, 0.75),
   width: 100%;
 }
 
+#conflict-overlay div {
+    transition: opacity 0.3s;
+    opacity: 0;
+}
+
+#conflict-overlay.show div {
+    opacity: 1;
+}
+
+.conflict-indicator {
+    z-index: 3;
+    background-color: rgba(255, 144, 144, 0.6);
+
+}
 
 .mtdropoff:before {
   content: '';
@@ -296,6 +310,12 @@ footer {
 
 .basic-info-container {
 
+}
+
+.basic-info-conflict {
+    margin-left: 10px;
+    color: #ff8d8d;
+    cursor: pointer;
 }
 
 .basic-info {

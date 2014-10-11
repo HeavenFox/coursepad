@@ -3,6 +3,7 @@
  */
 var SingleMeeting = require('./SingleMeeting.react.js');
 var MeetingDropoff = require('./MeetingDropoff.react.js');
+var ConflictIndicator = require('./ConflictIndicator.react.js');
 
 var schedules = require('../store/schedules.js');
 
@@ -24,12 +25,15 @@ var DropoffSet = React.createClass({
 
 var Calendar = React.createClass({
 
+    minTime: 8,
+    maxTime: 22,
+
     getMeetingContainer: function() {
         return this.refs['container'].getDOMNode();
     },
 
     getInitialState: function() {
-        return {meetings: [], dropoffs: []};
+        return {meetings: [], dropoffs: [], conflicts: []};
     },
 
     componentDidMount: function() {
@@ -112,12 +116,12 @@ var Calendar = React.createClass({
             meeting.dragStopHandler = this._onDragStopHandler.bind(this, meeting.meeting);
         }, this);
 
-        this.setState({meetings: singleMeetings});
+        this.setState({meetings: singleMeetings, conflicts: schedule.getConflictIntervals()});
     },
 
     render: function() {
         var stripes = [];
-        var minTime = 8, maxTime = 22;
+        var minTime = this.minTime, maxTime = this.maxTime;
         for (var i=minTime; i<=maxTime; i++) {
             var ampm = i >= 12 ? "p" : "a";
             var twelveHour = i > 12 ? i - 12 : i;
@@ -139,11 +143,18 @@ var Calendar = React.createClass({
         this.state.meetings.forEach(function(meeting) {
             meetings.push(SingleMeeting(meeting));
         });
+
+        var conflicts = this.state.conflicts.map(function(conflict) {
+            return <ConflictIndicator day={datetime.bitmaskToDay(conflict.pattern)} st_offset={conflict.startTimeHrs - this.minTime} length={conflict.endTimeHrs - conflict.startTimeHrs} />
+        }, this);
         return <div className="cal-inner" ref="container">
                 <div className="cal-meetings">
                     <div className="cal-meetings-inner">
                         {meetings}
                         <DropoffSet ref="dropoffset" />
+                        <div id="conflict-overlay">
+                        {conflicts}
+                        </div>
                     </div>
                 </div>
                 <div className="cal-stripes">

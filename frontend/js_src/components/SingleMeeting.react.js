@@ -58,7 +58,7 @@ var SingleMeeting = React.createClass({
     render: function() {
         this._hasAlternative = !!this.props['meeting'].getAlternateMeetings().length;
 
-        var classNames = 'calele meeting calele-' + this.props['day'].toLowerCase();
+        var classNames = 'meeting ' + this.getClassName();
         if (this._hasAlternative) {
             classNames += ' mutable';   
         }

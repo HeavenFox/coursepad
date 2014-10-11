@@ -1,5 +1,6 @@
 var EventEmitter = require('event-emitter');
 var datetime = require('../utils/datetime.js');
+var conflicts = require('../model/course/conflicts.js');
 
 var store = EventEmitter({
     ready: false,
@@ -49,11 +50,13 @@ function Schedule() {
     this.ready = false;
 
     this.hidden = {};
+
+    this._conflictCache = null;
 }
 
 Schedule.prototype.setVisibility = function(sectionId, val) {
     this.hidden[sectionId] = !val;
-    store.emit('change');
+    this._onChange();
 }
 
 Schedule.prototype.toggleVisibility = function(sectionId) {
@@ -73,6 +76,10 @@ Schedule.prototype.getVisibleMeetings = function() {
     return meetings;
 };
 
+Schedule.prototype._onChange = function() {
+    this._conflictCache = null;
+    store.emit('change');
+}
 
 Schedule.prototype.changeSection = function(toNumber, fromNumber) {
     var toSection;
@@ -118,7 +125,7 @@ Schedule.prototype.changeSection = function(toNumber, fromNumber) {
     this.sections[fromIndex] = toSection;
 
     this.persistSections();
-    store.emit('change');
+    this._onChange();
 
     return true;
 };
@@ -169,11 +176,11 @@ Schedule.prototype.addCourse = function(subject, number) {
 
 
             self.addCluster(courses);
-            console.log("1");
 
             self.persistSections();
-            console.log("2");
-            store.emit('change');
+
+            this._onChange();
+            
             return true;
         });
     }
@@ -284,6 +291,22 @@ Schedule.prototype.getVisibleSections = function() {
     return this.sections.filter(function(section) {
         return !this.hidden[section.parent.getNumber()];
     }, this);
+}
+
+Schedule.prototype.getConflictIntervals = function() {
+    if (this._conflictCache === null) {
+        var rawIntervals = [];
+        var visibleSections = this.getVisibleSections();
+        for (var i=0; i < visibleSections.length; i++) {
+            for (var j=0; j < i; j++) {
+                rawIntervals.push.apply(rawIntervals, conflicts.conflictIntervals(visibleSections[i].meetings, visibleSections[j].meetings));
+            }
+        }
+
+        this._conflictCache = conflicts.normalizeIntervals(rawIntervals);
+    }
+
+    return this._conflictCache;
 }
 
 Schedule.prototype.getBasicInfo = function() {

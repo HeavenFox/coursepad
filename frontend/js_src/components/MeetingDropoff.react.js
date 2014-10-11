@@ -30,7 +30,7 @@ var MeetingDropoff = React.createClass({
         if (!Array.isArray(meetings)) {
             meetings = [meetings];
         }
-        var classNames = 'calele mtdropoff calele-' + this.props['day'].toLowerCase();
+        var classNames = 'mtdropoff ' + this.getClassName();
         return <div className={classNames} style={style} ref="dropoff">
             <div className="mtdropoff-inner">
             {meetings.map(function(item) {

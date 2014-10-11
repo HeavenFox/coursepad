@@ -24,13 +24,43 @@ var BasicInfo = React.createClass({
     },
 
     _update: function() {
-        this.setState(schedules.getCurrentSchedule().getBasicInfo());
+        var newState = schedules.getCurrentSchedule().getBasicInfo();
+        newState['conflicts'] = schedules.getCurrentSchedule().getConflictIntervals().length > 0;
+        this.setState(newState);
+    },
+
+    _toggleAlwaysShowConflicts: function() {
+        this._alwaysShowConflicts = !this._alwaysShowConflicts;
+        if (this._alwaysShowConflicts) {
+            this._showConflicts();
+        } else {
+            this._hideConflicts();
+        }
+    },
+
+    _showConflicts: function() {
+        $('#conflict-overlay').addClass('show');
+
+    },
+
+    _hideConflicts: function() {
+        if (!this._alwaysShowConflicts) {
+            $('#conflict-overlay').removeClass('show');
+        }
     },
 
     getInitialState: function() {
-        return {units: [0,0], classes: 0, hours: 0};
+        return {units: [0,0], classes: 0, hours: 0, conflicts: false};
     },
     render: function() {
+        var conflict = null;
+        if (this.state.conflicts) {
+            conflict = <div className="basic-info-conflict"
+                            onMouseOver={this._showConflicts}
+                            onMouseOut={this._hideConflicts}
+                            onClick={this._toggleAlwaysShowConflicts}>Note: this schedule has conflicts</div>
+        }
+
         var creditIsRange = this.state['units'][0] != this.state['units'][1];
         return <div className="basic-info-container">
             <div className="basic-info">
@@ -49,7 +79,8 @@ var BasicInfo = React.createClass({
                     {Math.round(this.state['hours'] * 10) / 10}</p>
                 <p className="basic-info-title">{this.state['hours'] > 1 ? "HRS/WK" : "HR/WK"}</p>
             </div>
-
+            <div style={{clear: 'both'}} />
+            {conflict}
         </div>
     }
 });
