@@ -4,6 +4,7 @@ var jsx = require('gulp-jsx');
 var uglify = require('gulp-uglify');
 var sass = require('gulp-ruby-sass');
 var insert = require('gulp-insert');
+var del = require('del');
 
 var DEV = false;
 
@@ -65,7 +66,12 @@ gulp.task('default', function() {
     gulp.watch('static/**', ['static']);
 });
 
+gulp.task('clean', function() {
+    del(['_build/prod/**']);
+});
+
 gulp.task('build', function() {
     DEV = false;
+    gulp.run('clean');
     gulp.run('js', 'css', 'static');
 });
