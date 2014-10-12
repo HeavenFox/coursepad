@@ -114,7 +114,7 @@ $cal-time-width: 70px;
 .calele {
     width: $calendar-element-width;
     position: absolute;
-    z-index: 2;
+    z-index: 1;
 }
 
 .calele-m {
@@ -175,9 +175,21 @@ $palette: ("pearl" : rgba(234, 224, 200, 0.75),
     }
 }
 
+/**
+ * z-index table
+ * 0 : stripe;
+ * 1 : normal elements;
+ * 2 : mutable elements;
+ * 3 : conflict overlay;
+ * 4 : dropoff;
+ * 5 : dragging elements;
+ */
+
 .meeting.mutable {
     @include no-user-interaction;
+    z-index: 2;
 }
+
 
 .meeting.mutable:hover, .meeting.mutable *:hover, {
     cursor: -moz-grab;
@@ -211,27 +223,37 @@ $palette: ("pearl" : rgba(234, 224, 200, 0.75),
     text-align: center;
 }
 
-.mtdropoff p {
-}
-
 .mtdropoff-inner {
     display: inline-block;
   vertical-align: middle;
   width: 100%;
 }
 
-#conflict-overlay div {
+#conflict-overlay {
+    visibility: hidden;
+    transition: visibility 0s;
+
+    transition-delay: 0.3s;
+}
+
+#conflict-overlay.show {
+    visibility: visible;
+
+    transition-delay: 0s;
+}
+
+#conflict-overlay > div {
     transition: opacity 0.3s;
     opacity: 0;
 }
 
-#conflict-overlay.show div {
+#conflict-overlay.show > div {
     opacity: 1;
 }
 
 .conflict-indicator {
     z-index: 3;
-    background-color: rgba(255, 144, 144, 0.6);
+    background-color: rgba(255, 144, 144, 0.7);
 
 }
 
@@ -316,6 +338,10 @@ footer {
     margin-left: 10px;
     color: #ff8d8d;
     cursor: pointer;
+}
+
+.basic-info-conflict > p {
+    margin: 0;
 }
 
 .basic-info {

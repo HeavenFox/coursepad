@@ -30,8 +30,9 @@ var BasicInfo = React.createClass({
     },
 
     _toggleAlwaysShowConflicts: function() {
-        this._alwaysShowConflicts = !this._alwaysShowConflicts;
-        if (this._alwaysShowConflicts) {
+        var showState = !this.state['showConflicts'];
+        this.setState({'showConflicts': showState});
+        if (showState) {
             this._showConflicts();
         } else {
             this._hideConflicts();
@@ -40,25 +41,31 @@ var BasicInfo = React.createClass({
 
     _showConflicts: function() {
         $('#conflict-overlay').addClass('show');
-
     },
 
     _hideConflicts: function() {
-        if (!this._alwaysShowConflicts) {
-            $('#conflict-overlay').removeClass('show');
+        $('#conflict-overlay').removeClass('show');
+    },
+
+    _hideConflictsIfNotPinned: function() {
+        if (!this.state['showConflicts']) {
+            this._hideConflicts();
         }
     },
 
     getInitialState: function() {
-        return {units: [0,0], classes: 0, hours: 0, conflicts: false};
+        return {units: [0,0], classes: 0, hours: 0, conflicts: false, showConflicts: false};
     },
     render: function() {
         var conflict = null;
         if (this.state.conflicts) {
             conflict = <div className="basic-info-conflict"
                             onMouseOver={this._showConflicts}
-                            onMouseOut={this._hideConflicts}
-                            onClick={this._toggleAlwaysShowConflicts}>Note: this schedule has conflicts</div>
+                            onMouseOut={this._hideConflictsIfNotPinned}
+                            onClick={this._toggleAlwaysShowConflicts}>
+                                <p>Note: this schedule has conflicts</p>
+                                <p><small>{this.state['showConflicts'] ? 'Click to remove highlight' : 'Hover to highlight conflicts'}</small></p>
+                        </div>
         }
 
         var creditIsRange = this.state['units'][0] != this.state['units'][1];
