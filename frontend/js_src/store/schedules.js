@@ -79,21 +79,40 @@ Schedule.prototype.getVisibleMeetings = function() {
 Schedule.prototype._onChange = function() {
     this._conflictCache = null;
     store.emit('change');
-}
+};
+
+Schedule.prototype.findCourseInBasketById = function(id) {
+    for (var i=0; i < this.basket.length; i++) {
+        for (var j=0; j < this.basket[i].length; j++) {
+            if (this.basket[i][j].id == id) {
+                return this.basket[i][j];
+            }
+        }
+    }
+    return null;
+};
+
+Schedule.prototype.findSectionInBasketByNumber = function(number) {
+    for (var i=0; i < this.basket.length; i++) {
+        for (var j=0; j < this.basket[i].length; j++) {
+            var toSection = this.basket[i][j].findSectionByNumber(number);
+            if (toSection) return toSection;
+        }
+    }
+    return null;
+};
 
 Schedule.prototype.changeSection = function(toNumber, fromNumber) {
     var toSection;
     var fromIndex;
 
+
     if (fromNumber === undefined) {
-        find_cluster:
-        for (var i=0; i < this.basket.length; i++) {
-            for (var j=0; j < this.basket[i].length; j++) {
-                toSection = this.basket[i][j].findSectionByNumber(toNumber);
-                if (toSection) break find_cluster;
-            }
+        toSection = this.findSectionInBasketByNumber(toNumber);
+        if (!toSection) {
+            console.warn("Unable to find to section: " + toNumber);
+            return false;
         }
-        if (!toSection) return false;
         var sections = toSection.parent.sections[toSection.type];
         for (fromIndex = 0; fromIndex < this.sections.length; fromIndex++) {
             if (sections.indexOf(this.sections[fromIndex]) > -1) {
@@ -102,7 +121,40 @@ Schedule.prototype.changeSection = function(toNumber, fromNumber) {
         }
         
         if (fromIndex === this.sections.length) {
-            return false;
+            // Find from courses in the cluster
+            var fromCourse = null;
+            var selectedCoursesHash = this.getSelectedCourseIdsHash();
+            find_from:
+            for (var i=0; i < this.basket.length; i++) {
+                if (this.basket[i].indexOf(toSection.parent) > -1) {
+                    for (var j=0; j < this.basket[i].length; j++) {
+                        if (selectedCoursesHash[this.basket[i][j].id]) {
+                            fromCourse = this.basket[i][j];
+                            break find_from;
+                        }
+                    }
+                }
+            }
+
+            if (!fromCourse) {
+                console.warn("Cannot find corresponding from course for to section " + toNumber);
+                return false;
+            }
+
+            this._changeCourse(toSection.parent, fromCourse);
+
+            for (fromIndex = 0; fromIndex < this.sections.length; fromIndex++) {
+                if (this.sections[fromIndex].parent == toSection.parent && this.sections[fromIndex].type == toSection.type) {
+                    break;
+                }
+            }
+
+            if (fromIndex == this.sections.length) {
+                console.warn("Internal Consistency Exception: cannot find from section.");
+                return false;
+            }
+
+
         }
     } else {
         for (fromIndex = 0; fromIndex < this.sections.length; fromIndex++) {
@@ -112,12 +164,32 @@ Schedule.prototype.changeSection = function(toNumber, fromNumber) {
         }
 
         if (fromIndex === this.sections.length) {
+            console.warn("Unable to find from section: " + fromNumber);
             return false;
         }
 
+        var fromSection = this.sections[fromIndex];
+
         toSection = this.sections[fromIndex].parent.findSectionByNumber(toNumber);
         if (!toSection) {
-            return false;
+            toSection = this.findSectionInBasketByNumber(toNumber);
+            if (!toSection) {
+                console.warn("Unable to find to section: " + toNumber);
+                return false;
+            }
+
+            this._changeCourse(toSection.parent, fromSection.parent);
+
+            for (fromIndex = 0; fromIndex < this.sections.length; fromIndex++) {
+                if (this.sections[fromIndex].parent == toSection.parent && this.sections[fromIndex].type == toSection.type) {
+                    break;
+                }
+            }
+
+            if (fromIndex === this.sections.length) {
+                console.warn("Internal Consistency Exception: cannot find from section");
+                return false;
+            }
         }
     }
 
@@ -129,6 +201,74 @@ Schedule.prototype.changeSection = function(toNumber, fromNumber) {
     this._onChange();
 
     return true;
+};
+
+Schedule.prototype.changeCourse = function(to, from) {
+    this._changeCourse(to, from);
+    this.persistSections();
+    this._onChange();
+};
+
+Schedule.prototype._changeCourse = function(toCourse, fromCourse) {
+    if (!isNaN(toCourse)) {
+        toCourse = this.findCourseInBasketById(toCourse);
+    }
+
+    if (fromCourse === undefined) {
+        var selectedCoursesHash = this.getSelectedCourseIdsHash();
+        find_course:
+        for (var i=0; i < this.basket.length; i++) {
+            if (this.basket[i].indexOf(toCourse) > -1) {
+                for (var j=0; j < this.basket[i].length; j++) {
+                    if (selectedCoursesHash[this.basket[i][j].id]) {
+                        fromCourse = this.basket[i][j];
+                        break find_course;
+                    }
+                }
+            }
+        }
+        if (fromCourse === undefined) {
+            console.warn('From course not in basket');
+            return false;
+        }
+    } else if (!isNaN(fromCourse)) {
+        fromCourse = this.findCourseInBasketById(fromCourse);
+    }
+
+    var removedSections = Object.create(null);
+    var newSections = this.sections.filter(function(section) {
+        if (section.parent == fromCourse) {
+            removedSections[section.type] = section;
+            return false;
+        }
+        return true;
+    });
+    for (var type in toCourse.sections) {
+        if (toCourse.sections.hasOwnProperty(type)) {
+            var prevSection = removedSections[type];
+            if (!prevSection) {
+                console.warn("Type " + type + " not found in " + fromCourse.id + " but in " + toCourse.id);
+                newSections.push(toCourse.sections[type][0]);
+            } else {
+                var added = false;
+                if (prevSection.meetings.length > 0) {
+                    for (var i=0; i < toCourse.sections[type].length; i++) {
+                        var curSection = toCourse.sections[type][i];
+                        if (curSection.meetings.length > 0 && curSection.meetings[0].startTime == prevSection.meetings[0].startTime && curSection.meetings[0].pattern == prevSection.meetings[0].pattern) {
+                            added = true;
+                            newSections.push(curSection);
+                            break;
+                        }
+                    }
+                }
+                if (!added) {
+                    newSections.push(toCourse.sections[type][0]);
+                }
+            }
+        }
+    }
+
+    this.sections = newSections;
 };
 
 Schedule.prototype.addCluster = function(cluster) {
@@ -217,6 +357,57 @@ Schedule.prototype.persistSections = function() {
     persist.basket = this.serializeBasket();
     persist.colorMapping = $.extend({}, this.colorMapping);
     localStore.fsync(this.getStoreKey());
+};
+
+Schedule.prototype.getAlternateMeetings = function(meeting, returntype) {
+    if (returntype === undefined) {
+        returntype = "difftime";
+    }
+    var alternatives = [];
+
+    var course = meeting.parent.parent;
+    var type = meeting.parent.type;
+
+    // Get cluster
+    var cluster = null;
+    if (type === course.getPrimarySectionType()) {
+        for (var i=0; i < this.basket.length; i++) {
+            var curCluster = this.basket[i];
+            if (curCluster[0].subject == course.subject && curCluster[0].number == course.number) {
+                cluster = curCluster;
+                break;
+            }
+        }
+    }
+
+    function hasSameTime(curMeeting) {
+        return curMeeting.pattern == meeting.pattern && curMeeting.startTime == meeting.startTime && curMeeting.endTime == meeting.endTime;
+    }
+
+    // Get other sections of the same course
+    meeting.parent.parent.sections[type].forEach(function(component) {
+        if (component == meeting.parent) {
+            return;
+        }
+        if (component.meetings.some(hasSameTime) == (returntype == "sametime")) {
+            alternatives.push.apply(alternatives, component.meetings);
+        }
+    });
+
+    // Get sections of other courses in the cluster
+    if (cluster && cluster.length > 1) {
+        cluster.forEach(function(curCourse) {
+            if (curCourse != course) {
+                curCourse.sections[type].forEach(function(component) {
+                    if (component.meetings.some(hasSameTime) == (returntype == "sametime")) {
+                        alternatives.push.apply(alternatives, component.meetings);
+                    }
+                });
+            }
+        });
+    }
+
+    return alternatives;
 };
 
 Schedule.prototype.load = function() {

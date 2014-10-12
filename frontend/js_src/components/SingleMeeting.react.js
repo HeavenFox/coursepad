@@ -2,6 +2,7 @@
  * @jsx React.DOM
  */
 var CalendarElementMixin = require('./CalendarElementMixin.react.js');
+var schedules = require('../store/schedules.js');
 
 // Make a function that can only be run once
 function makeRunOnce(f) {
@@ -56,7 +57,7 @@ var SingleMeeting = React.createClass({
     },
 
     render: function() {
-        this._hasAlternative = !!this.props['meeting'].getAlternateMeetings().length;
+        this._hasAlternative = !!schedules.getCurrentSchedule().getAlternateMeetings(this.props['meeting']).length;
 
         var classNames = 'meeting ' + this.getClassName();
         if (this._hasAlternative) {

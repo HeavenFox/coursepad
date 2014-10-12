@@ -57,7 +57,7 @@ var Calendar = React.createClass({
     },
 
     _onDragStartHandler: function(meeting) {
-        var alternatives = meeting.getAlternateMeetings();
+        var alternatives = schedules.getCurrentSchedule().getAlternateMeetings(meeting);
         if (alternatives) {
             var dropoffs = [];
             var singleMeetings = this._splitMeetings(alternatives);

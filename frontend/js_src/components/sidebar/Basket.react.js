@@ -54,6 +54,10 @@ var Basket = React.createClass({
         schedules.getCurrentSchedule().changeSection(sectionId);
     },
 
+    _changeCourseTo: function(course) {
+        schedules.getCurrentSchedule().changeCourse(course);
+    },
+
 
     render: function() {
         var self = this;
@@ -92,7 +96,7 @@ var Basket = React.createClass({
                             if (sections.length > 1) {
                                 sectionsDom = listOfSections(sections);
                             }
-                            return <div className="content level-2"><SelectionIndicator selected={selectedCourses[course.id]} />{course.subject + ' ' + course.number}{sectionsDom}</div>
+                            return <div className="content level-2"><SelectionIndicator selected={selectedCourses[course.id]} action={self._changeCourseTo.bind(null, course)} />{course.subject + ' ' + course.number}{sectionsDom}</div>
 
                         });
 
