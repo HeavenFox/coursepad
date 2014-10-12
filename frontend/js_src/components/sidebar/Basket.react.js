@@ -5,7 +5,7 @@ var schedules = require('../../store/schedules.js');
 
 var SelectionIndicator = React.createClass({
     render: function() {
-        return <div className={'selected-indicator' + (this.props['selected'] ? ' selected' : '') + (this.props.action ? ' selectable' : '')} onClick={this.props.action}> </div>
+        return <div className={'selected-indicator' + (this.props['selected'] ? ' selected' : '') + (this.props.action && !this.props['selected'] ? ' selectable' : '')} onClick={this.props['selected'] ? null : this.props.action}> </div>
     }
 });
 
@@ -50,6 +50,7 @@ var Basket = React.createClass({
     },
 
     _changeSectionTo: function(sectionId) {
+        console.log("changing to " + sectionId);
         schedules.getCurrentSchedule().changeSection(sectionId);
     },
 
@@ -75,7 +76,7 @@ var Basket = React.createClass({
 
                 function listOfSections(sections) {
                     return sections.map(function(section) {
-                        return <div className="content level-2"><SelectionIndicator selected={selectedSections[section.number]} action={self._changeSectionTo.bind(this, section.number)} />{section.type + ' ' + section.sec}</div>
+                        return <div className="content level-2"><SelectionIndicator selected={selectedSections[section.number]} action={self._changeSectionTo.bind(null, section.number)} />{section.type + ' ' + section.sec}</div>
                     }, this);
                 }
 
@@ -100,9 +101,7 @@ var Basket = React.createClass({
 
                 return <div className={"basket-item " + className}>
                     <div className="content">
-                        <div className="content-buttons">M <a href="javascript:;" onClick={this._toggleVisibility.bind(this, number)}>V</a> <a href="javascript:;" onClick={(function() {
-                            this._toggleExpansion(number);
-                        }).bind(this)}>E</a></div>
+                        <div className="content-buttons">M <a href="javascript:;" onClick={this._toggleVisibility.bind(null, number)}>V</a> <a href="javascript:;" onClick={this._toggleExpansion.bind(null, number)}>E</a></div>
                     <div className="content-title">{number + ": "}{cluster[0].title}</div>
                     </div>
                     {clusterItems}

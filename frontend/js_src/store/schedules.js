@@ -86,10 +86,11 @@ Schedule.prototype.changeSection = function(toNumber, fromNumber) {
     var fromIndex;
 
     if (fromNumber === undefined) {
+        find_cluster:
         for (var i=0; i < this.basket.length; i++) {
             for (var j=0; j < this.basket[i].length; j++) {
                 toSection = this.basket[i][j].findSectionByNumber(toNumber);
-                if (toSection) break;
+                if (toSection) break find_cluster;
             }
         }
         if (!toSection) return false;
@@ -179,8 +180,8 @@ Schedule.prototype.addCourse = function(subject, number) {
 
             self.persistSections();
 
-            this._onChange();
-            
+            self._onChange();
+
             return true;
         });
     }

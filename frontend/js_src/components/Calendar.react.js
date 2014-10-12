@@ -89,6 +89,7 @@ var Calendar = React.createClass({
             for (var day = 0; day < 7; day++) {
                 if (meeting.pattern & (1<<day)) {
                     singleMeetings.push({
+                        key: meeting.parent.number + '-' + day,
                         nbr: meeting.parent.number,
                         title: title,
                         location: location,
@@ -133,7 +134,7 @@ var Calendar = React.createClass({
                 classes += ' even';
             }
 
-            stripes.push(<div className={classes}>
+            stripes.push(<div className={classes} key={i}>
                     <div className="cal-time">{formattedTime}</div>
                 </div>)
         }
@@ -145,7 +146,7 @@ var Calendar = React.createClass({
         });
 
         var conflicts = this.state.conflicts.map(function(conflict) {
-            return <ConflictIndicator day={datetime.bitmaskToDay(conflict.pattern)} st_offset={conflict.startTimeHrs - this.minTime} length={conflict.endTimeHrs - conflict.startTimeHrs} />
+            return <ConflictIndicator key={conflict.startTimeHrs.toFixed(1) + '-' + conflict.pattern} day={datetime.bitmaskToDay(conflict.pattern)} st_offset={conflict.startTimeHrs - this.minTime} length={conflict.endTimeHrs - conflict.startTimeHrs} />
         }, this);
         return <div className="cal-inner" ref="container">
                 <div className="cal-meetings">
