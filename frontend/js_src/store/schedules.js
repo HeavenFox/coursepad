@@ -56,6 +56,7 @@ function Schedule() {
 
 Schedule.prototype.setVisibility = function(sectionId, val) {
     this.hidden[sectionId] = !val;
+    this.persistSections();
     this._onChange();
 }
 
@@ -356,6 +357,7 @@ Schedule.prototype.persistSections = function() {
     persist.sections = this.serializeSections();
     persist.basket = this.serializeBasket();
     persist.colorMapping = $.extend({}, this.colorMapping);
+    persist.hidden = $.extend({}, this.hidden);
     localStore.fsync(this.getStoreKey());
 };
 
@@ -420,7 +422,8 @@ Schedule.prototype.load = function() {
         return Promise.resolve(false);
     }
 
-    this.colorMapping = serialized.colorMapping;
+    this.colorMapping = serialized.colorMapping || {};
+    this.hidden = serialized.hidden || {};
 
     return indexeddb.getByKeys('section_index', serialized.sections)
     .then(function(courseIds) {
