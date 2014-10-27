@@ -616,6 +616,42 @@ Schedule.prototype.getAlternateMeetings = function(meeting, returntype) {
     return alternatives;
 };
 
+Schedule.prototype.setSectionsWithClassNumbers = function(sections) {
+    var clusters = this.basket;
+    var hasSection = {};
+    var courseByNumber = {};
+    clusters.forEach(function(cluster) {
+        hasSection[cluster[0].getNumber()] = {};
+    });
+    
+    this.sections = sections.map(function(sectionId) {
+        for (var i=0; i < clusters.length; i++) {
+            for (var j=0; j < clusters[i].length; j++) {
+                var section = clusters[i][j].findSectionByNumber(sectionId);
+                if (section) {
+                    var courseNumber = clusters[i][j].getNumber();
+                    // Make sure there's only one component chosen per section type
+                    // And sections do not cross course boundary
+                    if (hasSection[courseNumber].hasOwnProperty(section.type) ||
+                        (courseByNumber[courseNumber] && courseByNumber[courseNumber]['id'] !== clusters[i][j]['id'])) {
+                        return null;
+                    } else {
+                        hasSection[courseNumber][section.type] = true;
+                        courseByNumber[courseNumber] = clusters[i][j];
+                        return section;
+                    }
+                }
+            }
+        }
+        console.warn("Section " + sectionId + " is not found.");
+        return null;
+    }).filter(function(x) {
+        return x !== null;
+    });
+
+    this._onChange();
+};
+
 Schedule.prototype.load = function() {
     var self = this;
     var serialized = localStore.get(this.getStoreKey(), Array)[this.index];

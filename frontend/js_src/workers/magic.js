@@ -1,0 +1,6 @@
+var priorities;
+
+onmessage = function() {
+    
+    
+};

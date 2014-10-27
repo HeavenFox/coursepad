@@ -176,3 +176,41 @@
         border-left: 3px solid $color;
     }
 }
+
+/*--------------------------------------------*/
+/* Magic */
+/*--------------------------------------------*/
+.magic.utilities-item > .utilities-content {
+    margin-left: 20px;
+}
+
+.magic.utilities-item .description {
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+.magic.utilities-item ul {
+    list-style: none;
+    font-size: 14px;
+    padding-left: 10px;
+    margin: 5px 0;
+}
+
+.magic.utilities-item ul label {
+    display: inline-block;
+    width: 120px;
+}
+
+.magic.utilities-item > .utilities-content > .btn {
+    background-color: #fafafa;
+    display: inline-block;
+    border: 1px solid #aaa;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.magic.utilities-item .hint {
+    font-size: 12px;
+    margin-top: 3px;
+}
+
