@@ -1,3 +1,4 @@
+/** @jsx React.DOM **/
 var flux = require('flux');
 
 var meta = require('./store/meta.js');
@@ -10,12 +11,12 @@ var termdb = require('./store/termdb.js');
 var schedules = require('./store/schedules.js');
 
 var magic = require('./magic/magic.js');
+var TermSelector = require('./components/TermSelector.react.js');
 
-
-
-React.renderComponent(Calendar(), document.getElementById('calendar'));
-React.renderComponent(SearchBar(), document.getElementById('topsearch'));
-React.renderComponent(Sidebar(), document.getElementById('utilities'));
+React.render(<Calendar />, document.getElementById('calendar'));
+React.render(<SearchBar />, document.getElementById('topsearch'));
+React.render(<Sidebar />, document.getElementById('utilities'));
+React.render(<TermSelector />, document.getElementById('term-selector'));
 
 function initCurrentTerm() {
     var currentTerm = meta.getSelectedTerm();

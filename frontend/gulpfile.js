@@ -1,6 +1,5 @@
 var gulp = require('gulp');
 var webpack = require('gulp-webpack');
-var jsx = require('gulp-jsx');
 var uglify = require('gulp-uglify');
 var sass = require('gulp-ruby-sass');
 var insert = require('gulp-insert');
@@ -23,7 +22,7 @@ function webpack_conf() {
         },
         module: {
             loaders: [
-                { test: /\.react.js$/, loader: "jsx-loader" },
+                { test: /\.js$/, loader: "jsx-loader" },
                 { test: /\.json/, loader: "json-loader"}
             ]
         }

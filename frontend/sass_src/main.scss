@@ -7,6 +7,10 @@
     user-select: none;
 }
 
+.clickable {
+    cursor: pointer;
+}
+
 $topbar-height : 70px;
 $leftbar-width-collapsed : 40px;
 
@@ -450,4 +454,18 @@ footer a {
     color: #aaa;
 }
 
+.drop-element .menu {
+    border: 1px solid #aaa;
+    background-color: white;
+    margin: 5px;
+    padding: 1px;
+}
+
+.drop-element .menu ul {
+    list-style: none;
+    margin: 5px;
+    padding: 0;
+}
+
 @import 'jquery-ui';
+@import 'drop';

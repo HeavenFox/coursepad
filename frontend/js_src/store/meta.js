@@ -16,7 +16,7 @@ var meta = EventEmitter({
     },
 
     getLocalTerms: function() {
-        return localStore.get('terms');
+        return localStore.get('terms') || [];
     },
 
     addLocalTerm: function(term) {
