@@ -12,6 +12,8 @@ var magic = require('./magic/magic.js');
 var TermSelector = require('./components/TermSelector.react.js');
 var humanize = require('./consts/humanize.js');
 
+require('./utils/nuke.js');
+
 React.render(<Calendar />, document.getElementById('calendar'));
 React.render(<SearchBar />, document.getElementById('topsearch'));
 React.render(<Sidebar />, document.getElementById('utilities'));
@@ -41,5 +43,4 @@ function initCurrentSchedule() {
 
 $(function() {
     initCurrentSchedule();
-
 });

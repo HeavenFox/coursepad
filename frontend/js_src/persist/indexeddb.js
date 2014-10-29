@@ -20,6 +20,12 @@ function open() {
     return dbPromise;
 }
 
+function close() {
+    return open().then(function(db) {
+        db.close();
+    });
+}
+
 function initSchema(db) {
     var rosterStore = db.createObjectStore('roster', {keyPath: 'id'});
     rosterStore.createIndex('term', 'term', {unique: false});
@@ -98,13 +104,8 @@ function getByKeys(objectStore, keys) {
     });
 }
 
-window.nuke = function() {
-    indexedDB.deleteDatabase("coursepad").onsuccess = function() {
-        console.log("Nuked!");
-    };
-}
-
 exports.open = open;
+exports.close = close;
 exports.queryByIndex = queryByIndex;
 exports.queryAllByIndex = queryAllByIndex;
 exports.getByKey = getByKey;
