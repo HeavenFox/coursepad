@@ -3,6 +3,8 @@
  */
 var schedules = require('../../store/schedules.js');
 
+var ana = require('../../analytics/analytics.js');
+
 var SelectionIndicator = React.createClass({
     render: function() {
         return <div className={'selected-indicator' + (this.props['selected'] ? ' selected' : '') + (this.props.action && !this.props['selected'] ? ' selectable' : '')} onClick={this.props['selected'] ? null : this.props.action}> </div>
@@ -43,6 +45,8 @@ var Basket = React.createClass({
         var expansionState = this.state['expansion'];
         expansionState[identifier] = !expansionState[identifier];
         this.setState({expansion: expansionState});
+
+        ana.sevent('basket', 'toggle_expansion', identifier);
     },
 
     _toggleVisibility: function(courseNumber) {
@@ -51,10 +55,14 @@ var Basket = React.createClass({
 
     _changeSectionTo: function(sectionId) {
         schedules.getCurrentSchedule().changeSection(sectionId);
+
+        ana.sevent('course', 'change_section_basket_dot', sectionId);
     },
 
     _changeCourseTo: function(course) {
         schedules.getCurrentSchedule().changeCourse(course);
+
+        ana.sevent('course', 'change_course_basket_dot', course);
     },
 
 

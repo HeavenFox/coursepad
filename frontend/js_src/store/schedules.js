@@ -6,6 +6,8 @@ var termdb = require('./termdb.js');
 var indexeddb = require('../persist/indexeddb.js');
 var localStore = require('../persist/localStorage.js');
 
+var ana = require('../analytics/analytics.js');
+
 var store = EventEmitter({
     ready: false,
     setCurrentSchedule: function(term, index) {
@@ -82,6 +84,8 @@ Schedule.prototype.setVisibility = function(sectionId, val) {
 
 Schedule.prototype.toggleVisibility = function(sectionId) {
     this.setVisibility(sectionId, !this.getVisibility(sectionId));
+
+    ana.sevent('course', 'toggle_visibility', sectionId);
 }
 
 Schedule.prototype.getVisibility = function(sectionId) {
@@ -342,6 +346,9 @@ Schedule.prototype.addCourse = function(subject, number) {
             self.persistSections();
 
             self._onChange();
+
+
+            ana.sevent('course', 'add', subject + ' ' + number);
 
             return true;
         });

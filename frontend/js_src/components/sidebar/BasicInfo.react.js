@@ -3,6 +3,8 @@
  */
 var schedules = require('../../store/schedules.js');
 
+var ana = require('../../analytics/analytics.js');
+
 var BasicInfo = React.createClass({
     componentWillMount: function() {
         schedules.on('readystatechange', this._onReadyStateChange);
@@ -37,6 +39,14 @@ var BasicInfo = React.createClass({
         } else {
             this._hideConflicts();
         }
+
+        ana.sevent('basicinfo', 'toggle_always_conflict');
+    },
+
+    _mouseoverConflict: function() {
+        this._showConflicts();
+
+        ana.sevent('basicinfo', 'hover_show_conflict');
     },
 
     _showConflicts: function() {
@@ -60,7 +70,7 @@ var BasicInfo = React.createClass({
         var conflict = null;
         if (this.state.conflicts) {
             conflict = <div className="basic-info-conflict"
-                            onMouseOver={this._showConflicts}
+                            onMouseOver={this._mouseoverConflict}
                             onMouseOut={this._hideConflictsIfNotPinned}
                             onClick={this._toggleAlwaysShowConflicts}>
                                 <p>Note: this schedule has conflicts</p>

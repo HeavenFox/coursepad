@@ -4,6 +4,8 @@
 var schedules = require('../store/schedules.js');
 var CalendarElementMixin = require('./CalendarElementMixin.react.js');
 
+var ana = require('../analytics/analytics.js');
+
 var MeetingDropoff = React.createClass({
     mixins : [CalendarElementMixin],
 
@@ -18,6 +20,8 @@ var MeetingDropoff = React.createClass({
 
     onDropped: function(fromClassNumber) {
         schedules.getCurrentSchedule().changeSection(this.props['nbr'], fromClassNumber);
+
+        ana.sevent('course', 'change_section_drop', fromClassNumber + '->' + this.props['nbr']);
     },
 
     render: function() {
