@@ -11,6 +11,19 @@
     cursor: pointer;
 }
 
+@mixin centered-img($img) {
+    background-image: url('../img/#{$img}.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    @media print,
+       (-o-min-device-pixel-ratio: 5/4),
+       (-webkit-min-device-pixel-ratio: 1.25),
+       (min-resolution: 120dpi) {
+        background-image: url('../img/#{$img}@2x.png');
+        background-size: 50% 50%;
+    }
+}
+
 $topbar-height : 70px;
 $leftbar-width-collapsed : 40px;
 
@@ -417,12 +430,27 @@ footer {
     margin-right: 0px;
 }
 
-.basket-item .content > .content-buttons {
-    display: none;
+.basket-item .content-buttons .btn {
+    cursor: pointer;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
 }
 
-.basket-item .content:hover > .content-buttons {
-    display: block;
+.basket-item .content-buttons .visibility-btn {
+    @include centered-img('basket_eye_open');
+}
+
+.basket-item .content-buttons .visibility-btn.closed {
+    @include centered-img('basket_eye_closed');
+}
+
+.basket-item .content-buttons .expand-btn {
+    @include centered-img('basket_tri_closed');
+}
+
+.basket-item .content-buttons .expand-btn.expanded {
+    @include centered-img('basket_tri_open');
 }
 
 .basket-item .content:hover > .content-title {

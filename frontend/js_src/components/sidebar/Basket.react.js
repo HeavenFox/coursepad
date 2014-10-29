@@ -104,7 +104,7 @@ var Basket = React.createClass({
 
                 return <div className={"basket-item " + className}>
                     <div className="content">
-                        <div className="content-buttons">M <a href="javascript:;" onClick={this._toggleVisibility.bind(null, number)}>V</a> <a href="javascript:;" onClick={this._toggleExpansion.bind(null, number)}>E</a></div>
+                        <div className="content-buttons"><div aria-role="button" className={"btn visibility-btn" + (clusterVisible ? '' : ' closed')} onClick={this._toggleVisibility.bind(null, number)}></div> <div aria-role="button" className={"btn expand-btn" + (this.state.expansion[number] ? ' expanded' : '')} onClick={this._toggleExpansion.bind(null, number)}></div></div>
                     <div className="content-title">{number + ": "}{cluster[0].title}</div>
                     </div>
                     {clusterItems}
