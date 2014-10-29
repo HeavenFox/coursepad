@@ -17,11 +17,7 @@ var MeetingDropoff = React.createClass({
     },
 
     onDropped: function(fromClassNumber) {
-        console.log(fromClassNumber);
-        console.log(this.props['nbr']);
-
         schedules.getCurrentSchedule().changeSection(this.props['nbr'], fromClassNumber);
-
     },
 
     render: function() {

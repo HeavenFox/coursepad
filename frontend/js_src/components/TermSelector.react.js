@@ -36,7 +36,6 @@ var TermList = React.createClass({
                 return <li className="clickable menuitem" onClick={this.props['clickHandler'].bind(null, term)} key={term}>{humanize.getTermName(term)}</li>
             }, this);
         }
-        console.log(lis);
         return <div className="menu" ref="menu"><ul>
             {lis}
         </ul></div>
@@ -94,7 +93,6 @@ var TermSelector = React.createClass({
 
     render: function() {
         var currentTermName = 'Semester';
-        console.log(this.state.currentTerm);
         if (this.state.currentTerm) {
             currentTermName = humanize.getTermName(this.state.currentTerm.term);
 

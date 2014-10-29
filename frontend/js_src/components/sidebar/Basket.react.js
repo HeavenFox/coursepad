@@ -50,7 +50,6 @@ var Basket = React.createClass({
     },
 
     _changeSectionTo: function(sectionId) {
-        console.log("changing to " + sectionId);
         schedules.getCurrentSchedule().changeSection(sectionId);
     },
 
