@@ -72,7 +72,7 @@ TermDatabase.prototype.searchByKeyword = function(keywords, increment) {
         }
     }
     results.sort(function(a,b) {
-        return a.segments[0][0] - b.segments[0][0];
+        return (a.segments[0][0] - b.segments[0][0]) || a.title.localeCompare(b.title);
     });
     return results;
 }

@@ -55,7 +55,7 @@ var SearchBar = React.createClass({
     componentDidMount: function() {
         var that = this;
         $(this.getDOMNode()).autocomplete({
-            minLength: 4,
+            minLength: 2,
             source: this.dataSource,
             select: function(event, ui) {
                 schedules.getCurrentSchedule()
