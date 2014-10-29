@@ -2,6 +2,8 @@ var EventEmitter = require('event-emitter');
 var localStore = require('../persist/localStorage.js');
 var endpoints = require('../consts/endpoints.js');
 
+const LATEST_VERSION = 1;
+
 var meta = EventEmitter({
     getSelectedTerm: function() {
         return localStore.get('current_term');
@@ -16,17 +18,31 @@ var meta = EventEmitter({
     },
 
     getLocalTerms: function() {
-        return localStore.get('terms') || [];
+        var localTerms = localStore.get('terms') || {};
+        // Upgrade from old format
+        if (Array.isArray(localTerms)) {
+            var newFormat = {};
+            var times = {
+                "fa14": 1410981659, "sp15": 1414178138
+            };
+            localTerms.forEach(function(t) {
+                newFormat[t] = times[t]
+            });
+            localTerms = newFormat;
+            localStore.set('terms', newFormat);
+        }
+
+        return localTerms;
     },
 
-    addLocalTerm: function(term) {
-        localStore.get('terms', Array).push(term);
+    addLocalTerm: function(term, time) {
+        localStore.get('terms', Object)[term] = time;
         localStore.fsync('terms');
     },
 
     getRemoteTerms: function() {
         return this.getRemoteMeta().then(function(data) {
-            return data.available_terms;
+            return data.roster_time;
         })
     },
 
@@ -38,5 +54,16 @@ var meta = EventEmitter({
         });
     }
 });
+
+// Upgrade schema
+var currentVersion = localStore.get('meta_version', undefined);
+
+if (currentVersion == undefined) {
+    localStore.set('meta_version', LATEST_VERSION);
+} else if (currentVersion < LATEST_VERSION) {
+    localStore.set('meta_version', LATEST_VERSION);
+}
+
+
 
 module.exports = meta;

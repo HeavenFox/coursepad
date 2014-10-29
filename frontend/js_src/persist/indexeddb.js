@@ -31,8 +31,6 @@ function initSchema(db) {
 
     var titleIndexStore = db.createObjectStore('title_index', {autoIncrement: true});
     titleIndexStore.createIndex('term', 'term', {unique: false});
-
-    var sectionIndexStore = db.createObjectStore('section_index');
 }
 
 function queryByIndex(objectStore, index, keyRange, callback) {

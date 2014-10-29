@@ -86,7 +86,7 @@ function setCurrentTerm(term) {
     store.emit('readystatechange');
 
     var dbLoadedPromise;
-    if (meta.getLocalTerms().indexOf(term) > -1) {
+    if (meta.getLocalTerms().hasOwnProperty(term)) {
         dbLoadedPromise = Promise.resolve();
     } else {
         dbLoadedPromise = loadTerm(term);
@@ -167,7 +167,7 @@ function loadTerm(term, progress) {
                     }
 
                     transaction.oncomplete = function() {
-                        meta.addLocalTerm(term);
+                        meta.addLocalTerm(term, data.time);
                         progress(1);
                         resolve(true);
                     }

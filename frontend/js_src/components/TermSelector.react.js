@@ -20,7 +20,7 @@ var TermList = React.createClass({
         var self = this;
 
         meta.getRemoteTerms().then(function(terms) {
-            self.setState({remoteTerms: terms, localTerms: meta.getLocalTerms()});
+            self.setState({remoteTerms: Object.keys(terms), localTerms: Object.keys(meta.getLocalTerms())});
         });
     },
 

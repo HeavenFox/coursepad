@@ -10,6 +10,7 @@ var schedules = require('./store/schedules.js');
 
 var magic = require('./magic/magic.js');
 var TermSelector = require('./components/TermSelector.react.js');
+var humanize = require('./consts/humanize.js');
 
 React.render(<Calendar />, document.getElementById('calendar'));
 React.render(<SearchBar />, document.getElementById('topsearch'));
@@ -24,8 +25,9 @@ function initCurrentSchedule() {
     if (currentTerm) {
         currentTermPromise = Promise.resolve(currentTerm);
     } else {
-        currentTermPromise = meta.getRemoteTerms().then(function(data) {
-            currentTerm = data[data.length-1];
+        currentTermPromise = meta.getRemoteTerms().then(function(terms) {
+            var data = humanize.sortTerms(Object.keys(terms), true);
+            currentTerm = data[0];
             return currentTerm;
         });
     }
