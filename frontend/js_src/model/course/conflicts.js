@@ -42,6 +42,7 @@ function conflictIntervals(meetings1, meetings2) {
 }
 
 function normalizeIntervals(intervals) {
+    console.log(intervals);
     var intervalsByDay = Object.create(null);
     intervals.forEach(function(interval) {
         for (var d = 1; d < (1 << 7); d <<= 1) {
@@ -71,7 +72,7 @@ function normalizeIntervals(intervals) {
         result.push(intervalsByDay[d][0]);
         for (var i=1; i < intervalsByDay[d].length; i++) {
             var lastEnd = result[result.length-1].endTimeHrs;
-            if (lastEnd < intervalsByDay[d][i]) {
+            if (lastEnd < intervalsByDay[d][i].startTimeHrs) {
                 result.push(intervalsByDay[d][i]);
             } else {
                 result[result.length-1].endTimeHrs = Math.max(lastEnd, intervalsByDay[d][i].endTimeHrs);
