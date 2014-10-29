@@ -103,6 +103,7 @@ function setCurrentTerm(term) {
         });
     })
     .then(function() {
+        meta.setSelectedTerm(term);
         store.ready = true;
         store.emit('readystatechange');
     });

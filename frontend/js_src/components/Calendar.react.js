@@ -84,7 +84,10 @@ var Calendar = React.createClass({
             var startHour = datetime.timeStringToHour(meeting.startTime);
             var length = datetime.timeStringToHour(meeting.endTime) - startHour;
             var time = meeting.startTime + ' \u2013 ' + meeting.endTime;
-            var location = meeting.building + ' ' + meeting.room;
+            var location = meeting.building;
+            if (meeting.room) {
+                location += (' ' + meeting.room);
+            }
             var title = meeting.parent.parent.subject + ' ' + meeting.parent.parent.number;
             for (var day = 0; day < 7; day++) {
                 if (meeting.pattern & (1<<day)) {

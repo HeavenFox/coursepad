@@ -28,7 +28,6 @@ function initCurrentSchedule() {
     } else {
         currentTermPromise = meta.getRemoteTerms().then(function(data) {
             currentTerm = data[data.length-1];
-            meta.setSelectedTerm(currentTerm);
             return currentTerm;
         });
     }
