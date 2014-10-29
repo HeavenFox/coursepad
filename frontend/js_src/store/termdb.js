@@ -11,8 +11,6 @@ function TermDatabase() {
     
 }
 
-currentTermDB = new TermDatabase();
-
 /**
  * @return {Promise}
  */
@@ -87,14 +85,24 @@ function setCurrentTerm(term) {
     store.ready = false;
     store.emit('readystatechange');
 
-    currentTermDB = new TermDatabase();
-    currentTermDB.term = term;
-    currentTermDB.titleIndex = [];
+    var dbLoadedPromise;
+    if (meta.getLocalTerms().indexOf(term) > -1) {
+        dbLoadedPromise = Promise.resolve();
+    } else {
+        dbLoadedPromise = loadTerm(term);
+    }
 
-    return indexeddb.queryByIndex('title_index', 'term', IDBKeyRange.only(term), function(item) {
-        item.titleLower = item.title.toLowerCase();
-        currentTermDB.titleIndex.push(item);
-    }).then(function() {
+    return dbLoadedPromise.then(function() {
+        currentTermDB = new TermDatabase();
+        currentTermDB.term = term;
+        currentTermDB.titleIndex = [];
+
+        return indexeddb.queryByIndex('title_index', 'term', IDBKeyRange.only(term), function(item) {
+            item.titleLower = item.title.toLowerCase();
+            currentTermDB.titleIndex.push(item);
+        });
+    })
+    .then(function() {
         store.ready = true;
         store.emit('readystatechange');
     });
@@ -118,9 +126,8 @@ function loadTerm(term, progress) {
             },
             success: function(data) {
                 indexeddb.open().then(function(db) {
-                    var transaction = db.transaction(['roster', 'subjects', 'title_index', 'section_index'], 'readwrite');
+                    var transaction = db.transaction(['roster', 'subjects', 'title_index'], 'readwrite');
                     var rosterStore = transaction.objectStore('roster');
-                    var sectionIndexStore = transaction.objectStore('section_index');
 
                     var titleHash = Object.create(null);
 
@@ -129,15 +136,6 @@ function loadTerm(term, progress) {
                             var course = data.roster[i];
 
                             course.term = term;
-
-                            for (var type in course.secs) {
-                                if (course.secs.hasOwnProperty(type)) {
-                                    var list = course.secs[type];
-                                    for (var j=0; j < list.length; j++) {
-                                        sectionIndexStore.add(course.id, list[j].nbr);
-                                    }
-                                }
-                            }
 
                             rosterStore.add(course);
 
@@ -185,13 +183,6 @@ function loadTerm(term, progress) {
     });
 }
 
-window.loadTerm = loadTerm;
-
-window.playground = function() {
-    indexeddb.open().then(function(db) {
-
-    });
-};
 
 var store = new EventEmitter({
     ready: false,

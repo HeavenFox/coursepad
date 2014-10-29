@@ -18,7 +18,8 @@ React.render(<SearchBar />, document.getElementById('topsearch'));
 React.render(<Sidebar />, document.getElementById('utilities'));
 React.render(<TermSelector />, document.getElementById('term-selector'));
 
-function initCurrentTerm() {
+
+function initCurrentSchedule() {
     var currentTerm = meta.getSelectedTerm();
     var currentTermPromise;
 
@@ -32,31 +33,14 @@ function initCurrentTerm() {
         });
     }
 
-    return currentTermPromise.then(function(term) {
-        var localTerms = meta.getLocalTerms();
-        if (!localTerms || localTerms.indexOf(term) < 0) {
-            return termdb.loadTerm(term).then(function() {
-                return term;
-            });
-        }
-        return term;
-    }).then(function(term) {
-        return termdb.setCurrentTerm(term);
-    });
-}
-
-
-
-
-function initCurrentSchedule() {
     var currentScheduleIndex = meta.getScheduleIndex() || 0;
-    var currentTermName = termdb.getCurrentTerm().term;
-    return schedules.setCurrentSchedule(currentTermName, currentScheduleIndex);
+
+    return currentTermPromise.then(function(term) {
+        return schedules.setCurrentSchedule(term, currentScheduleIndex);
+    });
 }
 
 $(function() {
-    initCurrentTerm().then(function(){
-        return initCurrentSchedule();
-    });
+    initCurrentSchedule();
 
 });

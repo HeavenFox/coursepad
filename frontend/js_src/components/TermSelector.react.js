@@ -4,6 +4,8 @@
 var Drop = require('drop');
 
 var meta = require('../store/meta.js');
+var termdb = require('../store/termdb.js');
+var schedules = require('../store/schedules.js');
 var humanize = require('../consts/humanize.js');
 
 var TermList = React.createClass({
@@ -42,6 +44,28 @@ var TermList = React.createClass({
 });
 
 var TermSelector = React.createClass({
+    getInitialState: function() {
+        return {
+            currentTerm: null,
+            ready: false
+        };
+    },
+
+    componentWillMount: function() {
+        termdb.on('readystatechange', this.termDBReadyStateChange);
+    },
+
+    componentDidUnmount: function() {
+        termdb.off('readystatechange', this.termDBReadyStateChange);
+    },
+
+    termDBReadyStateChange: function() {
+        this.setState({
+            currentTerm: termdb.getCurrentTerm(),
+            ready: termdb.ready
+        });
+    },
+
     componentDidMount: function() {
         var contentDescriptor = <TermList clickHandler={this._click} />;
         this.menu = new Drop({
@@ -62,14 +86,23 @@ var TermSelector = React.createClass({
     },
 
     _click: function(term) {
-        console.log(term);
+        schedules.setCurrentSchedule(term);
 
         this.menu.close();
 
     },
 
     render: function() {
-        return <div><span ref="selector" className="clickable">Fall 2014 &#9662;</span></div>
+        var currentTermName = 'Semester';
+        console.log(this.state.currentTerm);
+        if (this.state.currentTerm) {
+            currentTermName = humanize.getTermName(this.state.currentTerm.term);
+
+            if (!this.state.ready) {
+                currentTermName += '...';
+            }
+        }
+        return <div><span ref="selector" className="clickable">{currentTermName} &#9662;</span></div>
     }
 });
 

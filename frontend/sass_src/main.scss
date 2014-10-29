@@ -58,6 +58,11 @@ header {
 
 #topnav {
     float: right;
+    margin-right: 15px;
+}
+
+#topnav div {
+    line-height: $topbar-height;
 }
 
 #main {

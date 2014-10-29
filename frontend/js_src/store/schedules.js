@@ -2,20 +2,43 @@ var EventEmitter = require('event-emitter');
 var datetime = require('../utils/datetime.js');
 var conflicts = require('../model/course/conflicts.js');
 
+var termdb = require('./termdb.js');
+var indexeddb = require('../persist/indexeddb.js');
+var localStore = require('../persist/localStorage.js');
+
 var store = EventEmitter({
     ready: false,
     setCurrentSchedule: function(term, index) {
         var self = this;
         if (this.currentSchedule) {
+            if ((term === undefined || this.currentSchedule.term === term) && 
+                (index === undefined || this.currentSchedule.index === index)) {
+                return Promise.resolve(false);
+            }
+            self.ready = false;
+            self.emit('readystatechange');
         }
 
-        this.currentSchedule = new Schedule();
-        this.currentSchedule.term = term;
-        this.currentSchedule.index = index;
-        return this.currentSchedule.load().then(function() {
+        if (index === undefined) {
+            index = 0;
+        }
+
+        var dbLoadedPromise;
+        if (term === undefined || (termdb.getCurrentTerm() && termdb.getCurrentTerm().term == term)) {
+            dbLoadedPromise = Promise.resolve();
+        } else {
+            dbLoadedPromise = termdb.setCurrentTerm(term);
+        }
+
+        return dbLoadedPromise.then(function() {
+            self.currentSchedule = new Schedule();
+            self.currentSchedule.term = term;
+            self.currentSchedule.index = index;
+
+            return self.currentSchedule.load();
+        }).then(function() {
             self.ready = true;
             self.emit('readystatechange');
-
         });
     },
 
@@ -24,9 +47,6 @@ var store = EventEmitter({
     }
 });
 
-var termdb = require('./termdb.js');
-var indexeddb = require('../persist/indexeddb.js');
-var localStore = require('../persist/localStorage.js');
 
 var palette = [
     'lavender',
@@ -425,16 +445,10 @@ Schedule.prototype.load = function() {
     this.colorMapping = serialized.colorMapping || {};
     this.hidden = serialized.hidden || {};
 
-    return indexeddb.getByKeys('section_index', serialized.sections)
-    .then(function(courseIds) {
+    return Promise.resolve()
+    .then(function() {
         var basket = serialized.basket ? serialized.basket.slice() : [];
-        // Sanity check: all courses should be in basket
-        // courseIds.forEach(function(course) {
-        //     if (basket.indexOf(course) < 0) {
-        //         basket.push(course);
-        //         console.warn("WARNING: Course " + course + " is present in sections but not in basket. Added.");
-        //     }
-        // });
+        
         return Promise.all(basket.map(function(c) {
             var split = c.split(' ');
             if (split.length != 2) {
