@@ -1,6 +1,4 @@
 /** @jsx React.DOM **/
-var flux = require('flux');
-
 var meta = require('./store/meta.js');
 
 var Calendar = require('./components/Calendar.react.js');

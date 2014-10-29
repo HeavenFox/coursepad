@@ -36,7 +36,11 @@ gulp.task('js', function() {
 
     if (!DEV) {
         c = c.pipe(insert.prepend('const PROD=true;\n'))
-             .pipe(uglify());
+             .pipe(uglify({
+                compress: {
+                    drop_console: true
+                }
+             }));
     } else {
         c = c.pipe(insert.prepend('const PROD=false;\n'));
     }
