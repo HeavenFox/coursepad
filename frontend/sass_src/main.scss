@@ -11,6 +11,37 @@
     cursor: pointer;
 }
 
+body.modal-open {
+    overflow: hidden;
+}
+
+.modal-container {
+    position: fixed;
+    overflow: auto;
+        top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 499;
+}
+
+.modal-backdrop {
+    background-color: rgba(0,0,0,0.75);
+    position: fixed;
+    overflow: auto;
+        top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.modal-window {
+    position: relative;
+    width: 700px;
+    background-color: white;
+    margin: 70px auto;
+}
+
 @mixin centered-img($img) {
     background-image: url('../img/#{$img}.png');
     background-repeat: no-repeat;
@@ -406,6 +437,29 @@ footer {
     display: none;
 }
 
+.utilities-item > h2 {
+    text-transform: uppercase;
+    font-size: 16px;
+    color: #666;
+    margin: 18px 10px 10px 10px;
+}
+
+.tools.utilities-item ul {
+    list-style: none;
+    font-size: 14px;
+    padding: 0;
+    margin: 5px 5px 5px 20px;
+}
+
+.tools.utilities-item a {
+    color: black;
+    text-decoration: none;
+}
+
+.tools.utilities-item a:hover {
+    text-decoration: underline;
+}
+
 .basket-item {
     padding: 5px;
     margin: 10px;
@@ -498,6 +552,30 @@ footer a {
     list-style: none;
     margin: 5px;
     padding: 0;
+}
+
+.classnumber-list > h2 {
+    font-weight: normal;
+    font-size: 16px;
+    padding: 10px;
+}
+
+.classnumber-list {
+    padding-bottom: 10px;
+}
+
+span.modal-close {
+    display: block;
+    float: right;
+}
+
+span.class-number {
+    display: inline-block;
+    width: 70px;
+}
+
+.classnumber-course-list {
+    margin: 10px;
 }
 
 @import 'jquery-ui';

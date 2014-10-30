@@ -14,11 +14,14 @@ var humanize = require('./consts/humanize.js');
 
 require('./utils/nuke.js');
 
+var ClassNumbers = require('./components/pagelets/ClassNumbers.react.js');
+
 React.render(<Calendar />, document.getElementById('calendar'));
 React.render(<SearchBar />, document.getElementById('topsearch'));
 React.render(<Sidebar />, document.getElementById('utilities'));
 React.render(<TermSelector />, document.getElementById('term-selector'));
 
+React.render(<ClassNumbers />, document.getElementById('class-number-list'));
 
 function initCurrentSchedule() {
     var currentTerm = meta.getSelectedTerm();

@@ -122,7 +122,8 @@ var Basket = React.createClass({
         }
 
 
-        return <div className="basket">
+        return <div className="basket utilities-item">
+            <h2>Basket</h2>
         {clusters}
         </div>
     }

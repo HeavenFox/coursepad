@@ -10,6 +10,7 @@ var sectionType = {
 
 
 module.exports = {
+    sectionTypePriorities : ['LEC', 'SEM', 'IND', 'DIS', 'LAB', 'RSC', 'CLN'],
     getSectionType: function() {
 
     },
