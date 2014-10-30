@@ -39,6 +39,26 @@ function initSchema(db) {
     titleIndexStore.createIndex('term', 'term', {unique: false});
 }
 
+function queryObjectStore(store, query, mode) {
+    if (mode === undefined) {
+        mode = 'read';
+    }
+    return open().then(function(db) {
+        return new Promise(function(resolve, reject) {
+            var transaction = db.transaction([store], mode);
+            var result = query(transaction.objectStore(store));
+
+            transaction.oncomplete = function(e) {
+                resolve(result);
+            };
+
+            transaction.onerror = function(e) {
+                reject(e);
+            };
+        });
+    });
+} 
+
 function queryByIndex(objectStore, index, keyRange, callback) {
     return open().then(function(db) {
         return new Promise(function(resolve, reject) {
@@ -110,3 +130,4 @@ exports.queryByIndex = queryByIndex;
 exports.queryAllByIndex = queryAllByIndex;
 exports.getByKey = getByKey;
 exports.getByKeys = getByKeys;
+exports.queryObjectStore = queryObjectStore;

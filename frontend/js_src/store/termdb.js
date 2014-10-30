@@ -126,12 +126,9 @@ function loadTerm(term, progress) {
                 reject(status);
             },
             success: function(data) {
-                indexeddb.open().then(function(db) {
-                    var transaction = db.transaction(['roster', 'subjects', 'title_index'], 'readwrite');
-                    var rosterStore = transaction.objectStore('roster');
+                var titleHash = Object.create(null);
 
-                    var titleHash = Object.create(null);
-
+                indexeddb.queryObjectStore('roster', function(rosterStore) {
                     if (data.roster) {
                         for (var i=0; i < data.roster.length; i++) {
                             var course = data.roster[i];
@@ -144,40 +141,36 @@ function loadTerm(term, progress) {
 
                         }
                     }
+                }, 'readwrite').then(function() {
+                    return indexeddb.queryObjectStore('subjects', function(subjectsStore) {
+                        if (data.subjects) {
+                            for (var i=0; i < data.subjects.length; i++) {
+                                var subject = data.subjects[i];
 
+                                subject.term = term;
+                                subjectsStore.add(subject);
 
-                    var subjectsStore = transaction.objectStore('subjects');
-                    if (data.subjects) {
-                        for (var i=0; i < data.subjects.length; i++) {
-                            var subject = data.subjects[i];
-
-                            subject.term = term;
-                            subjectsStore.add(subject);
-
+                            }
                         }
-                    }
-
-                    var titleIndexCacheStore = transaction.objectStore('title_index');
-                    for (var title in titleHash) {
-                        titleIndexCacheStore.add({
-                            term: term,
-                            title: title,
-                            course: titleHash[title]
-                        });
-                    }
-
-                    transaction.oncomplete = function() {
-                        meta.addLocalTerm(term, data.time);
-                        progress(1);
-                        resolve(true);
-                    }
-
-                    transaction.onerror = function(e) {
-                        console.log("error", e);
-                        reject(e);
-                    }
+                    }, 'readwrite');
+                }).then(function() {
+                    return indexeddb.queryObjectStore('title_index', function(titleIndexCacheStore) {
+                        for (var title in titleHash) {
+                            titleIndexCacheStore.add({
+                                term: term,
+                                title: title,
+                                course: titleHash[title]
+                            });
+                        }
+                    }, 'readwrite');
+                }).then(function() {
+                    meta.addLocalTerm(term, data.time);
+                    progress(1);
+                    resolve(true);
+                }).then(null, function(e) {
+                    console.warn(e);
+                    reject(e);
                 });
-                
             },
             dataType: 'json'
         });
