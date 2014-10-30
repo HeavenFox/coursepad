@@ -318,6 +318,7 @@ Schedule.prototype.addCluster = function(cluster) {
                 return color;
             }
         }
+        return palette[Math.floor(Math.random() * palette.length)];
     }).call(this);
 
 };
