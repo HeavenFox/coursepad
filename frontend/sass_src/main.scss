@@ -87,14 +87,14 @@ header {
     margin: 0 0 0 10px;
     background-image: url('../img/logo.png');
 
-        background-repeat: no-repeat;
-        background-position: center;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 170px 24px;
     @media print,
        (-o-min-device-pixel-ratio: 5/4),
        (-webkit-min-device-pixel-ratio: 1.25),
        (min-resolution: 120dpi) {
         background-image: url('../img/logo@2x.png');
-        background-size: 50% 50%;
     }
 
     float: left;
