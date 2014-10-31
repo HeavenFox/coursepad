@@ -148,12 +148,16 @@ var Calendar = React.createClass({
             meetings.push(SingleMeeting(meeting));
         });
 
+        var fullWeek = this.state.meetings.some(function(singleMeeting) {
+            return singleMeeting.day == 'S' || singleMeeting.day == 'U';
+        })
+
         var conflicts = this.state.conflicts.map(function(conflict) {
             return <ConflictIndicator key={conflict.startTimeHrs.toFixed(1) + '-' + conflict.pattern} day={datetime.bitmaskToDay(conflict.pattern)} st_offset={conflict.startTimeHrs - this.minTime} length={conflict.endTimeHrs - conflict.startTimeHrs} />
         }, this);
         return <div className="cal-inner" ref="container">
                 <div className="cal-meetings">
-                    <div className="cal-meetings-inner">
+                    <div className={"cal-meetings-inner" + (fullWeek ? ' cal-meetings-inner-fullweek' : '')}>
                         {meetings}
                         <DropoffSet ref="dropoffset" />
                         <div id="conflict-overlay">

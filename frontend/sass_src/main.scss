@@ -144,6 +144,12 @@ $cal-time-width: 70px;
     width: 4 * $calendar-element-gutter + 5 * $calendar-element-width;
 }
 
+.cal-meetings-inner-fullweek {
+    margin: 0 auto 0 auto;
+    position: relative;
+    width: 6 * $calendar-element-gutter + 7 * $calendar-element-width;
+}
+
 .cal-stripe {
     height: 62px;
     padding-top: 3px;
@@ -192,6 +198,10 @@ $cal-time-width: 70px;
 
 .calele-s {
     left: 5 * $calendar-element-gutter + 5 * $calendar-element-width;
+}
+
+.calele-u {
+    left: 6 * $calendar-element-gutter + 6 * $calendar-element-width;
 }
 
 .meeting {
