@@ -79,7 +79,8 @@ var BasicInfo = React.createClass({
         }
 
         var creditIsRange = this.state['units'][0] != this.state['units'][1];
-        return <div className="basic-info-container">
+        return <div className={"basic-info-container" + (this.state.conflicts ? ' conflicts' : '')}>
+            <div className="basic-info-stats">
             <div className="basic-info">
                 <p className={'basic-info-value total-credit' + (creditIsRange ? ' total-credit-range' : '')}>
                     {creditIsRange ? this.state['units'][0] + '-' + this.state['units'][1] : this.state['units'][0]}
@@ -97,6 +98,7 @@ var BasicInfo = React.createClass({
                 <p className="basic-info-title">{this.state['hours'] > 1 ? "HRS/WK" : "HR/WK"}</p>
             </div>
             <div style={{clear: 'both'}} />
+            </div>
             {conflict}
         </div>
     }

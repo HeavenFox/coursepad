@@ -384,7 +384,20 @@ footer {
 }
 
 .basic-info-container {
+    height: 100px;
+    padding: 1px;
+}
 
+.basic-info-container .basic-info-stats {
+    margin-top: 16px;
+}
+
+.basic-info-container.conflicts .basic-info-stats {
+    margin-top: 0;
+}
+
+.basic-info-conflict-container {
+    height: 38px;
 }
 
 .basic-info-conflict {
@@ -405,9 +418,14 @@ footer {
 }
 
 .basic-info-value {
-    font-size: 24px;
+    font-size: 36px;
     font-weight: 400;
     margin: 3px;
+}
+
+.basic-info-container.conflicts .basic-info-value {
+    font-size: 24px;
+
 }
 
 .basic-info:first-child {
