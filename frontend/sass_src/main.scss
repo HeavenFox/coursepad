@@ -11,6 +11,10 @@
     cursor: pointer;
 }
 
+.clearboth {
+    clear: both;
+}
+
 body.modal-open {
     overflow: hidden;
 }
@@ -18,7 +22,7 @@ body.modal-open {
 .modal-container {
     position: fixed;
     overflow: auto;
-        top: 0;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
@@ -29,7 +33,7 @@ body.modal-open {
     background-color: rgba(0,0,0,0.75);
     position: fixed;
     overflow: auto;
-        top: 0;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
@@ -39,7 +43,7 @@ body.modal-open {
     position: relative;
     width: 700px;
     background-color: white;
-    margin: 70px auto;
+    margin: 60px auto;
 }
 
 @mixin centered-img($img) {
@@ -52,6 +56,19 @@ body.modal-open {
        (min-resolution: 120dpi) {
         background-image: url('../img/#{$img}@2x.png');
         background-size: 50% 50%;
+    }
+}
+
+@mixin centered-img-with-size($img, $width, $height) {
+    background-image: url('../img/#{$img}.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: $width $height;
+    @media print,
+       (-o-min-device-pixel-ratio: 5/4),
+       (-webkit-min-device-pixel-ratio: 1.25),
+       (min-resolution: 120dpi) {
+        background-image: url('../img/#{$img}@2x.png');
     }
 }
 
@@ -637,6 +654,85 @@ span.class-number {
 
 .unsupported-browser-content {
     margin: 10px;
+}
+
+.splash-screen {
+    box-shadow: 0px 0px 25px 0px rgba(75,75,75,1);
+}
+
+.splash-screen-header {
+    @include centered-img-with-size('splash-header', 700px, 80px);
+    height: 80px;
+}
+
+.splash-screen-inner {
+    padding: 10px;
+}
+
+.splash-screen-inner h2 {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.splash-screen-inner h3 {
+    text-align: center;
+    font-weight: normal;
+    margin: 3px 0;
+}
+
+.splash-screen-item-container {
+    clear: both;
+}
+
+.splash-screen-item {
+    float: left;
+    width: 210px;
+    margin: 0 6px;
+    font-size: 14px;
+}
+
+.splash-screen .start-using-container {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+.splash-screen .splash-screen-item p {
+    margin-top: 5px;
+}
+
+.start-using-btn-container {
+    text-align: center;
+    margin-top: 5px;
+}
+
+.splash-screen-fast-img {
+    width: 100%;
+    height: 70px;
+    @include centered-img-with-size('splash-fast', 64px, 64px);
+}
+
+.splash-screen-247-img {
+    width: 100%;
+    height: 70px;
+    @include centered-img-with-size('splash-247', 64px, 64px);
+}
+
+.splash-screen-support-img {
+    width: 100%;
+    height: 70px;
+    @include centered-img-with-size('splash-support', 64px, 64px);
+}
+
+.splash-screen .start-using-btn {
+    display: inline-block;
+    cursor: pointer;
+    padding: 5px;
+    border: 1px solid #357ebd;
+    border-radius: 4px;
+    background-color: #428bca;
+    color: #fff;
+    font-size: 14px;
 }
 
 .classnumber-course-list {

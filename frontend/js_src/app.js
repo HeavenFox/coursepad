@@ -12,16 +12,21 @@ var magic = require('./magic/magic.js');
 var TermSelector = require('./components/TermSelector.react.js');
 var humanize = require('./consts/humanize.js');
 
+var welcome = require('./utils/welcome.js');
+var browser_check = require('./utils/browser-check.js');
+
 require('./utils/nuke.js');
 
-require('./utils/browser-check.js');
-
-var ClassNumbers = require('./components/pagelets/ClassNumbers.react.js');
 
 React.render(<Calendar />, document.getElementById('calendar'));
 React.render(<SearchBar />, document.getElementById('topsearch'));
 React.render(<Sidebar />, document.getElementById('utilities'));
 React.render(<TermSelector />, document.getElementById('term-selector'));
+
+welcome();
+browser_check();
+meta.upgradeSchema();
+
 
 function initCurrentSchedule() {
     var currentTerm = meta.getSelectedTerm();
@@ -43,6 +48,9 @@ function initCurrentSchedule() {
         return schedules.setCurrentSchedule(term, currentScheduleIndex);
     });
 }
+
+
+
 
 $(function() {
     initCurrentSchedule();

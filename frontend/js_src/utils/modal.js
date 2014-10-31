@@ -1,14 +1,26 @@
-module.exports = {
-    show: function(component) {
-        $('body').addClass('modal-open');
-        $('.modal-container').removeClass('hidden');
+var showing = false;
 
-        React.render(component, $('.modal-window').get(0));
-    },
-
-    stop: function() {
-        $('body').removeClass('modal-open');
-        $('.modal-container').addClass('hidden');
-        React.unmountComponentAtNode($('.modal-window').get());
+function show(component, priority) {
+    if (showing) {
+        stop();
     }
+
+    showing = true;
+
+    $('body').addClass('modal-open');
+    $('.modal-container').removeClass('hidden');
+
+    React.render(component, $('.modal-window').get(0));
+}
+
+function stop() {
+    showing = false;
+    $('body').removeClass('modal-open');
+    $('.modal-container').addClass('hidden');
+    React.unmountComponentAtNode($('.modal-window').get());
+}
+
+module.exports = {
+    show: show,
+    stop: stop
 }

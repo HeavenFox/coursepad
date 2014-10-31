@@ -52,18 +52,18 @@ var meta = EventEmitter({
                 resolve(data);
             });
         });
+    },
+
+    upgradeSchema: function() {
+        // Upgrade schema
+        var currentVersion = localStore.get('meta_version', undefined);
+
+        if (currentVersion == undefined) {
+            localStore.set('meta_version', LATEST_VERSION);
+        } else if (currentVersion < LATEST_VERSION) {
+            localStore.set('meta_version', LATEST_VERSION);
+        }
     }
 });
-
-// Upgrade schema
-var currentVersion = localStore.get('meta_version', undefined);
-
-if (currentVersion == undefined) {
-    localStore.set('meta_version', LATEST_VERSION);
-} else if (currentVersion < LATEST_VERSION) {
-    localStore.set('meta_version', LATEST_VERSION);
-}
-
-
 
 module.exports = meta;
