@@ -42,7 +42,6 @@ function conflictIntervals(meetings1, meetings2) {
 }
 
 function normalizeIntervals(intervals) {
-    console.log(intervals);
     var intervalsByDay = Object.create(null);
     intervals.forEach(function(interval) {
         for (var d = 1; d < (1 << 7); d <<= 1) {

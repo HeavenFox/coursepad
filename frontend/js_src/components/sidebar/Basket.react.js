@@ -5,6 +5,8 @@ var schedules = require('../../store/schedules.js');
 
 var ana = require('../../analytics/analytics.js');
 
+var Drop = require('drop');
+
 var SelectionIndicator = React.createClass({
     render: function() {
         return <div className={'selected-indicator' + (this.props['selected'] ? ' selected' : '') + (this.props.action && !this.props['selected'] ? ' selectable' : '')} onClick={this.props['selected'] ? null : this.props.action}> </div>
@@ -51,6 +53,46 @@ var Basket = React.createClass({
 
     _toggleVisibility: function(courseNumber) {
         schedules.getCurrentSchedule().toggleVisibility(courseNumber);
+    },
+
+    _deleteCourse: function(courseNumber) {
+        schedules.getCurrentSchedule().removeCourseByNumber(courseNumber);
+        console.log(courseNumber);
+    },
+
+    _toggleMenu: function(courseNumber, e) {
+        var drop;
+        var menu = document.createElement('div');
+        menu.className = 'menu';
+        var ul = document.createElement('ul');
+        menu.appendChild(ul);
+
+        var li = document.createElement('li');
+        li.className = 'clickable menuitem';
+        li.innerHTML = 'Delete';
+        li.addEventListener('click', (function() {
+            drop.close();
+            this._deleteCourse(courseNumber);
+        }).bind(this));
+
+        ul.appendChild(li);
+
+        drop = new Drop({
+            target: e.target,
+            openOn: 'now',
+            destroy: true,
+            position: 'bottom right',
+            content: menu,
+            constrainToWindow: true,
+            tetherOptions: {
+                constraints: [
+                    {
+                        to: 'scrollParent',
+                        pin: true
+                    }
+                ]
+            }
+        });
     },
 
     _changeSectionTo: function(sectionId) {
@@ -112,7 +154,11 @@ var Basket = React.createClass({
 
                 return <div className={"basket-item " + className}>
                     <div className="content">
-                        <div className="content-buttons"><div aria-role="button" className={"btn visibility-btn" + (clusterVisible ? '' : ' closed')} onClick={this._toggleVisibility.bind(null, number)}></div> <div aria-role="button" className={"btn expand-btn" + (this.state.expansion[number] ? ' expanded' : '')} onClick={this._toggleExpansion.bind(null, number)}></div></div>
+                        <div className="content-buttons">
+                            <div aria-role="button" className="btn menu-btn" onClick={this._toggleMenu.bind(null, number)}></div>
+                            <div aria-role="button" className={"btn visibility-btn" + (clusterVisible ? '' : ' closed')} onClick={this._toggleVisibility.bind(null, number)}></div>
+                            <div aria-role="button" className={"btn expand-btn" + (this.state.expansion[number] ? ' expanded' : '')} onClick={this._toggleExpansion.bind(null, number)}></div>
+                        </div>
                     <div className="content-title">{number + ": "}{cluster[0].title}</div>
                     </div>
                     {clusterItems}

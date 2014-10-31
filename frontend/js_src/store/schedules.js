@@ -127,6 +127,26 @@ Schedule.prototype.findSectionInBasketByNumber = function(number) {
     return null;
 };
 
+Schedule.prototype.removeCourseByNumber = function(courseNumber) {
+    for (var i=0; i < this.basket.length; i++) {
+        if (this.basket[i].length && this.basket[i][0].getNumber() == courseNumber) {
+            this.basket.splice(i, 1);
+            break;
+        }
+    }
+
+    this.sections = this.sections.filter(function(section) {
+        return section.parent.getNumber() !== courseNumber;
+    });
+
+    delete this.hidden[courseNumber];
+    delete this.colorMapping[courseNumber];
+
+    this.persistSections();
+
+    this._onChange();
+};
+
 Schedule.prototype.changeSection = function(toNumber, fromNumber) {
     var toSection;
     var fromIndex;

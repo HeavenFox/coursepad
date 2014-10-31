@@ -489,6 +489,12 @@ footer {
     display: inline-block;
     width: 18px;
     height: 18px;
+    margin: 0 1px;
+}
+
+.basket-item .content-buttons .menu-btn {
+    @include centered-img('basket_menu');
+    margin-right: 3px;
 }
 
 .basket-item .content-buttons .visibility-btn {
