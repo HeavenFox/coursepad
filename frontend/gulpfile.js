@@ -49,7 +49,8 @@ gulp.task('js', function() {
 
 gulp.task('css', function() {
     var sassConf = {
-        style: DEV ? 'nested' : 'compressed'
+        style: DEV ? 'nested' : 'compressed',
+        sourcemap: DEV
     };
     gulp.src('sass_src/**/*.scss')
         .pipe(sass(sassConf))
