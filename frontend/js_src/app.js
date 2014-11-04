@@ -51,6 +51,7 @@ function initCurrentSchedule() {
 
 
 
+require('./controllers/update.js');
 
 $(function() {
     initCurrentSchedule();

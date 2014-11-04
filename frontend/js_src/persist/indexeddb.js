@@ -1,4 +1,4 @@
-var VERSION = 1;
+var VERSION = 2;
 
 var dbPromise;
 
@@ -12,7 +12,11 @@ function open() {
             };
 
             request.onupgradeneeded = function(e) {
-                initSchema(e.target.result);
+                if (e.oldVersion == 0) {
+                    initSchema(e.target.result);
+                } else {
+                    upgradeSchema(e.target.transaction, e.oldVersion);
+                }
             }
         });
     }
@@ -26,6 +30,13 @@ function close() {
     });
 }
 
+function upgradeSchema(transaction, version) {
+    switch (version) {
+    case 1:
+        transaction.objectStore('subjects').createIndex('term', 'term', {unique: false});
+    }
+}
+
 function initSchema(db) {
     var rosterStore = db.createObjectStore('roster', {keyPath: 'id'});
     rosterStore.createIndex('term', 'term', {unique: false});
@@ -34,6 +45,7 @@ function initSchema(db) {
 
     var subjectsStore = db.createObjectStore('subjects', {autoIncrement: true});
     subjectsStore.createIndex('subject', ['term', 'sub'], {unique: false});
+    subjectsStore.createIndex('term', 'term', {unique: false});
 
     var titleIndexStore = db.createObjectStore('title_index', {autoIncrement: true});
     titleIndexStore.createIndex('term', 'term', {unique: false});
@@ -41,42 +53,68 @@ function initSchema(db) {
 
 function queryObjectStore(store, query, mode) {
     if (mode === undefined) {
-        mode = 'read';
+        mode = 'readonly';
     }
     return open().then(function(db) {
         return new Promise(function(resolve, reject) {
             var transaction = db.transaction([store], mode);
-            var result = query(transaction.objectStore(store));
+            var objStore = transaction.objectStore(store);
+
+            query(objStore);
 
             transaction.oncomplete = function(e) {
-                resolve(result);
+                resolve(true);
             };
 
             transaction.onerror = function(e) {
+                console.warn(e);
                 reject(e);
             };
+
         });
     });
-} 
+}
 
-function queryByIndex(objectStore, index, keyRange, callback) {
+function cursorByIndex(objectStore, index, keyRange, callback, mode) {
     return open().then(function(db) {
         return new Promise(function(resolve, reject) {
-            db.transaction([objectStore])
-              .objectStore(objectStore)
+            var transaction = db.transaction([objectStore], mode);
+              transaction.objectStore(objectStore)
               .index(index)
               .openCursor(keyRange)
               .onsuccess = function(e) {
                 var cursor = e.target.result;
                 if (cursor) {
-                    var item = cursor.value;
-                    callback(item);
+                    callback(cursor);
                     cursor.continue();
-                } else {
-                    resolve(true);
                 }
               }
+            transaction.oncomplete = function() {
+                resolve(true);
+            }
 
+        });
+    });
+}
+
+function queryByIndex(objectStore, index, keyRange, callback) {
+    return open().then(function(db) {
+        return new Promise(function(resolve, reject) {
+            var transaction = db.transaction([objectStore]);
+            transaction.objectStore(objectStore)
+                .index(index)
+                .openCursor(keyRange)
+                .onsuccess = function(e) {
+                    var cursor = e.target.result;
+                    if (cursor) {
+                        var item = cursor.value;
+                        callback(item);
+                        cursor.continue();
+                    }
+                }
+            transaction.oncomplete = function(e) {
+                resolve(true);
+            }
         });
     });
 }
@@ -126,6 +164,7 @@ function getByKeys(objectStore, keys) {
 
 exports.open = open;
 exports.close = close;
+exports.cursorByIndex = cursorByIndex;
 exports.queryByIndex = queryByIndex;
 exports.queryAllByIndex = queryAllByIndex;
 exports.getByKey = getByKey;

@@ -25,11 +25,14 @@ var store = EventEmitter({
             index = 0;
         }
 
+        var shouldCheckForUpdates = false;
+
         var dbLoadedPromise;
         if (term === undefined || (termdb.getCurrentTerm() && termdb.getCurrentTerm().term == term)) {
             dbLoadedPromise = Promise.resolve();
         } else {
             dbLoadedPromise = termdb.setCurrentTerm(term);
+            shouldCheckForUpdates = true;
         }
 
         return dbLoadedPromise.then(function() {
@@ -41,6 +44,9 @@ var store = EventEmitter({
         }).then(function() {
             self.ready = true;
             self.emit('readystatechange');
+            if (shouldCheckForUpdates) {
+                termdb.checkForUpdates();
+            }
         });
     },
 
@@ -485,13 +491,31 @@ Schedule.prototype.load = function() {
             return termdb.getCurrentTerm().getCoursesBySubjectAndNumber(split[0], +split[1]); 
         }));
     }).then(function(clusters) {
+        clusters = clusters.filter(function(cluster) {
+            return Array.isArray(cluster) && cluster.length > 0;
+        });
         self.basket = clusters;
+        var hasSection = {};
+        var courseByNumber = {};
+        clusters.forEach(function(cluster) {
+            hasSection[cluster[0].getNumber()] = {};
+        });
         self.sections = serialized.sections.map(function(sectionId) {
             for (var i=0; i < clusters.length; i++) {
                 for (var j=0; j < clusters[i].length; j++) {
                     var section = clusters[i][j].findSectionByNumber(sectionId);
                     if (section) {
-                        return section;
+                        var courseNumber = clusters[i][j].getNumber();
+                        // Make sure there's only one component chosen per section type
+                        // And sections do not cross course boundary
+                        if (hasSection[courseNumber].hasOwnProperty(section.type) ||
+                            courseByNumber[courseNumber] !== clusters[i][j]) {
+                            return null;
+                        } else {
+                            hasSection[courseNumber][section.type] = true;
+                            courseByNumber[courseNumber] = clusters[i][j];
+                            return section;
+                        }
                     }
                 }
             }
@@ -500,8 +524,42 @@ Schedule.prototype.load = function() {
         }).filter(function(x) {
             return x !== null;
         });
+
+        clusters.forEach(function(cluster) {
+            var courseNumber = cluster[0].getNumber();
+            var course;
+            var addedSections = {};
+            if (courseByNumber[courseNumber]) {
+                course = courseByNumber[courseNumber];
+                addedSections = hasSection[courseNumber];
+            } else {
+                course = cluster[0];
+            }
+
+            for (var type in course.sections) {
+                if (course.sections.hasOwnProperty(type)) {
+                    if (!addedSections.hasOwnProperty(type)) {
+                        self.sections.push(course.sections[type][0]);
+                    }
+                }
+            }
+        });
+
+        self.persistSections();
+
         return true;
     });
+}
+
+/**
+ * @return {Promise}
+ */
+Schedule.prototype.termDBUpdated = function() {
+    var self = this;
+    this.persistSections();
+    return this.load().then(function() {
+        self._onChange();
+    })
 }
 
 Schedule.prototype.getSelectedCourseIdsHash = function() {

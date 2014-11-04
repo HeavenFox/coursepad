@@ -3,6 +3,8 @@ var endpoints = require('../consts/endpoints.js');
 var indexeddb = require('../persist/indexeddb.js');
 var meta = require('./meta.js');
 
+var ajax = require('../utils/ajax.js');
+
 var currentTermDB = null;
 
 var Course = require('../model/Course.js');
@@ -77,6 +79,143 @@ TermDatabase.prototype.searchByKeyword = function(keywords, increment) {
     return results;
 }
 
+/**
+ * @return {Promise}
+ */
+TermDatabase.prototype.applyUpdates = function(updates) {
+    var self = this;
+    if (updates.term != this.term) {
+        return Promise.resolve(false);
+    }
+    var termId = updates.term;
+    this.titleIndex = [];
+
+    var chain = indexeddb.cursorByIndex('title_index', 'term', IDBKeyRange.only(termId), function(cursor) {
+        cursor.delete();
+    }, 'readwrite');
+
+    for (var i=0; i < updates.diffs.length; i++) {
+        var diff = updates.diffs[i];
+        if (diff['roster']) {
+            chain = chain.then(function() {
+                var rosterDiff = diff['roster'];
+                return indexeddb.queryObjectStore('roster', function(rosterStore) {
+                    var i;
+                    if (rosterDiff['added']) {
+                        for (i=0; i < rosterDiff['added'].length; i++) {
+                            rosterDiff['added'][i].term = termId;
+
+                            rosterStore.add(rosterDiff['added'][i]);
+                        }
+                    }
+
+                    if (rosterDiff['deleted']) {
+                        for (i=0; i < rosterDiff['deleted'].length; i++) {
+                            rosterStore.delete(rosterDiff['deleted'][i]);
+                        }
+                    }
+
+                    if (rosterDiff['modified']) {
+                        for (i=0; i < rosterDiff['modified'].length; i++) {
+                            rosterDiff['modified'][i].term = termId;
+
+                            rosterStore.put(rosterDiff['modified'][i]);
+
+                        }
+                    }
+                }, 'readwrite');
+            })
+        }
+
+        if (diff['subjects']) {
+            var subjectsDiff = diff['subjects'];
+
+            chain = chain.then(function() {
+                function hashify(diff) {
+                    var result = Object.create(null);
+                    if (diff) {
+                        diff.forEach(function(subject) {
+                            result[subject['sub']] = subject;
+                        })
+                    }
+                    return result;
+                }
+
+                var modifiedSubDiff = hashify(subjectsDiff['modified']);
+                var removedSubDiff = Object.create(null);
+                if (subjectsDiff['deleted']) {
+                    subjectsDiff['deleted'].forEach(function(s) {
+                        removedSubDiff[s] = true;
+                    });
+                }
+
+                return indexeddb.queryObjectStore('subjects', function(subjectsStore) {
+                    var index = subjectsStore.index('term');
+
+                    index.openCursor(IDBKeyRange.only(termId)).onsuccess = function(e) {
+                        var cursor = e.target.result;
+                        if (cursor) {
+                            if (modifiedSubDiff[cursor.value['sub']]) {
+                                modifiedSubDiff[cursor.value['sub']]['term'] = termId;
+                                cursor.update(modifiedSubDiff[cursor.value['sub']]);
+                            } else if (removedSubDiff[cursor.value['sub']]) {
+                                cursor.delete();
+                            }
+                            cursor.continue();
+                        }
+                    };
+
+                    if (subjectsDiff['added']) {
+                        for (var i=0; i < subjectsDiff['added']; i++) {
+                            subjectsDiff['added'][i].term = termId;
+                            subjectsStore.add(subjectsDiff['added'][i]);
+                        }
+                    }
+                }, 'readwrite');
+            });
+        }
+
+        chain = chain.then(function() {
+            // Set local storage
+            meta.addLocalTerm(termId, diff.time);
+        });
+    }
+
+    chain = chain.then(function() {
+        // Rebuild Index
+        var indexHash = Object.create(null);
+        return indexeddb.queryObjectStore('roster', function(rosterStore) {
+            rosterStore.index('term').openCursor().onsuccess = function(e) {
+                var cursor = e.target.result;
+                if (cursor) {
+                    var number = cursor.value['sub'] + cursor.value['nbr'];
+                    if (!(indexHash[number])) {
+                        indexHash[number] = {
+                            term: termId,
+                            title: cursor.value['sub'] + cursor.value['nbr'] + ': ' + cursor.value['title'],
+                            course: [cursor.value['sub'], cursor.value['nbr']]
+                        }
+                    }
+                    cursor.continue();
+                }
+            }
+        }).then(function() {
+            // Insert index
+            return indexeddb.queryObjectStore('title_index', function(titleIndexStore) {
+                for (var i in indexHash) {
+                    titleIndexStore.add(indexHash[i]);
+                    indexHash[i].titleLower = indexHash[i].title.toLowerCase();
+                    self.titleIndex.push(indexHash[i]);
+                }
+            }, 'readwrite');
+        });
+    }).then(null, function(e) {
+        console.error('apply updates', e);
+    });
+
+    return chain;
+};
+
 function setCurrentTerm(term) {
     if (currentTermDB !== null && currentTermDB.term === term) {
         return Promise.resolve(false);
@@ -89,10 +228,12 @@ function setCurrentTerm(term) {
     if (meta.getLocalTerms().hasOwnProperty(term)) {
         dbLoadedPromise = Promise.resolve();
     } else {
+        console.log("start downloading");
         dbLoadedPromise = loadTerm(term);
     }
 
     return dbLoadedPromise.then(function() {
+        console.log("start loading");
         currentTermDB = new TermDatabase();
         currentTermDB.term = term;
         currentTermDB.titleIndex = [];
@@ -103,6 +244,7 @@ function setCurrentTerm(term) {
         });
     })
     .then(function() {
+        console.log("done");
         meta.setSelectedTerm(term);
         store.ready = true;
         store.emit('readystatechange');
@@ -177,12 +319,56 @@ function loadTerm(term, progress) {
     });
 }
 
+function checkForUpdates() {
+    var current_term = getCurrentTerm();
+    if (current_term && current_term.term) {
+        var term_id = current_term.term;
+        return meta.getRemoteTerms().then(function(remoteTerms) {
+            var localTerms = meta.getLocalTerms();
+            if (remoteTerms[term_id] > localTerms[term_id]) {
+                // Need upgrade
+                return ajax.getJson(endpoints.db('version_history.json')).then(function(history) {
+                    var timestamps = history['term_db'][term_id];
+                    var index = timestamps.indexOf(localTerms[term_id]);
+                    if (index < 0) {
+                        throw new Error('cannot find history')
+                    }
+
+                    var path = timestamps.slice(index);
+
+                    var diffPromises = [];
+                    for (var i=0; i < path.length-1; i++) {
+                        diffPromises.push(ajax.getJson(endpoints.db('diffs/diff_termdb_' + term_id + '_' + path[i] + '_' + path[i+1] + '.json')));
+                    }
+
+                    return Promise.all(diffPromises);
+                }).then(function(diffs) {
+                    console.log(diffs);
+                    return {term: term_id, diffs: diffs};
+                }).then(null, function(e) {
+                    console.warn('update check error', e);
+                });
+            } else {
+                return false;
+            }
+        });
+    }
+    return Promise.resolve(false);
+}
 
 var store = new EventEmitter({
     ready: false,
     setCurrentTerm: setCurrentTerm,
     getCurrentTerm: getCurrentTerm,
-    loadTerm: loadTerm
+    loadTerm: loadTerm,
+    checkForUpdates: function() {
+        var self = this;
+        checkForUpdates().then(function(result) {
+            if (result !== false) {
+                self.emit('updateAvailable', result);
+            }
+        })
+    }
 });
 
 module.exports = store;
