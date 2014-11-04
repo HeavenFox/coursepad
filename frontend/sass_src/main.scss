@@ -379,7 +379,8 @@ $palette: ("pearl" : rgba(234, 224, 200, 0.75),
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 
     max-height: 500px;
-    overflow: scroll;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .ui-autocomplete .ui-menu-item {
