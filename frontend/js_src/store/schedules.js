@@ -82,21 +82,27 @@ function Schedule() {
     this._conflictCache = null;
 }
 
-Schedule.prototype.setVisibility = function(sectionId, val) {
-    this.hidden[sectionId] = !val;
+Schedule.prototype.setVisibility = function(courseNumber, val) {
+    this.hidden[courseNumber] = !val;
     this.persistSections();
     this._onChange();
 }
 
-Schedule.prototype.toggleVisibility = function(sectionId) {
-    this.setVisibility(sectionId, !this.getVisibility(sectionId));
+Schedule.prototype.toggleVisibility = function(courseNumber) {
+    this.setVisibility(courseNumber, !this.getVisibility(courseNumber));
 
-    ana.sevent('course', 'toggle_visibility', sectionId);
+    ana.sevent('course', 'toggle_visibility', courseNumber);
 }
 
-Schedule.prototype.getVisibility = function(sectionId) {
-    return !this.hidden[sectionId];
+Schedule.prototype.getVisibility = function(courseNumber) {
+    return !this.hidden[courseNumber];
 }
+
+Schedule.prototype.getVisibleClusters = function() {
+    return this.basket.filter(function(cluster) {
+        return !this.hidden[cluster[0].getNumber()];
+    }, this);
+};
 
 Schedule.prototype.getVisibleMeetings = function() {
     var meetings = [];

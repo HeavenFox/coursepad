@@ -33,7 +33,7 @@ var Calendar = React.createClass({
     },
 
     getInitialState: function() {
-        return {meetings: [], dropoffs: [], conflicts: []};
+        return {meetings: [], dropoffs: [], conflicts: [], needWeekend: false};
     },
 
     componentDidMount: function() {
@@ -120,7 +120,17 @@ var Calendar = React.createClass({
             meeting.dragStopHandler = this._onDragStopHandler.bind(this, meeting.meeting);
         }, this);
 
-        this.setState({meetings: singleMeetings, conflicts: schedule.getConflictIntervals()});
+        var hasWeekend = schedule.getVisibleClusters().some(function(cluster) {
+            return cluster.some(function(course) {
+                return course.getAllSections().some(function(section) {
+                    return section.meetings.some(function(meeting) {
+                        return meeting.pattern & (3<<5);
+                    });
+                })
+            });
+        });
+
+        this.setState({meetings: singleMeetings, conflicts: schedule.getConflictIntervals(), needWeekend: hasWeekend});
     },
 
     render: function() {
@@ -148,9 +158,7 @@ var Calendar = React.createClass({
             meetings.push(SingleMeeting(meeting));
         });
 
-        var fullWeek = this.state.meetings.some(function(singleMeeting) {
-            return singleMeeting.day == 'S' || singleMeeting.day == 'U';
-        })
+        var fullWeek = this.state.needWeekend;
 
         var conflicts = this.state.conflicts.map(function(conflict) {
             return <ConflictIndicator key={conflict.startTimeHrs.toFixed(1) + '-' + conflict.pattern} day={datetime.bitmaskToDay(conflict.pattern)} st_offset={conflict.startTimeHrs - this.minTime} length={conflict.endTimeHrs - conflict.startTimeHrs} />
