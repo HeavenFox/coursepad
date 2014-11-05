@@ -75,13 +75,13 @@ function queryObjectStore(store, query, mode) {
     });
 }
 
-function cursorByIndex(objectStore, index, keyRange, callback, mode) {
+function keyCursorByIndex(objectStore, index, keyRange, callback, mode) {
     return open().then(function(db) {
         return new Promise(function(resolve, reject) {
             var transaction = db.transaction([objectStore], mode);
               transaction.objectStore(objectStore)
               .index(index)
-              .openCursor(keyRange)
+              .openKeyCursor(keyRange)
               .onsuccess = function(e) {
                 var cursor = e.target.result;
                 if (cursor) {
@@ -164,7 +164,7 @@ function getByKeys(objectStore, keys) {
 
 exports.open = open;
 exports.close = close;
-exports.cursorByIndex = cursorByIndex;
+exports.keyCursorByIndex = keyCursorByIndex;
 exports.queryByIndex = queryByIndex;
 exports.queryAllByIndex = queryAllByIndex;
 exports.getByKey = getByKey;

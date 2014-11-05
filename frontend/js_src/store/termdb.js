@@ -90,9 +90,16 @@ TermDatabase.prototype.applyUpdates = function(updates) {
     var termId = updates.term;
     this.titleIndex = [];
 
-    var chain = indexeddb.cursorByIndex('title_index', 'term', IDBKeyRange.only(termId), function(cursor) {
-        cursor.delete();
-    }, 'readwrite');
+    var titleIndexKeysToDelete = [];
+    var chain = indexeddb.keyCursorByIndex('title_index', 'term', IDBKeyRange.only(termId), function(cursor) {
+        titleIndexKeysToDelete.push(cursor.primaryKey);
+    }, 'readonly').then(function() {
+        return indexeddb.queryObjectStore('title_index', function(titleIndexStore) {
+            for (var i=0; i < titleIndexKeysToDelete.length; i++) {
+                titleIndexStore.delete(titleIndexKeysToDelete[i]);
+            }
+        }, 'readwrite');
+    });
 
     for (var i=0; i < updates.diffs.length; i++) {
         var diff = updates.diffs[i];
@@ -210,7 +217,7 @@ TermDatabase.prototype.applyUpdates = function(updates) {
             }, 'readwrite');
         });
     }).then(null, function(e) {
-        console.error('apply updates', e);
+        console.error('Error when Applying Updates: ', e);
     });
 
     return chain;
