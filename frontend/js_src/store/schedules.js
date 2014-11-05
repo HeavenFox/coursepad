@@ -509,7 +509,7 @@ Schedule.prototype.load = function() {
                         // Make sure there's only one component chosen per section type
                         // And sections do not cross course boundary
                         if (hasSection[courseNumber].hasOwnProperty(section.type) ||
-                            courseByNumber[courseNumber] !== clusters[i][j]) {
+                            (courseByNumber[courseNumber] && courseByNumber[courseNumber]['id'] !== clusters[i][j]['id'])) {
                             return null;
                         } else {
                             hasSection[courseNumber][section.type] = true;
