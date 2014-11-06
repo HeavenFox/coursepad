@@ -35,9 +35,14 @@ function CourseComponent(parent, type, obj) {
     this.sec = obj['sec'];
     this.parent = parent;
     this.type = type;
-    this.meetings = obj['mt'].map(function(obj) {
-        return new Meeting(this, obj);
-    }, this);
+    if (obj['mt']) {
+        this.meetings = obj['mt'].map(function(obj) {
+            return new Meeting(this, obj);
+        }, this);
+    } else {
+        this.meetings = [];
+    }
+    
 }
 
 var SECTION_PRIORITY = ['LEC', 'SEM', 'IND', 'DIS', 'LAB'];
