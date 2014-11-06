@@ -7,3 +7,5 @@ frontend/app/js/main.js
 frontend/app/css/main.css
 deploy.sh
 *.swp
+*.pyc
+*.bak
