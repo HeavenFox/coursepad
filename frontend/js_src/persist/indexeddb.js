@@ -1,4 +1,4 @@
-var VERSION = 2;
+var VERSION = 3;
 
 var dbPromise;
 
@@ -34,6 +34,27 @@ function upgradeSchema(transaction, version) {
     switch (version) {
     case 1:
         transaction.objectStore('subjects').createIndex('term', 'term', {unique: false});
+    case 2:
+        var newCacheStore = transaction.db.createObjectStore('title_typeahead_index', {keyPath: 'term'});
+        var index = Object.create(null);
+        transaction.objectStore('title_index').openCursor().onsuccess = function(e) {
+            var cursor = e.target.result;
+            if (cursor) {
+                var obj = cursor.value;
+                var term = obj.term;
+                delete obj.term;
+                if (index[term] === undefined) {
+                    index[term] = {term: term, index: []};
+                }
+                index[term].index.push(obj);
+                cursor.continue();
+            } else {
+                transaction.db.deleteObjectStore('title_index');
+                for (var term in index) {
+                    newCacheStore.add(index[term]);
+                }
+            }
+        }
     }
 }
 
@@ -47,8 +68,7 @@ function initSchema(db) {
     subjectsStore.createIndex('subject', ['term', 'sub'], {unique: false});
     subjectsStore.createIndex('term', 'term', {unique: false});
 
-    var titleIndexStore = db.createObjectStore('title_index', {autoIncrement: true});
-    titleIndexStore.createIndex('term', 'term', {unique: false});
+    db.createObjectStore('title_typeahead_index', {keyPath: 'term'});
 }
 
 function queryObjectStore(store, query, mode) {
@@ -162,6 +182,40 @@ function getByKeys(objectStore, keys) {
     });
 }
 
+function add(objectStore, obj, key) {
+    return open().then(function(db) {
+        return new Promise(function(resolve, reject) {
+            var tr = db.transaction([objectStore], 'readwrite');
+            var os = tr.objectStore(objectStore);
+
+            if (key === undefined) {
+                os.add(obj);
+            } else {
+                os.add(obj, key);
+            }
+
+            tr.oncomplete = function(e) {
+                resolve(true);
+            }
+        });
+    });
+}
+
+function deleteRecord(objectStore, key) {
+    return open().then(function(db) {
+        return new Promise(function(resolve, reject) {
+            var tr = db.transaction([objectStore], 'readwrite');
+            var os = tr.objectStore(objectStore);
+
+            os.delete(key);
+
+            tr.oncomplete = function(e) {
+                resolve(true);
+            }
+        });
+    });
+}
+
 exports.open = open;
 exports.close = close;
 exports.keyCursorByIndex = keyCursorByIndex;
@@ -170,3 +224,5 @@ exports.queryAllByIndex = queryAllByIndex;
 exports.getByKey = getByKey;
 exports.getByKeys = getByKeys;
 exports.queryObjectStore = queryObjectStore;
+exports.add = add;
+exports.delete = deleteRecord;

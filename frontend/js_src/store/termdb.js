@@ -79,6 +79,14 @@ TermDatabase.prototype.searchByKeyword = function(keywords, increment) {
     return results;
 }
 
+TermDatabase.prototype.setTitleIndex = function(index) {
+    this.titleIndex = [];
+    index.index.forEach(function(item) {
+        item.titleLower = item.title.toLowerCase();
+        this.titleIndex.push(item);
+    }, this);
+};
+
 /**
  * @return {Promise}
  */
@@ -91,15 +99,7 @@ TermDatabase.prototype.applyUpdates = function(updates) {
     this.titleIndex = [];
 
     var titleIndexKeysToDelete = [];
-    var chain = indexeddb.keyCursorByIndex('title_index', 'term', IDBKeyRange.only(termId), function(cursor) {
-        titleIndexKeysToDelete.push(cursor.primaryKey);
-    }, 'readonly').then(function() {
-        return indexeddb.queryObjectStore('title_index', function(titleIndexStore) {
-            for (var i=0; i < titleIndexKeysToDelete.length; i++) {
-                titleIndexStore.delete(titleIndexKeysToDelete[i]);
-            }
-        }, 'readwrite');
-    });
+    var chain = indexeddb.delete('title_typeahead_index', termId);
 
     for (var i=0; i < updates.diffs.length; i++) {
         var diff = updates.diffs[i];
@@ -188,9 +188,11 @@ TermDatabase.prototype.applyUpdates = function(updates) {
         });
     }
 
+    // Rebuild Index
+    var indexHash = Object.create(null);
+    var index = {term: termId, index: []};
+
     chain = chain.then(function() {
-        // Rebuild Index
-        var indexHash = Object.create(null);
         return indexeddb.queryObjectStore('roster', function(rosterStore) {
             rosterStore.index('term').openCursor().onsuccess = function(e) {
                 var cursor = e.target.result;
@@ -198,7 +200,6 @@ TermDatabase.prototype.applyUpdates = function(updates) {
                     var number = cursor.value['sub'] + cursor.value['nbr'];
                     if (!(indexHash[number])) {
                         indexHash[number] = {
-                            term: termId,
                             title: cursor.value['sub'] + cursor.value['nbr'] + ': ' + cursor.value['title'],
                             course: [cursor.value['sub'], cursor.value['nbr']]
                         }
@@ -206,17 +207,19 @@ TermDatabase.prototype.applyUpdates = function(updates) {
                     cursor.continue();
                 }
             }
-        }).then(function() {
-            // Insert index
-            return indexeddb.queryObjectStore('title_index', function(titleIndexStore) {
-                for (var i in indexHash) {
-                    titleIndexStore.add(indexHash[i]);
-                    indexHash[i].titleLower = indexHash[i].title.toLowerCase();
-                    self.titleIndex.push(indexHash[i]);
-                }
-            }, 'readwrite');
         });
-    }).then(null, function(e) {
+    })
+    .then(function() {
+        for (var i in indexHash) {
+            index.index.push(indexHash[i]);
+        }
+        // Insert index
+        return indexeddb.add('title_typeahead_index', index);
+    })
+    .then(function() {
+        self.setTitleIndex(index);
+    })
+    .then(null, function(e) {
         console.error('Error when Applying Updates: ', e);
     });
 
@@ -245,12 +248,13 @@ function setCurrentTerm(term) {
         currentTermDB.term = term;
         currentTermDB.titleIndex = [];
 
-        return indexeddb.queryByIndex('title_index', 'term', IDBKeyRange.only(term), function(item) {
-            item.titleLower = item.title.toLowerCase();
-            currentTermDB.titleIndex.push(item);
-        });
+        return indexeddb.getByKey('title_typeahead_index', term);
     })
-    .then(function() {
+    .then(function(index) {
+        if (index !== undefined) {
+            currentTermDB.setTitleIndex(index);
+        }
+
         console.log("done");
         meta.setSelectedTerm(term);
         store.ready = true;
@@ -303,15 +307,14 @@ function loadTerm(term, progress) {
                         }
                     }, 'readwrite');
                 }).then(function() {
-                    return indexeddb.queryObjectStore('title_index', function(titleIndexCacheStore) {
-                        for (var title in titleHash) {
-                            titleIndexCacheStore.add({
-                                term: term,
-                                title: title,
-                                course: titleHash[title]
-                            });
-                        }
-                    }, 'readwrite');
+                    var obj = {term: term, index: []};
+                    for (var title in titleHash) {
+                        obj.index.push({
+                            title: title,
+                            course: titleHash[title]
+                        });
+                    }
+                    return indexeddb.add('title_typeahead_index', obj);
                 }).then(function() {
                     meta.addLocalTerm(term, data.time);
                     progress(1);
