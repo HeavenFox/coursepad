@@ -15,7 +15,14 @@ var MeetingDropoff = React.createClass({
             self.onDropped(ui.draggable.attr('data-nbr'))
 
         },
-        greedy: true});
+        greedy: true,
+        over: function() {
+            self._onHover();
+        },
+        out: function() {
+            self._onHoverEnd();
+        }
+        });
     },
 
     onDropped: function(fromClassNumber) {
@@ -24,13 +31,21 @@ var MeetingDropoff = React.createClass({
         ana.sevent('course', 'change_section_drop', fromClassNumber + '->' + this.props['nbr']);
     },
 
+    _onHover: function() {
+        $('.mtdropoff-' + this.props['nbr']).addClass('mtdropoff-highlight');
+    },
+
+    _onHoverEnd: function() {
+        $('.mtdropoff-' + this.props['nbr']).removeClass('mtdropoff-highlight');
+    },
+
     render: function() {
         var meetings = this.props['times'];
         var style = this.getLayoutStyle();
         if (!Array.isArray(meetings)) {
             meetings = [meetings];
         }
-        var classNames = 'mtdropoff ' + this.getClassName();
+        var classNames = 'mtdropoff mtdropoff-' + this.props['nbr'] + ' ' + this.getClassName();
         return <div className={classNames} style={style} ref="dropoff">
             <div className="mtdropoff-inner">
             {meetings.map(function(item) {
