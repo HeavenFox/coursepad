@@ -72,10 +72,14 @@ body.modal-open {
     }
 }
 
+$small-screen-cutoff: 1400px;
+
 $topbar-height : 70px;
 $leftbar-width-collapsed : 40px;
 
 $right-column-width: 300px;
+
+$right-column-width-small: 200px;
 
 $calendar-element-width: 120px;
 $calendar-element-gutter: 20px;
@@ -137,16 +141,24 @@ $cal-time-width: 70px;
 #calendar {
     float: left;
     width: calc(100% - #{$right-column-width});
+    @media (max-width: #{$small-screen-cutoff}) {
+        width: calc(100% - #{$right-column-width-small});
+    }
 }
 
 #utilities {
     width: $right-column-width;
     float: right;
+
+    @media (max-width: #{$small-screen-cutoff}) {
+        width: $right-column-width-small;
+    }
 }
 
 .cal-inner {
     position: relative;
     margin-top: 20px;
+    overflow: hidden;
 }
 
 .cal-meetings {
@@ -447,21 +459,32 @@ footer {
     width: 80px;
     margin: 5px;
     text-align: center;
+    @media (max-width: #{$small-screen-cutoff}) {
+        width: 60px;
+        margin: 2px;
+    }
+}
+
+.basic-info:first-child {
+    margin-left: 20px;
+    @media (max-width: #{$small-screen-cutoff}) {
+        margin-left: 5px;
+    }
 }
 
 .basic-info-value {
     font-size: 36px;
     font-weight: 400;
     margin: 3px;
+
+    @media (max-width: #{$small-screen-cutoff}) {
+        font-size: 24px;
+    }
 }
 
 .basic-info-container.conflicts .basic-info-value {
     font-size: 24px;
 
-}
-
-.basic-info:first-child {
-    margin-left: 20px;
 }
 
 .basic-info-title {
@@ -524,6 +547,16 @@ footer {
     margin-left: 5px;
 }
 
+@media (max-width: #{$small-screen-cutoff}) {
+    .basket-item .content-buttons {
+        display: none;
+    }
+
+    .basket-item:hover .content-buttons {
+        display: block;
+    }
+}
+
 .basket-item .content {
 }
 
@@ -561,10 +594,6 @@ footer {
 
 .basket-item .content-buttons .expand-btn.expanded {
     @include centered-img('basket_tri_open');
-}
-
-.basket-item .content:hover > .content-title {
-    margin-right: 30px;
 }
 
 .basket-item .content.level-2 {
