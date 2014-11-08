@@ -29,7 +29,7 @@ var UnsupportedBrowserWarning = React.createClass({
             </div>
         }
 
-        return <div className="unsupported-browser">
+        return <div className="modal-window-inner unsupported-browser">
             <div className="sadface">:-(</div>
             <div className="unsupported-browser-content">
             <h3>{title}</h3>

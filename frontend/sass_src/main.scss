@@ -664,13 +664,49 @@ span.class-number {
     width: 70px;
 }
 
-.unsupported-browser .close-btn-container {
+.import-export {
+    padding: 10px;
+}
+
+.import-export h2 {
+    margin: 4px 0 8px 0;
+    font-size: 1.3em;
+}
+
+.import-export h3 {
+    margin: 2px 0;
+    font-size: 1.1em;
+}
+
+.import-export p {
+    margin: 0.4em 0;
+}
+
+.import-export .close-btn-container {
+    margin-top: 12px;
+}
+
+.btn {
+    display: inline-block;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.btn-blue {
+    border: 1px solid #357ebd;
+    background-color: #428bca;
+    color: #fff;
+}
+
+.modal-window-inner .close-btn-container {
     padding-top: 10px;
     padding-bottom: 10px;
     text-align: center;
 }
 
-.unsupported-browser .close-btn {
+.modal-window-inner .close-btn {
     display: inline-block;
     cursor: pointer;
     padding: 5px;

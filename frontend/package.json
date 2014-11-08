@@ -21,7 +21,8 @@
     "flux": "^2.0.1",
     "react": "^0.11.2",
     "tether": "HubSpot/tether",
-    "drop": "CoursePad/drop#cp"
+    "drop": "CoursePad/drop#cp",
+    "filesaver": "CoursePad/FileSaver.js#cp"
   },
   "devDependencies": {
     "del": "^0.1.3",
