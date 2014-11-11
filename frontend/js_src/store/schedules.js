@@ -6,6 +6,8 @@ var termdb = require('./termdb.js');
 var indexeddb = require('../persist/indexeddb.js');
 var localStore = require('../persist/localStorage.js');
 
+var color = require('../utils/color.js');
+
 var ana = require('../analytics/analytics.js');
 
 var store = EventEmitter({
@@ -21,6 +23,9 @@ var store = EventEmitter({
             self.emit('readystatechange');
         }
 
+        if (term === undefined) {
+            term = this.currentSchedule.term;
+        }
         if (index === undefined) {
             index = 0;
         }
@@ -52,6 +57,136 @@ var store = EventEmitter({
 
     getCurrentSchedule: function() {
         return this.currentSchedule;
+    },
+
+    getNewScheduleNameAndColor: function() {
+        var schedule = this.getCurrentSchedule();
+        var storageKey = schedule.term + '_schedules';
+        var list = localStore.get(storageKey, Array);
+        var nameHash = Object.create(null);
+        var colorHash = Object.create(null);
+
+        this.getAllSchedules().forEach(function(schedule) {
+            nameHash[schedule.name] = true;
+            colorHash[schedule.color] = true;
+        });
+
+        var name;
+        var nameSn = 1;
+        while (true) {
+            name = 'Schedule (' + nameSn + ')';
+            if (!nameHash[name]) {
+                break;
+            }
+            nameSn++;
+        }
+
+        var scheduleColor;
+
+        var colorDistance = 1/8;
+        var currentHue = 0;
+        while (true) {
+            scheduleColor = color.hsvToHex(currentHue, 0.25, 0.54);
+            if (!colorHash[scheduleColor]) {
+                break;
+            }
+            currentHue += colorDistance;
+            if (currentHue >= 1) {
+                colorDistance /= 2;
+                currentHue = colorDistance;
+            }
+        }
+
+        return {name: name, color: scheduleColor};
+    },
+
+    withStorageList: function(cb, thisArg) {
+        if (thisArg === undefined) thisArg = null;
+        var schedule = this.getCurrentSchedule();
+        var storageKey = schedule.term + '_schedules';
+        var list = localStore.get(storageKey, Array);
+
+        var result = cb.call(thisArg, list);
+
+        localStore.fsync(storageKey);
+
+        if (result.emit) {
+            this.emit(result.emit);
+        }
+
+        if (result.value) {
+            return result.value;
+        }
+    },
+
+    renameSchedule: function(index, name) {
+        this.withStorageList(function(list) {
+            list[index].name = name;
+            return {emit: 'listchange'};
+        });
+    },
+
+    deleteSchedule: function(index) {
+        this.withStorageList(function(list) {
+            var currentSchedule = this.getCurrentSchedule();
+            if (currentSchedule.index === index) {
+                throw new Error();
+            }
+            list.splice(index, 1);
+            if (index < currentSchedule.index) {
+                currentSchedule.index--;
+            }
+            return {emit: 'listchange'};
+        }, this);
+    },
+
+    addSchedule: function(name, scheduleColor) {
+        var schedule = this.getCurrentSchedule();
+        var storageKey = schedule.term + '_schedules';
+        var list = localStore.get(storageKey, Array);
+
+        list.push({
+            color: scheduleColor,
+            name: name,
+            uniqueId: Math.floor(Math.random() * 0xFFFFFFFF)
+        });
+
+        localStore.fsync(storageKey);
+        this.emit('listchange');
+    },
+
+    getAllSchedules: function() {
+        var schedule = this.getCurrentSchedule();
+        if (!schedule) {
+            return null;
+        }
+        var storageKey = schedule.term + '_schedules';
+        var modified = false;
+        var list = localStore.get(storageKey, Array);
+        var result = list.map(function(item, index) {
+            // if (!item['scheduleColor']) {
+            //     modified = true;
+            //     item['scheduleColor'] = '';
+            // }
+
+            // if (!item['scheduleName']) {
+            //     modified = true;
+            //     item['scheduleName'] = 'My Schedule';
+            // }
+
+            return {
+                color: item['color'],
+                name: item['name'],
+                isCurrent: index === schedule.index,
+                uniqueId: item['uniqueId']
+            };
+        });
+
+        // if (modified) {
+        //     localStore.fsync(storageKey);
+        // }
+
+        return result;
     }
 });
 
@@ -75,9 +210,11 @@ function Schedule() {
     this.basket = [];
     this.sections = [];
 
-    this.ready = false;
-
     this.hidden = {};
+
+    this.color = '#979797';
+    this.name = 'My Schedule';
+    this.uniqueId = Math.floor(Math.random() * 0xFFFFFFFF);
 
     this._conflictCache = null;
 }
@@ -422,6 +559,9 @@ Schedule.prototype.persistSections = function() {
     persist.basket = this.serializeBasket();
     persist.colorMapping = $.extend({}, this.colorMapping);
     persist.hidden = $.extend({}, this.hidden);
+    persist.color = this.color;
+    persist.name = this.name;
+    persist.uniqueId = this.uniqueId;
     localStore.fsync(this.getStoreKey());
 };
 
@@ -489,6 +629,10 @@ Schedule.prototype.load = function() {
     this.colorMapping = serialized.colorMapping || {};
     this.hidden = serialized.hidden || {};
 
+    if (serialized.color) this.color = serialized.color;
+    if (serialized.name) this.name = serialized.name;
+    if (serialized.uniqueId) this.uniqueId = serialized.uniqueId;
+
     return Promise.resolve()
     .then(function() {
         var basket = serialized.basket ? serialized.basket.slice() : [];
@@ -510,7 +654,8 @@ Schedule.prototype.load = function() {
         clusters.forEach(function(cluster) {
             hasSection[cluster[0].getNumber()] = {};
         });
-        self.sections = serialized.sections.map(function(sectionId) {
+        var serializedSections = serialized.sections || [];
+        self.sections = serializedSections.map(function(sectionId) {
             for (var i=0; i < clusters.length; i++) {
                 for (var j=0; j < clusters[i].length; j++) {
                     var section = clusters[i][j].findSectionByNumber(sectionId);
