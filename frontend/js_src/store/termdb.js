@@ -102,90 +102,91 @@ TermDatabase.prototype.applyUpdates = function(updates) {
     var chain = indexeddb.delete('title_typeahead_index', termId);
 
     for (var i=0; i < updates.diffs.length; i++) {
-        var diff = updates.diffs[i];
-        if (diff['roster']) {
-            chain = chain.then(function() {
-                var rosterDiff = diff['roster'];
-                return indexeddb.queryObjectStore('roster', function(rosterStore) {
-                    var i;
-                    if (rosterDiff['added']) {
-                        for (i=0; i < rosterDiff['added'].length; i++) {
-                            rosterDiff['added'][i].term = termId;
+        (function(diff) {
+            if (diff['roster']) {
+                chain = chain.then(function() {
+                    var rosterDiff = diff['roster'];
+                    return indexeddb.queryObjectStore('roster', function(rosterStore) {
+                        var i;
+                        if (rosterDiff['added']) {
+                            for (i=0; i < rosterDiff['added'].length; i++) {
+                                rosterDiff['added'][i].term = termId;
 
-                            rosterStore.add(rosterDiff['added'][i]);
-                        }
-                    }
-
-                    if (rosterDiff['deleted']) {
-                        for (i=0; i < rosterDiff['deleted'].length; i++) {
-                            rosterStore.delete(rosterDiff['deleted'][i]);
-                        }
-                    }
-
-                    if (rosterDiff['modified']) {
-                        for (i=0; i < rosterDiff['modified'].length; i++) {
-                            rosterDiff['modified'][i].term = termId;
-
-                            rosterStore.put(rosterDiff['modified'][i]);
-
-                        }
-                    }
-                }, 'readwrite');
-            })
-        }
-
-        if (diff['subjects']) {
-            var subjectsDiff = diff['subjects'];
-
-            chain = chain.then(function() {
-                function hashify(diff) {
-                    var result = Object.create(null);
-                    if (diff) {
-                        diff.forEach(function(subject) {
-                            result[subject['sub']] = subject;
-                        })
-                    }
-                    return result;
-                }
-
-                var modifiedSubDiff = hashify(subjectsDiff['modified']);
-                var removedSubDiff = Object.create(null);
-                if (subjectsDiff['deleted']) {
-                    subjectsDiff['deleted'].forEach(function(s) {
-                        removedSubDiff[s] = true;
-                    });
-                }
-
-                return indexeddb.queryObjectStore('subjects', function(subjectsStore) {
-                    var index = subjectsStore.index('term');
-
-                    index.openCursor(IDBKeyRange.only(termId)).onsuccess = function(e) {
-                        var cursor = e.target.result;
-                        if (cursor) {
-                            if (modifiedSubDiff[cursor.value['sub']]) {
-                                modifiedSubDiff[cursor.value['sub']]['term'] = termId;
-                                cursor.update(modifiedSubDiff[cursor.value['sub']]);
-                            } else if (removedSubDiff[cursor.value['sub']]) {
-                                cursor.delete();
+                                rosterStore.add(rosterDiff['added'][i]);
                             }
-                            cursor.continue();
                         }
-                    };
 
-                    if (subjectsDiff['added']) {
-                        for (var i=0; i < subjectsDiff['added']; i++) {
-                            subjectsDiff['added'][i].term = termId;
-                            subjectsStore.add(subjectsDiff['added'][i]);
+                        if (rosterDiff['deleted']) {
+                            for (i=0; i < rosterDiff['deleted'].length; i++) {
+                                rosterStore.delete(rosterDiff['deleted'][i]);
+                            }
                         }
+
+                        if (rosterDiff['modified']) {
+                            for (i=0; i < rosterDiff['modified'].length; i++) {
+                                rosterDiff['modified'][i].term = termId;
+
+                                rosterStore.put(rosterDiff['modified'][i]);
+
+                            }
+                        }
+                    }, 'readwrite');
+                })
+            }
+
+            if (diff['subjects']) {
+                var subjectsDiff = diff['subjects'];
+
+                chain = chain.then(function() {
+                    function hashify(diff) {
+                        var result = Object.create(null);
+                        if (diff) {
+                            diff.forEach(function(subject) {
+                                result[subject['sub']] = subject;
+                            })
+                        }
+                        return result;
                     }
-                }, 'readwrite');
-            });
-        }
 
-        chain = chain.then(function() {
-            // Set local storage
-            meta.addLocalTerm(termId, diff.time);
-        });
+                    var modifiedSubDiff = hashify(subjectsDiff['modified']);
+                    var removedSubDiff = Object.create(null);
+                    if (subjectsDiff['deleted']) {
+                        subjectsDiff['deleted'].forEach(function(s) {
+                            removedSubDiff[s] = true;
+                        });
+                    }
+
+                    return indexeddb.queryObjectStore('subjects', function(subjectsStore) {
+                        var index = subjectsStore.index('term');
+
+                        index.openCursor(IDBKeyRange.only(termId)).onsuccess = function(e) {
+                            var cursor = e.target.result;
+                            if (cursor) {
+                                if (modifiedSubDiff[cursor.value['sub']]) {
+                                    modifiedSubDiff[cursor.value['sub']]['term'] = termId;
+                                    cursor.update(modifiedSubDiff[cursor.value['sub']]);
+                                } else if (removedSubDiff[cursor.value['sub']]) {
+                                    cursor.delete();
+                                }
+                                cursor.continue();
+                            }
+                        };
+
+                        if (subjectsDiff['added']) {
+                            for (var i=0; i < subjectsDiff['added'].length; i++) {
+                                subjectsDiff['added'][i].term = termId;
+                                subjectsStore.add(subjectsDiff['added'][i]);
+                            }
+                        }
+                    }, 'readwrite');
+                });
+            }
+
+            chain = chain.then(function() {
+                // Set local storage
+                meta.addLocalTerm(termId, diff.time);
+            });
+        })(updates.diffs[i]);
     }
 
     // Rebuild Index

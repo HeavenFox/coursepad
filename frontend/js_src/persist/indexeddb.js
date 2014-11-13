@@ -212,6 +212,10 @@ function deleteRecord(objectStore, key) {
             tr.oncomplete = function(e) {
                 resolve(true);
             }
+
+            tr.onerror = function(e) {
+                reject(e.target.error);
+            }
         });
     });
 }
