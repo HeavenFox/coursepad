@@ -58,7 +58,7 @@ var meta = EventEmitter({
         // Upgrade schema
         var currentVersion = localStore.get('meta_version', undefined);
 
-        if (currentVersion == undefined) {
+        if (currentVersion === undefined) {
             localStore.set('meta_version', LATEST_VERSION);
         } else if (currentVersion < LATEST_VERSION) {
             localStore.set('meta_version', LATEST_VERSION);

@@ -126,7 +126,7 @@ var Calendar = React.createClass({
                     return section.meetings.some(function(meeting) {
                         return meeting.pattern & (3<<5);
                     });
-                })
+                });
             });
         });
 
@@ -141,7 +141,7 @@ var Calendar = React.createClass({
             var twelveHour = i > 12 ? i - 12 : i;
             var formattedTime = "" + twelveHour + ":00" + ampm;
             var classes = "cal-stripe";
-            if ((i-minTime) % 2 == 0) {
+            if ((i-minTime) % 2 === 0) {
                 classes += ' odd';
             } else {
                 classes += ' even';
@@ -149,7 +149,7 @@ var Calendar = React.createClass({
 
             stripes.push(<div className={classes} key={i}>
                     <div className="cal-time">{formattedTime}</div>
-                </div>)
+                </div>);
         }
 
 
@@ -161,7 +161,7 @@ var Calendar = React.createClass({
         var fullWeek = this.state.needWeekend;
 
         var conflicts = this.state.conflicts.map(function(conflict) {
-            return <ConflictIndicator key={conflict.startTimeHrs.toFixed(1) + '-' + conflict.pattern} day={datetime.bitmaskToDay(conflict.pattern)} st_offset={conflict.startTimeHrs - this.minTime} length={conflict.endTimeHrs - conflict.startTimeHrs} />
+            return <ConflictIndicator key={conflict.startTimeHrs.toFixed(1) + '-' + conflict.pattern} day={datetime.bitmaskToDay(conflict.pattern)} st_offset={conflict.startTimeHrs - this.minTime} length={conflict.endTimeHrs - conflict.startTimeHrs} />;
         }, this);
         return <div className="cal-inner" ref="container">
                 <div className="cal-meetings">
@@ -180,4 +180,4 @@ var Calendar = React.createClass({
     }
 });
 
-module.exports = Calendar
+module.exports = Calendar;

@@ -88,7 +88,7 @@ function eliminateConflictSections(clusters, fixed, start) {
             var course = cluster[j];
             for (var k=0; k < course.length; k++) {
                 var sections = course[k];
-                if (sections.length == 0) {
+                if (sections.length === 0) {
                     continue;
                 }
                 for (var l=0; l < sections.length; ) {
@@ -106,7 +106,7 @@ function eliminateConflictSections(clusters, fixed, start) {
                         l++;
                     }
                 }
-                if (sections.length == 0) {
+                if (sections.length === 0) {
                     return true;
                 }
             }

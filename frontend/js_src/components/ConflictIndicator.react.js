@@ -7,7 +7,7 @@ var ConflictIndicator = React.createClass({
     mixins : [CalendarElementMixin],
 
     render: function() {
-        return <div className={'conflict-indicator ' + this.getClassName()} style={this.getLayoutStyle()}></div>
+        return <div className={'conflict-indicator ' + this.getClassName()} style={this.getLayoutStyle()}></div>;
     }
 });
 

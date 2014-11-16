@@ -58,8 +58,8 @@ function normalizeIntervals(intervals) {
         }
     });
     var result = [];
-    for (d in intervalsByDay) {
-        if (intervalsByDay[d].length == 0) {
+    for (var d in intervalsByDay) {
+        if (intervalsByDay[d].length === 0) {
             console.warn('Consistency Warning: Empty Interval');
             continue;
         }

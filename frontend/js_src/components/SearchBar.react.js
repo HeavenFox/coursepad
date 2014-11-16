@@ -27,7 +27,7 @@ var SearchBar = React.createClass({
         for (var i=0; i < item.segments.length; i++) {
             $title.append(document.createTextNode(
                 item.title.slice(
-                    i == 0 ? 0 : item.segments[i-1][1],
+                    i === 0 ? 0 : item.segments[i-1][1],
                     item.segments[i][0]
                 )
             ));
@@ -64,7 +64,7 @@ var SearchBar = React.createClass({
         }).autocomplete("instance")._renderItem = this.renderItem;
     },
     render: function() {
-        return <input type="text" autoComplete="off" disabled={!this.state.available} placeholder={this.state.available ? "Search for Class (e.g. CS3110; Intro to Photography)" : "Loading Available Classes..."} />
+        return <input type="text" autoComplete="off" disabled={!this.state.available} placeholder={this.state.available ? "Search for Class (e.g. CS3110; Intro to Photography)" : "Loading Available Classes..."} />;
     }
 });
 

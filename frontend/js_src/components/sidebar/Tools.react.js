@@ -21,7 +21,7 @@ var Tools = React.createClass({
                 <li><a href="javascript:;" onClick={this._showClassNumbers}>Show Class Numbers</a></li>
                 <li><a href="javascript:;" onClick={this._importExport}>Import / Export</a></li>
             </ul>
-        </div>
+        </div>;
     }
 });
 

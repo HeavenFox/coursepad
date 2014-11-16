@@ -267,6 +267,7 @@ Schedule.prototype.changeCourse = function(to, from) {
 };
 
 Schedule.prototype._changeCourse = function(toCourse, fromCourse) {
+    var i, j;
     if (!isNaN(toCourse)) {
         toCourse = this.findCourseInBasketById(toCourse);
     }
@@ -274,9 +275,9 @@ Schedule.prototype._changeCourse = function(toCourse, fromCourse) {
     if (fromCourse === undefined) {
         var selectedCoursesHash = this.getSelectedCourseIdsHash();
         find_course:
-        for (var i=0; i < this.basket.length; i++) {
+        for (i=0; i < this.basket.length; i++) {
             if (this.basket[i].indexOf(toCourse) > -1) {
-                for (var j=0; j < this.basket[i].length; j++) {
+                for (j=0; j < this.basket[i].length; j++) {
                     if (selectedCoursesHash[this.basket[i][j].id]) {
                         fromCourse = this.basket[i][j];
                         break find_course;
@@ -309,7 +310,7 @@ Schedule.prototype._changeCourse = function(toCourse, fromCourse) {
             } else {
                 var added = false;
                 if (prevSection.meetings.length > 0) {
-                    for (var i=0; i < toCourse.sections[type].length; i++) {
+                    for (i=0; i < toCourse.sections[type].length; i++) {
                         var curSection = toCourse.sections[type][i];
                         if (curSection.meetings.length > 0 && curSection.meetings[0].startTime == prevSection.meetings[0].startTime && curSection.meetings[0].pattern == prevSection.meetings[0].pattern) {
                             added = true;
@@ -635,8 +636,8 @@ Schedule.prototype.getBasicInfo = function() {
                 return;
             }
             totalHours += datetime.bitmaskToDay(meeting.pattern).length * 
-                             (datetime.timeStringToHour(meeting.endTime)
-                              - datetime.timeStringToHour(meeting.startTime));
+                            (datetime.timeStringToHour(meeting.endTime) - 
+                            datetime.timeStringToHour(meeting.startTime));
 
         });
     });

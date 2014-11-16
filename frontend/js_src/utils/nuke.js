@@ -7,7 +7,7 @@ window.nuke = function() {
 
         var deleteIDBTries = 3;
 
-        function deleteIndexedDB() {
+        var deleteIndexedDB = function() {
             var delReq = window.indexedDB.deleteDatabase('coursepad');
             delReq.onsuccess = function() {
                 alert('Reset success');
@@ -20,7 +20,7 @@ window.nuke = function() {
                     window.setTimeout(deleteIndexedDB, 100);
                 }
             }
-        }
+        };
         
         indexeddb.close().then(function() {
             window.setTimeout(deleteIndexedDB, 100);

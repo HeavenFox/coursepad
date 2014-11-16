@@ -12,7 +12,7 @@ function open() {
             };
 
             request.onupgradeneeded = function(e) {
-                if (e.oldVersion == 0) {
+                if (e.oldVersion === 0) {
                     initSchema(e.target.result);
                 } else {
                     upgradeSchema(e.target.transaction, e.oldVersion);
@@ -34,14 +34,16 @@ function upgradeSchema(transaction, version) {
     switch (version) {
     case 1:
         transaction.objectStore('subjects').createIndex('term', 'term', {unique: false});
+        /* falls through */
     case 2:
         var newCacheStore = transaction.db.createObjectStore('title_typeahead_index', {keyPath: 'term'});
         var index = Object.create(null);
         transaction.objectStore('title_index').openCursor().onsuccess = function(e) {
             var cursor = e.target.result;
+            var term;
             if (cursor) {
                 var obj = cursor.value;
-                var term = obj.term;
+                term = obj.term;
                 delete obj.term;
                 if (index[term] === undefined) {
                     index[term] = {term: term, index: []};
@@ -50,7 +52,7 @@ function upgradeSchema(transaction, version) {
                 cursor.continue();
             } else {
                 transaction.db.deleteObjectStore('title_index');
-                for (var term in index) {
+                for (term in index) {
                     newCacheStore.add(index[term]);
                 }
             }

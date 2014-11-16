@@ -4,6 +4,8 @@ var uglify = require('gulp-uglify');
 var sass = require('gulp-ruby-sass');
 var insert = require('gulp-insert');
 var del = require('del');
+var jshint = require('gulp-jshint');
+var react = require('gulp-react');
 
 var DEV = false;
 
@@ -29,6 +31,14 @@ function webpack_conf() {
     };
     return conf;
 }
+
+gulp.task('lint', function() {
+    gulp.src('./js_src/**/*.js')
+        .pipe(react())
+        .pipe(jshint())
+        .pipe(jshint.reporter('default'))
+        .pipe(jshint.reporter('fail'));
+})
 
 gulp.task('js', function() {
     var c = gulp.src('js_src/app.js')

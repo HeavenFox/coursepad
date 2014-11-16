@@ -62,7 +62,7 @@ function Course(obj) {
             }, this);
         }
     }
-};
+}
 
 Course.prototype.getNumber = function() {
     return this.subject + ' ' + this.number;

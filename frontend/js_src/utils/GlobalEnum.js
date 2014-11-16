@@ -5,7 +5,7 @@ if (!PROD) {
 }
 
 module.exports = function(e) {
-    for (key in e) {
+    for (var key in e) {
         if (e.hasOwnProperty(key)) {
             e[key] = ++counter;
             if (!PROD) {
