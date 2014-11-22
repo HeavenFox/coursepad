@@ -1,0 +1,1630 @@
+{
+  "prev_time": 1415650548,
+  "roster": {
+    "added": [
+      {
+        "id": 19337,
+        "nbr": 1937,
+        "secs": {
+          "LEC": [
+            {
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "bcc66"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 18607,
+              "sec": "001"
+            }
+          ]
+        },
+        "sub": "PE",
+        "title": "Women's Varsity Sailing",
+        "unit": [
+          1
+        ]
+      }
+    ],
+    "deleted": [],
+    "modified": [
+      {
+        "id": 6455,
+        "nbr": 9900,
+        "secs": {
+          "RSC": [
+            {
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "bk88"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 11806,
+              "sec": "725"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Research in Mechanical and Aerospace Engineering",
+        "unit": [
+          1,
+          15
+        ]
+      },
+      {
+        "id": 7533,
+        "nbr": 6000,
+        "secs": {
+          "IND": [
+            {
+              "consent": "Instructor Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 14166,
+              "sec": "604"
+            }
+          ]
+        },
+        "sub": "NS",
+        "title": "Special Problems for Graduate Students",
+        "unit": [
+          1,
+          9
+        ]
+      },
+      {
+        "id": 5752,
+        "nbr": 4190,
+        "secs": {
+          "IND": [
+            {
+              "consent": "Instructor Consent Required",
+              "mt": [
+                {
+                  "ed": "12/05/2014",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 6678,
+              "sec": "601"
+            }
+          ]
+        },
+        "sub": "ITAL",
+        "title": "Special Topics in Italian Literature",
+        "unit": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": 6400,
+        "nbr": 8900,
+        "secs": {
+          "RSC": [
+            {
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "bk88"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 11837,
+              "sec": "725"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Research in Mechanical and Aerospace Engineering",
+        "unit": [
+          1,
+          15
+        ]
+      },
+      {
+        "comeetings": [
+          [
+            "ORIE",
+            3500
+          ]
+        ],
+        "id": 7845,
+        "nbr": 5500,
+        "secs": {
+          "DIS": [
+            {
+              "mt": [
+                {
+                  "bldg": "PHL",
+                  "ed": "12/05/2014",
+                  "et": "04:25PM",
+                  "profs": [
+                    "pp396"
+                  ],
+                  "ptn": 1,
+                  "rm": "403",
+                  "sd": "08/26/2014",
+                  "st": "02:30PM"
+                }
+              ],
+              "nbr": 11170,
+              "sec": "201"
+            },
+            {
+              "mt": [
+                {
+                  "bldg": "PHL",
+                  "ed": "12/05/2014",
+                  "et": "04:25PM",
+                  "profs": [
+                    "pp396"
+                  ],
+                  "ptn": 2,
+                  "rm": "407",
+                  "sd": "08/26/2014",
+                  "st": "02:30PM"
+                }
+              ],
+              "nbr": 11171,
+              "sec": "202"
+            },
+            {
+              "mt": [
+                {
+                  "bldg": "PHL",
+                  "ed": "12/05/2014",
+                  "et": "04:25PM",
+                  "profs": [
+                    "pp396"
+                  ],
+                  "ptn": 4,
+                  "rm": "403",
+                  "sd": "08/26/2014",
+                  "st": "02:30PM"
+                }
+              ],
+              "nbr": 11172,
+              "sec": "203"
+            },
+            {
+              "mt": [
+                {
+                  "bldg": "PHL",
+                  "ed": "12/05/2014",
+                  "et": "04:25PM",
+                  "profs": [
+                    "pp396"
+                  ],
+                  "ptn": 8,
+                  "rm": "219",
+                  "sd": "08/26/2014",
+                  "st": "02:30PM"
+                }
+              ],
+              "nbr": 11173,
+              "sec": "204"
+            },
+            {
+              "mt": [
+                {
+                  "bldg": "PHL",
+                  "ed": "12/05/2014",
+                  "et": "04:25PM",
+                  "profs": [
+                    "pp396"
+                  ],
+                  "ptn": 16,
+                  "rm": "213",
+                  "sd": "08/26/2014",
+                  "st": "02:30PM"
+                }
+              ],
+              "nbr": 16318,
+              "sec": "205"
+            }
+          ],
+          "LEC": [
+            {
+              "mt": [
+                {
+                  "bldg": "HLS",
+                  "ed": "12/05/2014",
+                  "et": "02:15PM",
+                  "profs": [
+                    "jd694",
+                    "pp396",
+                    "jjp274"
+                  ],
+                  "ptn": 21,
+                  "rm": "B14",
+                  "sd": "08/26/2014",
+                  "st": "01:25PM"
+                }
+              ],
+              "nbr": 11169,
+              "sec": "001"
+            }
+          ]
+        },
+        "sub": "ORIE",
+        "title": "Engineering Probability and Statistics II",
+        "unit": [
+          4
+        ]
+      },
+      {
+        "id": 4713,
+        "nbr": 2000,
+        "secs": {
+          "SEM": [
+            {
+              "mt": [
+                {
+                  "bldg": "URH",
+                  "ed": "12/05/2014",
+                  "et": "11:00AM",
+                  "profs": [
+                    "kln37"
+                  ],
+                  "ptn": 21,
+                  "rm": "382",
+                  "sd": "08/26/2014",
+                  "st": "10:10AM"
+                }
+              ],
+              "nbr": 6535,
+              "sec": "101"
+            }
+          ]
+        },
+        "sub": "GERST",
+        "title": "Germany: Intercultural Context",
+        "unit": [
+          3
+        ]
+      },
+      {
+        "id": 9349,
+        "nbr": 5900,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Instructor Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "pj16",
+                    "rls444"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 11245,
+              "sec": "701"
+            }
+          ]
+        },
+        "sub": "SYSEN",
+        "title": "Systems Engineering Design Project",
+        "topics": [
+          "CN Rail Crew Demand and Supply"
+        ],
+        "unit": [
+          1,
+          6
+        ]
+      },
+      {
+        "id": 9351,
+        "nbr": 5900,
+        "secs": {
+          "RSC": [
+            {
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "mu25"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 12017,
+              "sec": "704"
+            }
+          ]
+        },
+        "sub": "SYSEN",
+        "title": "Systems Engineering Design Project",
+        "topics": [
+          "Cornell Mars Rover"
+        ],
+        "unit": [
+          1,
+          6
+        ]
+      },
+      {
+        "id": 19321,
+        "nbr": 6790,
+        "secs": {
+          "LEC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "et": "05:40PM",
+                  "profs": [
+                    "mm462"
+                  ],
+                  "ptn": 5,
+                  "rm": "TBA",
+                  "sd": "08/26/2014",
+                  "st": "04:25PM"
+                }
+              ],
+              "nbr": 18602,
+              "sec": "001"
+            }
+          ]
+        },
+        "sub": "NBA",
+        "title": "Green Revolving Fund",
+        "unit": [
+          3
+        ]
+      },
+      {
+        "id": 7435,
+        "nbr": 4020,
+        "secs": {
+          "IND": [
+            {
+              "consent": "Instructor Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 14130,
+              "sec": "604"
+            }
+          ]
+        },
+        "sub": "NS",
+        "title": "Supervised Fieldwork",
+        "unit": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": 6327,
+        "nbr": 6900,
+        "secs": {
+          "RSC": [
+            {
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "mu25"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 11879,
+              "sec": "720"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Special Investigations in Mechanical and Aerospace Engineering",
+        "topics": [
+          "M.Eng. Project"
+        ],
+        "unit": [
+          1,
+          8
+        ]
+      },
+      {
+        "id": 6374,
+        "nbr": 6900,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "mu25"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 12352,
+              "sec": "782"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Special Investigations in Mechanical and Aerospace Engineering",
+        "topics": [
+          "Cornell Rocketry Team"
+        ],
+        "unit": [
+          1,
+          8
+        ]
+      },
+      {
+        "id": 6378,
+        "nbr": 6900,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "mu25"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 12997,
+              "sec": "792"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Special Investigations in Mechanical and Aerospace Engineering",
+        "topics": [
+          "Design Build Fly Team"
+        ],
+        "unit": [
+          1,
+          8
+        ]
+      },
+      {
+        "id": 6381,
+        "nbr": 6900,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "mu25"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 13000,
+              "sec": "798"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Special Investigations in Mechanical and Aerospace Engineering",
+        "topics": [
+          "Mars Rover Team"
+        ],
+        "unit": [
+          1,
+          8
+        ]
+      },
+      {
+        "id": 7315,
+        "nbr": 2450,
+        "secs": {
+          "LEC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "bldg": "MVR",
+                  "ed": "12/05/2014",
+                  "et": "11:25AM",
+                  "profs": [
+                    "js57"
+                  ],
+                  "ptn": 10,
+                  "rm": "G71",
+                  "sd": "08/26/2014",
+                  "st": "10:10AM"
+                }
+              ],
+              "nbr": 14315,
+              "sec": "001"
+            }
+          ]
+        },
+        "sub": "NS",
+        "title": "Social Science Perspectives on Food and Nutrition",
+        "unit": [
+          3
+        ]
+      },
+      {
+        "id": 8886,
+        "nbr": 7000,
+        "secs": {
+          "IND": [
+            {
+              "consent": "Instructor Consent Required",
+              "mt": [
+                {
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "bal5",
+                    "ngs9"
+                  ],
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 6609,
+              "sec": "601"
+            }
+          ]
+        },
+        "sub": "PMA",
+        "title": "Independent Study for Graduate Students in Theatre",
+        "unit": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": 7869,
+        "nbr": 7900,
+        "secs": {
+          "LEC": [
+            {
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "dw36"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 11248,
+              "sec": "001"
+            }
+          ]
+        },
+        "sub": "ORIE",
+        "title": "Special Investigations",
+        "unit": [
+          1,
+          6
+        ]
+      },
+      {
+        "id": 787,
+        "nbr": 5204,
+        "secs": {
+          "SEM": [
+            {
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "et": "09:00PM",
+                  "profs": [
+                    "nf77"
+                  ],
+                  "ptn": 2,
+                  "rm": "TBA",
+                  "sd": "08/26/2014",
+                  "st": "06:00PM"
+                }
+              ],
+              "nbr": 18124,
+              "sec": "130"
+            }
+          ]
+        },
+        "sub": "ARCH",
+        "title": "Professional Training",
+        "unit": [
+          1
+        ]
+      },
+      {
+        "id": 7487,
+        "nbr": 4030,
+        "secs": {
+          "IND": [
+            {
+              "consent": "Instructor Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 13673,
+              "sec": "604"
+            }
+          ]
+        },
+        "sub": "NS",
+        "title": "Teaching Apprenticeship",
+        "unit": [
+          1,
+          5
+        ]
+      },
+      {
+        "id": 7490,
+        "nbr": 4030,
+        "secs": {
+          "IND": [
+            {
+              "consent": "Instructor Consent Required",
+              "mt": [
+                {
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "js57"
+                  ],
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 14800,
+              "sec": "612"
+            }
+          ]
+        },
+        "sub": "NS",
+        "title": "Teaching Apprenticeship",
+        "unit": [
+          1,
+          5
+        ]
+      },
+      {
+        "comeetings": [
+          [
+            "ORIE",
+            5500
+          ]
+        ],
+        "id": 7809,
+        "nbr": 3500,
+        "secs": {
+          "DIS": [
+            {
+              "mt": [
+                {
+                  "bldg": "PHL",
+                  "ed": "12/05/2014",
+                  "et": "04:25PM",
+                  "profs": [
+                    "pp396"
+                  ],
+                  "ptn": 1,
+                  "rm": "403",
+                  "sd": "08/26/2014",
+                  "st": "02:30PM"
+                }
+              ],
+              "nbr": 11153,
+              "sec": "201"
+            },
+            {
+              "mt": [
+                {
+                  "bldg": "PHL",
+                  "ed": "12/05/2014",
+                  "et": "04:25PM",
+                  "profs": [
+                    "pp396"
+                  ],
+                  "ptn": 2,
+                  "rm": "407",
+                  "sd": "08/26/2014",
+                  "st": "02:30PM"
+                }
+              ],
+              "nbr": 11154,
+              "sec": "202"
+            },
+            {
+              "mt": [
+                {
+                  "bldg": "PHL",
+                  "ed": "12/05/2014",
+                  "et": "04:25PM",
+                  "profs": [
+                    "pp396"
+                  ],
+                  "ptn": 4,
+                  "rm": "403",
+                  "sd": "08/26/2014",
+                  "st": "02:30PM"
+                }
+              ],
+              "nbr": 11155,
+              "sec": "203"
+            },
+            {
+              "mt": [
+                {
+                  "bldg": "PHL",
+                  "ed": "12/05/2014",
+                  "et": "04:25PM",
+                  "profs": [
+                    "pp396"
+                  ],
+                  "ptn": 8,
+                  "rm": "219",
+                  "sd": "08/26/2014",
+                  "st": "02:30PM"
+                }
+              ],
+              "nbr": 11156,
+              "sec": "204"
+            },
+            {
+              "mt": [
+                {
+                  "bldg": "PHL",
+                  "ed": "12/05/2014",
+                  "et": "04:25PM",
+                  "profs": [
+                    "pp396"
+                  ],
+                  "ptn": 16,
+                  "rm": "213",
+                  "sd": "08/26/2014",
+                  "st": "02:30PM"
+                }
+              ],
+              "nbr": 16315,
+              "sec": "205"
+            }
+          ],
+          "LEC": [
+            {
+              "mt": [
+                {
+                  "bldg": "HLS",
+                  "ed": "12/05/2014",
+                  "et": "02:15PM",
+                  "profs": [
+                    "jd694",
+                    "pp396",
+                    "jjp274"
+                  ],
+                  "ptn": 21,
+                  "rm": "B14",
+                  "sd": "08/26/2014",
+                  "st": "01:25PM"
+                }
+              ],
+              "nbr": 12425,
+              "sec": "001"
+            }
+          ]
+        },
+        "sub": "ORIE",
+        "title": "Engineering Probability and Statistics II",
+        "unit": [
+          4
+        ]
+      },
+      {
+        "id": 5832,
+        "nbr": 5090,
+        "secs": {
+          "IND": [
+            {
+              "mt": [
+                {
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "klg16"
+                  ],
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 4806,
+              "sec": "601"
+            }
+          ]
+        },
+        "sub": "LA",
+        "title": "Master of Professional Studies Project",
+        "unit": [
+          6
+        ]
+      },
+      {
+        "id": 6200,
+        "nbr": 4291,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "whs3"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 11663,
+              "sec": "720"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Supervised Senior Design Experience",
+        "topics": [
+          "Ind. Des. Project"
+        ],
+        "unit": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": 6201,
+        "nbr": 4291,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "arg2"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 11634,
+              "sec": "721"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Supervised Senior Design Experience",
+        "topics": [
+          "Ind. Des. Project"
+        ],
+        "unit": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": 6228,
+        "nbr": 4291,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "mu25"
+                  ],
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 12796,
+              "sec": "782"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Supervised Senior Design Experience",
+        "topics": [
+          "Cornell Rocketry Team"
+        ],
+        "unit": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": 6232,
+        "nbr": 4291,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "mu25"
+                  ],
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 12987,
+              "sec": "792"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Supervised Senior Design Experience",
+        "topics": [
+          "Design Build Fly"
+        ],
+        "unit": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": 6235,
+        "nbr": 4291,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "mu25"
+                  ],
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 12990,
+              "sec": "798"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Supervised Senior Design Experience",
+        "topics": [
+          "Mars Rover Team"
+        ],
+        "unit": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": 4715,
+        "nbr": 2040,
+        "secs": {
+          "SEM": [
+            {
+              "mt": [
+                {
+                  "bldg": "WHT",
+                  "ed": "12/05/2014",
+                  "et": "01:10PM",
+                  "profs": [
+                    "aem235"
+                  ],
+                  "ptn": 21,
+                  "rm": "B14",
+                  "sd": "08/26/2014",
+                  "st": "12:20PM"
+                }
+              ],
+              "nbr": 6537,
+              "sec": "101"
+            }
+          ]
+        },
+        "sub": "GERST",
+        "title": "Perspectives on German Culture",
+        "unit": [
+          3
+        ]
+      },
+      {
+        "id": 6257,
+        "nbr": 4900,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "whs3"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 11716,
+              "sec": "720"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Individual and Group Projects in Mechanical Engineering",
+        "topics": [
+          "Independent Research"
+        ],
+        "unit": [
+          1,
+          8
+        ]
+      },
+      {
+        "id": 6286,
+        "nbr": 4900,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "mu25"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 12187,
+              "sec": "782"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Individual and Group Projects in Mechanical Engineering",
+        "topics": [
+          "Cornell Rocketry Team"
+        ],
+        "unit": [
+          1,
+          8
+        ]
+      },
+      {
+        "id": 6290,
+        "nbr": 4900,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "mu25"
+                  ],
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 12992,
+              "sec": "792"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Individual and Group Projects in Mechanical Engineering",
+        "topics": [
+          "Design Build Fly Team"
+        ],
+        "unit": [
+          1,
+          8
+        ]
+      },
+      {
+        "id": 6293,
+        "nbr": 4900,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "mu25"
+                  ],
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 12995,
+              "sec": "798"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Individual and Group Projects in Mechanical Engineering",
+        "topics": [
+          "Mars Rover Team"
+        ],
+        "unit": [
+          1,
+          8
+        ]
+      },
+      {
+        "id": 7614,
+        "nbr": 9990,
+        "secs": {
+          "RSC": [
+            {
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 14270,
+              "sec": "704"
+            }
+          ]
+        },
+        "sub": "NS",
+        "title": "Doctoral Thesis and Research",
+        "unit": [
+          1,
+          15
+        ]
+      },
+      {
+        "id": 4711,
+        "nbr": 1230,
+        "secs": {
+          "SEM": [
+            {
+              "mt": [
+                {
+                  "bldg": "URH",
+                  "ed": "12/05/2014",
+                  "et": "11:00AM",
+                  "profs": [
+                    "lky4"
+                  ],
+                  "ptn": 23,
+                  "rm": "312",
+                  "sd": "08/26/2014",
+                  "st": "10:10AM"
+                }
+              ],
+              "nbr": 6672,
+              "sec": "101"
+            }
+          ]
+        },
+        "sub": "GERST",
+        "title": "Expanding the German Dossier",
+        "unit": [
+          4
+        ]
+      },
+      {
+        "id": 6135,
+        "nbr": 1900,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "whs3"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 12278,
+              "sec": "720"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Freshman and Nontechnical Projects in Mechanical Engineering",
+        "topics": [
+          "Independent Research"
+        ],
+        "unit": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": 6163,
+        "nbr": 1900,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "mu25"
+                  ],
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 12295,
+              "sec": "782"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Freshman and Nontechnical Projects in Mechanical Engineering",
+        "topics": [
+          "Cornell Rocketry Team"
+        ],
+        "unit": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": 6167,
+        "nbr": 1900,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "mu25"
+                  ],
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 12981,
+              "sec": "792"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Freshman and Nontechnical Projects in Mechanical Engineering",
+        "topics": [
+          "Design Build Fly Team"
+        ],
+        "unit": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": 6170,
+        "nbr": 1900,
+        "secs": {
+          "RSC": [
+            {
+              "consent": "Department Consent Required",
+              "mt": [
+                {
+                  "ed": "12/05/2014",
+                  "profs": [
+                    "mu25"
+                  ],
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 12985,
+              "sec": "798"
+            }
+          ]
+        },
+        "sub": "MAE",
+        "title": "Freshman and Nontechnical Projects in Mechanical Engineering",
+        "topics": [
+          "Mars Rover Team"
+        ],
+        "unit": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": 7381,
+        "nbr": 4010,
+        "secs": {
+          "IND": [
+            {
+              "consent": "Instructor Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 14079,
+              "sec": "604"
+            }
+          ]
+        },
+        "sub": "NS",
+        "title": "Empirical Research",
+        "unit": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": 7327,
+        "nbr": 4000,
+        "secs": {
+          "IND": [
+            {
+              "consent": "Instructor Consent Required",
+              "mt": [
+                {
+                  "bldg": "TBA",
+                  "ed": "12/05/2014",
+                  "rm": "TBA",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 14051,
+              "sec": "604"
+            }
+          ]
+        },
+        "sub": "NS",
+        "title": "Directed Readings",
+        "unit": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": 4206,
+        "nbr": 1101,
+        "secs": {
+          "DIS": [
+            {
+              "mt": [
+                {
+                  "bldg": "RHD",
+                  "ed": "12/05/2014",
+                  "et": "04:25PM",
+                  "profs": [
+                    "dbs10"
+                  ],
+                  "ptn": 8,
+                  "rm": "453",
+                  "sd": "08/26/2014",
+                  "st": "02:30PM"
+                }
+              ],
+              "nbr": 11268,
+              "sec": "201"
+            },
+            {
+              "mt": [
+                {
+                  "bldg": "RHD",
+                  "ed": "12/05/2014",
+                  "et": "02:15PM",
+                  "profs": [
+                    "dbs10"
+                  ],
+                  "ptn": 8,
+                  "rm": "453",
+                  "sd": "08/26/2014",
+                  "st": "12:20PM"
+                }
+              ],
+              "nbr": 11269,
+              "sec": "202"
+            },
+            {
+              "mt": [
+                {
+                  "bldg": "RHD",
+                  "ed": "12/05/2014",
+                  "et": "01:10PM",
+                  "profs": [
+                    "dbs10"
+                  ],
+                  "ptn": 16,
+                  "rm": "453",
+                  "sd": "08/26/2014",
+                  "st": "11:15AM"
+                }
+              ],
+              "nbr": 13031,
+              "sec": "203"
+            }
+          ],
+          "LEC": [
+            {
+              "mt": [
+                {
+                  "bldg": "RHD",
+                  "ed": "12/05/2014",
+                  "et": "11:00AM",
+                  "profs": [
+                    "rgb6",
+                    "dbs10"
+                  ],
+                  "ptn": 10,
+                  "rm": "471",
+                  "sd": "08/26/2014",
+                  "st": "10:10AM"
+                }
+              ],
+              "nbr": 11267,
+              "sec": "001"
+            }
+          ]
+        },
+        "sub": "ENGRI",
+        "title": "Engineering Applications of Operations Research",
+        "unit": [
+          3
+        ]
+      },
+      {
+        "id": 7584,
+        "nbr": 8990,
+        "secs": {
+          "RSC": [
+            {
+              "mt": [
+                {
+                  "ed": "12/05/2014",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 14231,
+              "sec": "704"
+            }
+          ]
+        },
+        "sub": "NS",
+        "title": "Master's Thesis and Research",
+        "unit": [
+          1,
+          15
+        ]
+      },
+      {
+        "id": 7870,
+        "nbr": 9000,
+        "secs": {
+          "SEM": [
+            {
+              "mt": [
+                {
+                  "bldg": "RHD",
+                  "ed": "12/05/2014",
+                  "et": "05:30PM",
+                  "profs": [
+                    "dw36"
+                  ],
+                  "ptn": 2,
+                  "rm": "253",
+                  "sd": "08/26/2014",
+                  "st": "04:15PM"
+                }
+              ],
+              "nbr": 11177,
+              "sec": "101"
+            }
+          ]
+        },
+        "sub": "ORIE",
+        "title": "ORIE Graduate Colloquium",
+        "unit": [
+          1
+        ]
+      },
+      {
+        "id": 5757,
+        "nbr": 6390,
+        "secs": {
+          "IND": [
+            {
+              "consent": "Instructor Consent Required",
+              "mt": [
+                {
+                  "ed": "12/05/2014",
+                  "sd": "08/26/2014"
+                }
+              ],
+              "nbr": 6680,
+              "sec": "601"
+            }
+          ]
+        },
+        "sub": "ITAL",
+        "title": "Special Topics in Italian Literature",
+        "unit": [
+          1,
+          4
+        ]
+      }
+    ]
+  },
+  "subjects": {
+    "added": [],
+    "deleted": [],
+    "modified": []
+  },
+  "time": 1416601245
+}
