@@ -195,7 +195,7 @@ TermDatabase.prototype.applyUpdates = function(updates) {
 
     chain = chain.then(function() {
         return indexeddb.queryObjectStore('roster', function(rosterStore) {
-            rosterStore.index('term').openCursor().onsuccess = function(e) {
+            rosterStore.index('term').openCursor(IDBKeyRange.only(termId)).onsuccess = function(e) {
                 var cursor = e.target.result;
                 if (cursor) {
                     var number = cursor.value['sub'] + cursor.value['nbr'];
