@@ -330,6 +330,9 @@ Schedule.prototype._changeCourse = function(toCourse, fromCourse) {
 };
 
 Schedule.prototype.addCluster = function(cluster) {
+    if (cluster.length === 0) {
+        throw new Error('This class does not exist');
+    }
     this.basket.push(cluster);
     for (var type in cluster[0].sections) {
         if (cluster[0].sections.hasOwnProperty(type)) {
