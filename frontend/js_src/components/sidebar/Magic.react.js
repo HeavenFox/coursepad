@@ -27,11 +27,22 @@ var Priority = React.createClass({
 });
 
 var Magic = React.createClass({
+    getInitialState: function() {
+        return {collapsed: true};
+    },
+
+    _toggleCollapse: function() {
+        this.setState({collapsed: !this.state.collapsed});
+    },
+
     render: function() {
         var bindings = {lateStart: 3, earlyEnd: 3, noFriday: 3, lunchBreak: 3};
         return <div className="magic utilities-item">
         <h2>Magic</h2>
             <div className="utilities-content">
+            <div className="clickable btn" onClick={function(){magic.makeSchedule(bindings);}}>Conjure a Schedule</div>
+            <div className="clickable" onClick={this._toggleCollapse}>{(this.state.collapsed ? '+' : '-') + ' Fine tune magical level'}</div>
+            <div className={this.state.collapsed ? 'hidden' : ''}>
             <p className="description">Rate the Importance of... (1-5)</p>
             <ul>
                 <Priority label="Get up late" bind={bindings} to="lateStart" />
@@ -40,7 +51,7 @@ var Magic = React.createClass({
                 <Priority label="Have Lunch" bind={bindings} to="lunchBreak" />
             </ul>
             <p className="hint">Hint: marking everything 5 is the same as marking everything 1</p>
-            <div className="clickable btn" onClick={function(){magic.makeSchedule(bindings);}}>Conjure a Schedule</div>
+            </div>
             <p className="hint">Note: Magic is in alpha. Generated schedule will not be saved automatically</p>
             </div>
         </div>;
