@@ -296,14 +296,14 @@ $cal-time-width: 70px;
 
 .cal-inner {
     position: relative;
-    margin-top: 20px;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 .cal-meetings {
     margin-left: $cal-time-width;
     padding-left: 10px;
     margin-right: 10px;
+    margin-top: 20px;
 }
 
 .cal-meetings-inner {
@@ -715,16 +715,16 @@ footer {
 }
 
 .basket-item .content-buttons .menu-btn {
-    @include centered-img('basket_menu');
+    @include centered-img-with-size('basket_menu', 16px, 16px);
     margin-right: 3px;
 }
 
 .basket-item .content-buttons .visibility-btn {
-    @include centered-img('basket_eye_open');
+    @include centered-img-with-size('basket_eye_open', 16px, 16px);
 }
 
 .basket-item .content-buttons .visibility-btn.closed {
-    @include centered-img('basket_eye_closed');
+    @include centered-img-with-size('basket_eye_closed', 16px, 16px);
 }
 
 .basket-item .content-buttons .expand-btn {
