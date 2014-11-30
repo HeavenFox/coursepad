@@ -100,6 +100,12 @@ body.modal-open {
     }
 }
 
+.btnish, .btn {
+    @include no-user-interaction;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
 $small-screen-cutoff: 1400px;
 
 $topbar-height : 70px;
@@ -684,6 +690,7 @@ footer {
 .basket-item .content-buttons {
     float: right;
     margin-left: 5px;
+    @include no-user-interaction;
 }
 
 @media (max-width: #{$small-screen-cutoff}) {
