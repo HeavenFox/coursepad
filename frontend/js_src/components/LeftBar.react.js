@@ -77,7 +77,7 @@ var ScheduleLine = React.createClass({
             editing.push(<div onClick={this._onDelete} className="glyphicon glyphicon-trash clickable" />);
         }
         editing.push(<div onClick={this.state.editing ? this._onSave : this._onEdit} className={(this.state.editing ? "glyphicon-floppy-disk" : "glyphicon-pencil") + " glyphicon clickable"} />);
-        return <li onClick={this.state.editing ? null : this._onClick} className={this.state.editing ? "" : "clickable"}>
+        return <li onClick={this.state.editing ? null : this._onClick} className={this.state.editing ? "" : "btnish"}>
                 <ScheduleIcon color={this.props.color} fill={this.props.isCurrent} />
                 <div className="schedule-listing-content">{content}</div>
                 <div className="schedule-listing-edit-opts">
@@ -158,7 +158,7 @@ var LeftBar = React.createClass({
                                        onSave={this._saveNewSchedule}
                                        key="new-edit" />);
             } else {
-                lis.push(<li onClick={this._addSchedule} className="clickable" key="new">
+                lis.push(<li onClick={this._addSchedule} className="btnish" key="new">
                             <div className="schedule-logo add" />
                             <div className="schedule-listing-content">Add a Schedule</div>
                         </li>);
