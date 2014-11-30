@@ -44,10 +44,19 @@ var ScheduleLine = React.createClass({
         this.props.onClick();
     },
 
+    _onCancel: function() {
+        this.setState({editing: false});
+        if (this.props.onCancel) {
+            this.props.onCancel();
+        }
+    },
+
 
     _onKeyUp: function(e) {
-        if (e.keyCode == 13) {
+        if (e.keyCode === 13) { // enter
             this._onSave();
+        } else if (e.keyCode === 27) { // esc
+            this._onCancel();
         }
     },
 
@@ -134,6 +143,10 @@ var LeftBar = React.createClass({
         schedules.deleteSchedule(index);
     },
 
+    _onCancelAdd: function() {
+        this.setState({creating: false});
+    },
+
     render: function() {
         var lis = [];
         var allSchedules = this.state.schedules;
@@ -156,6 +169,7 @@ var LeftBar = React.createClass({
                                        isCurrent={false}
                                        editing={true}
                                        onSave={this._saveNewSchedule}
+                                       onCancel={this._onCancelAdd}
                                        key="new-edit" />);
             } else {
                 lis.push(<li onClick={this._addSchedule} className="btnish" key="new">
