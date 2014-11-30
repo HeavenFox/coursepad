@@ -622,6 +622,7 @@ Schedule.prototype.load = function() {
     if (serialized === undefined) {
         this.basket = [];
         this.sections = [];
+        this.persistSections();
         // Done here
         return Promise.resolve(false);
     }
