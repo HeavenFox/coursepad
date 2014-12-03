@@ -25,10 +25,12 @@
     "filesaver": "CoursePad/FileSaver.js#cp"
   },
   "devDependencies": {
+    "autoprefixer-core": "^4.0.1",
     "del": "^0.1.3",
     "gulp": "^3.8.8",
     "gulp-jshint": "^1.9.0",
     "gulp-jsx": "^0.5.0",
+    "gulp-postcss": "^3.0.0",
     "gulp-react": "^2.0.0",
     "gulp-ruby-sass": "sindresorhus/gulp-ruby-sass#master",
     "gulp-sourcemaps": "^1.2.8",

@@ -7,6 +7,8 @@ var jshint = require('gulp-jshint');
 var react = require('gulp-react');
 var sourcemaps = require('gulp-sourcemaps');
 var gutil = require('gulp-util');
+var postcss = require('gulp-postcss');
+var autoprefixer = require('autoprefixer-core');
 
 var DEV = false;
 
@@ -58,11 +60,12 @@ gulp.task('js', function() {
 gulp.task('css', function() {
     var sassConf = {
         style: DEV ? 'nested' : 'compressed',
-        sourcemap: DEV ? 'inline' : 'none'
+        sourcemap: DEV ? 'none' : 'none'
     };
 
     gulp.src('sass_src/**/*.scss')
         .pipe(sass(sassConf))
+        .pipe(postcss([autoprefixer({})]))
         .pipe(gulp.dest(target() + 'css/'));
 });
 
