@@ -8,10 +8,6 @@ var UnsupportedBrowserWarning = require('../components/pagelets/UnsupportedBrows
 
 module.exports = function() {
     if (!localStore.get('dont-warn-unsupported-browser')) {
-        if (!window.indexedDB) {
-            modal.show(<UnsupportedBrowserWarning reason="feature" />);
-        } else if (navigator && navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') == -1) {
-            modal.show(<UnsupportedBrowserWarning reason="safari" />);
-        }
+
     }
 };

@@ -50,7 +50,9 @@ var SearchBar = React.createClass({
         if (!currentDB) {
             return;
         }
-        response(currentDB.searchByKeyword(request.term));
+        currentDB.searchByKeyword(request.term).then(function(result) {
+            response(result);
+        });
     },
     componentDidMount: function() {
         var that = this;

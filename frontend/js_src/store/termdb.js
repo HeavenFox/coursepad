@@ -9,36 +9,14 @@ var currentTermDB = null;
 
 var Course = require('../model/Course.js');
 
+
+
 function TermDatabase() {
     
 }
 
-/**
- * @return {Promise}
- */
-TermDatabase.prototype.getCoursesBySubjectAndNumber = function(subject, number) {
-    var resolvedCourses;
-    return indexeddb.queryAllByIndex('roster', 'course', IDBKeyRange.only([this.term, subject, number])).then(function(courses) {
-        return courses.map(function(c) {
-            return new Course(c);
-        });
-    }).then(function(courses) {
-        resolvedCourses = courses;
-
-        return [];
-    }).then(function(professors) {
-
-        return resolvedCourses;
-    });
-}
-
-/**
- * @param {String} keywords 
- * @param {Array?} increment result from previous
- */ 
-TermDatabase.prototype.searchByKeyword = function(keywords, increment) {
+TermDatabase.prototype.searchIn = function(toSearch, keywords) {
     var results = [];
-    var toSearch = increment ? increment : this.titleIndex;
     var i, j;
     var terms = keywords.toLowerCase().split(/ /).filter(function(term) {
         return term.length > 0;
@@ -68,7 +46,7 @@ TermDatabase.prototype.searchByKeyword = function(keywords, increment) {
             }
         }
         if (found) {
-            var currentResult = increment ? toSearch[i] : $.extend({}, toSearch[i]);
+            var currentResult = $.extend({}, toSearch[i]);
             currentResult.segments = segments;
             results.push(currentResult);
         }
@@ -76,10 +54,106 @@ TermDatabase.prototype.searchByKeyword = function(keywords, increment) {
     results.sort(function(a,b) {
         return (a.segments[0][0] - b.segments[0][0]) || a.title.localeCompare(b.title);
     });
+
     return results;
+};
+
+function LocalTermDatabase() {
+
 }
 
-TermDatabase.prototype.setTitleIndex = function(index) {
+
+LocalTermDatabase.prototype = Object.create(TermDatabase.prototype);
+LocalTermDatabase.prototype.constructor = RemoteTermDatabase;
+
+function RemoteTermDatabase() {
+    
+}
+
+RemoteTermDatabase.prototype = Object.create(TermDatabase.prototype);
+RemoteTermDatabase.prototype.constructor = RemoteTermDatabase;
+
+RemoteTermDatabase.prototype.getCoursesBySubjectAndNumber = function(subject, number) {
+    return this.getBasket([subject + ' ' + number]).then(function(basket) {
+        if (basket.length > 0 && basket[0].length > 0) {
+            return basket[0];
+        }
+        return [];
+    });
+};
+
+RemoteTermDatabase.prototype.getBasket = function(basket) {
+    var classes = basket.join('|');
+
+    return ajax.getJson(endpoints.termdbBasket(this.term, classes)).then(function(basket) {
+        basket.forEach(function(cluster) {
+            cluster.forEach(function(c, i) {
+                cluster[i] = new Course(c);
+            });
+        });
+
+        return basket;
+    });
+};
+
+RemoteTermDatabase.prototype.searchByKeyword = function(keywords) {
+    var self = this;
+    return ajax.getJson(endpoints.termdbSearch(this.term, keywords)).then(function(toSearch) {
+        toSearch.forEach(function(item) {
+            item.titleLower = item.title.toLowerCase();
+        });
+        return self.searchIn(toSearch, keywords);
+    });
+};
+
+/**
+ * @return {Promise}
+ */
+LocalTermDatabase.prototype.getCoursesBySubjectAndNumber = function(subject, number) {
+    var resolvedCourses;
+    return indexeddb.queryAllByIndex('roster', 'course', IDBKeyRange.only([this.term, subject, number])).then(function(courses) {
+        return courses.map(function(c) {
+            return new Course(c);
+        });
+    }).then(function(courses) {
+        resolvedCourses = courses;
+
+        return [];
+    }).then(function(professors) {
+
+        return resolvedCourses;
+    });
+};
+
+/**
+ * @return {Promise}
+ */
+LocalTermDatabase.prototype.getBasket = function(basket) {
+    var self = this;
+    return Promise.all(basket.map(function(c) {
+        var split = c.split(' ');
+        if (split.length != 2) {
+                return null;
+        }
+        return self.getCoursesBySubjectAndNumber(split[0], +split[1]); 
+    }))
+    .then(function(clusters) {
+        return clusters.filter(function(cluster) {
+            return Array.isArray(cluster) && cluster.length > 0;
+        });
+    });
+};
+
+/**
+ * @param {String} keywords
+ * @return {Promise}
+ */ 
+LocalTermDatabase.prototype.searchByKeyword = function(keywords) {
+    var results = this.searchIn(this.titleIndex, keywords);
+    return Promise.resolve(results);
+}
+
+LocalTermDatabase.prototype.setTitleIndex = function(index) {
     this.titleIndex = [];
     index.index.forEach(function(item) {
         item.titleLower = item.title.toLowerCase();
@@ -90,7 +164,7 @@ TermDatabase.prototype.setTitleIndex = function(index) {
 /**
  * @return {Promise}
  */
-TermDatabase.prototype.applyUpdates = function(updates) {
+LocalTermDatabase.prototype.applyUpdates = function(updates) {
     var self = this;
     if (updates.term != this.term) {
         return Promise.resolve(false);
@@ -227,6 +301,15 @@ TermDatabase.prototype.applyUpdates = function(updates) {
     return chain;
 };
 
+function useLocal() {
+    try {
+        IDBKeyRange.only([1, 2]);
+    } catch (e) {
+        return false;
+    }
+    return window.indexedDB && !(navigator && navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') == -1);
+}
+
 function setCurrentTerm(term) {
     if (currentTermDB !== null && currentTermDB.term === term) {
         return Promise.resolve(false);
@@ -235,32 +318,48 @@ function setCurrentTerm(term) {
     store.ready = false;
     store.emit('readystatechange');
 
-    var dbLoadedPromise;
-    if (meta.getLocalTerms().hasOwnProperty(term)) {
-        dbLoadedPromise = Promise.resolve();
-    } else {
-        console.log("start downloading");
-        dbLoadedPromise = loadTerm(term);
-    }
-
-    return dbLoadedPromise.then(function() {
-        console.log("start loading");
-        currentTermDB = new TermDatabase();
-        currentTermDB.term = term;
-        currentTermDB.titleIndex = [];
-
-        return indexeddb.getByKey('title_typeahead_index', term);
-    })
-    .then(function(index) {
-        if (index !== undefined) {
-            currentTermDB.setTitleIndex(index);
-        }
-
-        console.log("done");
+    var done = function() {
         meta.setSelectedTerm(term);
         store.ready = true;
         store.emit('readystatechange');
-    });
+    };
+
+    if (useLocal()) {
+        console.log('Using indexedDB');
+        var dbLoadedPromise;
+        if (meta.getLocalTerms().hasOwnProperty(term)) {
+            dbLoadedPromise = Promise.resolve();
+        } else {
+            console.log("start downloading");
+            dbLoadedPromise = loadTerm(term);
+        }
+
+        return dbLoadedPromise.then(function() {
+            console.log("start loading");
+            currentTermDB = new LocalTermDatabase();
+            currentTermDB.term = term;
+            currentTermDB.titleIndex = [];
+
+            return indexeddb.getByKey('title_typeahead_index', term);
+        })
+        .then(function(index) {
+            if (index !== undefined) {
+                currentTermDB.setTitleIndex(index);
+            }
+
+            console.log("done");
+            done();
+        });
+    } else {
+        console.log('Using remote term database');
+        currentTermDB = new RemoteTermDatabase();
+        currentTermDB.term = term;
+
+        done();
+        return Promise.resolve();
+    }
+
+
 }
 
 function getCurrentTerm() {
@@ -373,6 +472,9 @@ var store = new EventEmitter({
     getCurrentTerm: getCurrentTerm,
     loadTerm: loadTerm,
     checkForUpdates: function() {
+        if (!useLocal()) {
+            return;
+        }
         var self = this;
         checkForUpdates().then(function(result) {
             if (result !== false) {

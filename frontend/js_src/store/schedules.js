@@ -3,7 +3,6 @@ var datetime = require('../utils/datetime.js');
 var conflicts = require('../model/course/conflicts.js');
 
 var termdb = require('./termdb.js');
-var indexeddb = require('../persist/indexeddb.js');
 var localStore = require('../persist/localStorage.js');
 
 var color = require('../utils/color.js');
@@ -675,17 +674,8 @@ Schedule.prototype.load = function() {
     .then(function() {
         var basket = serialized.basket ? serialized.basket.slice() : [];
         
-        return Promise.all(basket.map(function(c) {
-            var split = c.split(' ');
-            if (split.length != 2) {
-                return null;
-            }
-            return termdb.getCurrentTerm().getCoursesBySubjectAndNumber(split[0], +split[1]); 
-        }));
+        return termdb.getCurrentTerm().getBasket(basket);
     }).then(function(clusters) {
-        clusters = clusters.filter(function(cluster) {
-            return Array.isArray(cluster) && cluster.length > 0;
-        });
         self.basket = clusters;
         var hasSection = {};
         var courseByNumber = {};
