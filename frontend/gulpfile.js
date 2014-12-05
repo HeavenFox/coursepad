@@ -29,6 +29,9 @@ function webpack_conf() {
             loaders: [
                 { test: /\.js$/, loader: "jsx-loader" },
                 { test: /\.json/, loader: "json-loader"}
+            ],
+            postLoaders: [
+                { test: /\.js$/, loader: "regenerator" }
             ]
         }
     };
