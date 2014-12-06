@@ -1,0 +1,21 @@
+@mixin no-user-interaction {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+@mixin centered-img-with-size($img, $width, $height) {
+    background-image: url('../img/#{$img}.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: $width $height;
+    @media print,
+       (-o-min-device-pixel-ratio: 5/4),
+       (-webkit-min-device-pixel-ratio: 1.25),
+       (min-resolution: 120dpi) {
+        background-image: url('../img/#{$img}@2x.png');
+    }
+}

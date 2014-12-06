@@ -1,0 +1,40 @@
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 300;
+    background-color: #2B2B2B;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+$palette: (
+    "pearl" : rgba(234, 224, 200, 0.75),
+    "pink" : rgba(234, 205, 200, 0.75),
+    "purple" : rgba(234, 200, 223, 0.75),
+    "lavender" : rgba(221, 200, 234, 0.75),
+    "blue" : rgba(200, 201, 234, 0.75),
+    "cyan" : rgba(200, 234, 234, 0.75),
+    "applegreen" : rgba(200, 234, 217, 0.75),
+    "green" : rgba(205, 234, 200, 0.75),
+    "beryl" : rgba(221, 234, 200, 0.75),
+    "yellow" : rgba(229, 234, 200, 0.75)
+);
+
+
+
+
+
+.drop-element .menu {
+    border: 1px solid #aaa;
+    background-color: white;
+    margin: 5px;
+    padding: 1px;
+}
+
+.drop-element .menu ul {
+    list-style: none;
+    margin: 5px;
+    padding: 0;
+}

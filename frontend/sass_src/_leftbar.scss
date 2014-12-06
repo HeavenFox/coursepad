@@ -1,0 +1,96 @@
+#sidebar {
+    position: absolute;
+    color: #b4b4b4;
+    overflow-x: hidden;
+    width: $leftbar-width-collapsed;
+    white-space: nowrap;
+    transition: width 0.3s;
+}
+
+#main-container.schedules-open #sidebar {
+    width: $leftbar-width-expanded;
+}
+
+#sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#sidebar li {
+    font-size: 14px;
+    width: $leftbar-width-expanded;
+
+    display: flex;
+    align-items: center;
+}
+
+#sidebar li:hover {
+    background-color: black;
+}
+
+.schedule-logo {
+    display: block;
+    padding: 6px 12px;
+}
+
+#sidebar h3 {
+    margin: 2px 7px;
+    font-size: 12px;
+    color: #929292;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+#sidebar li input {
+    width: 100%;
+    background-color: black;
+    color: inherit;
+    border: 1px solid #b4b4b4;
+    font: inherit;
+    outline: none;
+    &:focus {
+        border: 1px solid white;
+    }
+}
+
+.schedule-listing-edit-opts {
+    padding-right: 7px;
+    padding-left: 2px;
+}
+
+.schedule-listing-edit-opts > .glyphicon {
+    font-size: 12px;
+    margin-left: 6px;
+}
+
+.schedule-listing-edit-opts > .edit {
+    width: 12px;
+    height: 12px;
+    @include centered-img-with-size('leftbar-edit', 12px, 12px);
+}
+
+.schedule-listing-edit-opts > .save {
+    width: 12px;
+    height: 12px;
+    @include centered-img-with-size('leftbar-save', 12px, 12px);
+}
+
+.schedule-listing-content {
+    flex-grow: 1;
+}
+
+#main-container.schedules-open #sidebar h3 {
+    opacity: 1;
+}
+
+.schedule-logo.add {
+    width: 18px;
+    height: 18px;
+    margin-left: -1px;
+    @include centered-img-with-size('leftbar-add', 18px, 18px);
+}
+
+#main-container.schedules-open #main {
+    margin-left: $leftbar-width-expanded;
+}

@@ -1,0 +1,33 @@
+
+.clickable {
+    cursor: pointer;
+}
+
+.clearboth {
+    clear: both;
+}
+
+
+#loading {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 100px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;;
+    background-color: white;
+    border: 1px solid #ccc;
+    margin: -15px 0 0 -50px;
+    z-index: 99;
+}
+
+.hidden {
+    display: none;
+}
+
+.btnish, .btn {
+    @include no-user-interaction;
+    cursor: pointer;
+    touch-action: manipulation;
+}

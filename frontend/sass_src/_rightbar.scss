@@ -1,0 +1,178 @@
+.basic-info-container {
+    height: 100px;
+    padding: 1px;
+}
+
+.basic-info-container .basic-info-stats {
+    margin-top: 16px;
+}
+
+.basic-info-container.conflicts .basic-info-stats {
+    margin-top: 0;
+}
+
+.basic-info-conflict-container {
+    height: 38px;
+}
+
+.basic-info-conflict {
+    margin-left: 10px;
+    color: #ff8d8d;
+    cursor: pointer;
+}
+
+.basic-info-conflict > p {
+    margin: 0;
+}
+
+.basic-info {
+    display: inline-block;
+    width: 80px;
+    margin: 5px;
+    text-align: center;
+    @media (max-width: #{$small-screen-cutoff}) {
+        width: 60px;
+        margin: 2px;
+    }
+}
+
+.basic-info:first-child {
+    margin-left: 20px;
+    @media (max-width: #{$small-screen-cutoff}) {
+        margin-left: 5px;
+    }
+}
+
+.basic-info-value {
+    font-size: 36px;
+    font-weight: 400;
+    margin: 3px;
+
+    @media (max-width: #{$small-screen-cutoff}) {
+        font-size: 24px;
+    }
+}
+
+.basic-info-container.conflicts .basic-info-value {
+    font-size: 24px;
+
+}
+
+.basic-info-title {
+    font-size: 12px;
+    margin: 3px;
+}
+
+
+.utilities-item > h2 {
+    text-transform: uppercase;
+    font-size: 16px;
+    color: #666;
+    margin: 18px 10px 10px 10px;
+}
+
+.tools.utilities-item ul {
+    list-style: none;
+    font-size: 14px;
+    padding: 0;
+    margin: 5px 5px 5px 20px;
+}
+
+.tools.utilities-item a {
+    color: black;
+    text-decoration: none;
+}
+
+.tools.utilities-item a:hover {
+    text-decoration: underline;
+}
+
+.basket-item {
+    padding: 5px;
+    margin: 10px;
+}
+
+.basket-item.invisible {
+    color: #aaa;
+}
+
+.basket-item .content-buttons {
+    float: right;
+    margin-left: 5px;
+    @include no-user-interaction;
+}
+
+@media (max-width: #{$small-screen-cutoff}) {
+    .basket-item .content-buttons {
+        display: none;
+    }
+
+    .basket-item:hover .content-buttons {
+        display: block;
+    }
+}
+
+.basket-item .content {
+}
+
+.basket-item .content-title {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    margin-right: 0px;
+}
+
+.basket-item .content-buttons .btn {
+    cursor: pointer;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin: 0 1px;
+}
+
+.basket-item .content-buttons .menu-btn {
+    @include centered-img-with-size('basket_menu', 16px, 16px);
+    margin-right: 3px;
+}
+
+.basket-item .content-buttons .visibility-btn {
+    @include centered-img-with-size('basket_eye_open', 16px, 16px);
+}
+
+.basket-item .content-buttons .visibility-btn.closed {
+    @include centered-img-with-size('basket_eye_closed', 16px, 16px);
+}
+
+.basket-item .content-buttons .expand-btn {
+    @include centered-img-with-size('basket_tri_closed', 16px, 16px);
+}
+
+.basket-item .content-buttons .expand-btn.expanded {
+    @include centered-img-with-size('basket_tri_open', 16px, 16px);
+}
+
+.basket-item .content.level-2 {
+    margin: 5px 0 5px 12px;
+}
+
+.selected-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 3px;
+    margin-left: -10px;
+    background-color: gray;
+}
+.selected-indicator.selectable {
+    cursor: pointer;
+}
+
+.selected-indicator.selected {
+    background-color: green;
+}
+
+@each $name, $color in $palette {
+    .basket-item.#{$name} {
+        border-left: 3px solid $color;
+    }
+}
