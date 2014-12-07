@@ -12,7 +12,6 @@ var Sidebar = React.createClass({
         return <div>
             <BasicInfo />
             <Basket />
-            <Magic />
             <Tools />
         </div>
     }
