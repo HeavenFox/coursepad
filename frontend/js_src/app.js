@@ -10,6 +10,7 @@ var schedules = require('./store/schedules.js');
 
 var magic = require('./magic/magic.js');
 var TermSelector = require('./components/TermSelector.react.js');
+var User = require('./components/User.react.js');
 var LeftBar = require('./components/LeftBar.react.js');
 var humanize = require('./consts/humanize.js');
 
@@ -23,6 +24,7 @@ React.render(<Calendar />, document.getElementById('calendar'));
 React.render(<SearchBar />, document.getElementById('topsearch'));
 React.render(<Sidebar />, document.getElementById('utilities'));
 React.render(<TermSelector />, document.getElementById('term-selector'));
+React.render(<User />, document.getElementById('current-user'));
 React.render(<LeftBar />, document.getElementById('sidebar'));
 
 welcome();

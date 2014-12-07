@@ -4,6 +4,9 @@ header {
     padding: 0;
     height: $topbar-height;
     color: white;
+
+    display: flex;
+    align-items: center;
 }
 
 #logo {
@@ -23,21 +26,26 @@ header {
     }
 
     float: left;
+    order: 1;
 }
 
 #topnav {
     float: right;
     margin-right: 15px;
+    display: flex;
+    align-items: center;
+    order: 3;
 }
 
-#topnav div {
+/*#topnav div {
     line-height: $topbar-height;
-}
+}*/
 
 /* Search */
 #topsearch {
-    margin-left: 180px;
-    margin-right: 250px;
+    order: 2;
+    flex-grow: 1;
+    margin-left: 50px;
 }
 
 #topsearch input {
@@ -48,8 +56,6 @@ header {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: 300;
     padding: 5px;
-    margin-left: 50px;
-    margin-top: ($topbar-height - 30px) / 2;
 }
 
 .ui-autocomplete {
@@ -85,4 +91,26 @@ header {
     font-style: normal;
     font-weight: 500;
     text-decoration: underline;
+}
+
+/* -------------------------------- */
+/* User */
+
+#current-user {
+    margin-left: 16px;
+}
+
+.current-user-inner > span {
+    display: flex;
+    align-items: center;
+}
+
+.topbar-user-icon {
+    box-shadow: 0px 0px 5px 0px rgba(255,255,255,0.85);
+    background-image: url('../img/mystery-man.jpg');
+    background-size: cover;
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    margin-right: 8px;
 }
