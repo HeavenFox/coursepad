@@ -52,6 +52,9 @@ gulp.task('js', function() {
         .pipe(webpack(webpack_conf()))
         .pipe(DEV ? sourcemaps.write() : gutil.noop())
         .pipe(DEV ? gutil.noop() : uglify({
+                mangle: {
+                    except: ['GeneratorFunction']
+                },
                 compress: {
                     drop_console: true,
                     global_defs: {PROD: true}
