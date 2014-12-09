@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/vharitonsky/iniflags"
 	"github.com/zenazn/goji"
 	"server/sync"
 	"server/termdb"
@@ -10,7 +11,7 @@ import (
 
 func main() {
 	fn := flag.String("termdb", "", "Term DB Location")
-	flag.Parse()
+	iniflags.Parse()
 
 	termdb.LoadDatabase(*fn)
 

@@ -1,8 +1,11 @@
 var EventEmitter = require('event-emitter');
 var localStore = require('../persist/localStorage.js');
 var endpoints = require('../consts/endpoints.js');
+var ajax = require('../utils/ajax.js');
 
 const LATEST_VERSION = 1;
+
+var remoteMetaPromise = null;
 
 var meta = EventEmitter({
     getSelectedTerm: function() {
@@ -40,18 +43,17 @@ var meta = EventEmitter({
         localStore.fsync('terms');
     },
 
-    getRemoteTerms: function() {
-        return this.getRemoteMeta().then(function(data) {
+    getRemoteTerms: function(noCache) {
+        return this.getRemoteMeta(noCache).then(function(data) {
             return data.roster_time;
         })
     },
 
-    getRemoteMeta: function() {
-        return new Promise(function(resolve, reject) {
-            $.get(endpoints.db('meta.json'), function(data) {
-                resolve(data);
-            });
-        });
+    getRemoteMeta: function(noCache) {
+        if (noCache || remoteMetaPromise === null) {
+            remoteMetaPromise = ajax.getJson(endpoints.db('meta.json'));
+        }
+        return remoteMetaPromise;
     },
 
     upgradeSchema: function() {

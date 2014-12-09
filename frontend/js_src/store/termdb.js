@@ -366,12 +366,16 @@ function getCurrentTerm() {
     return currentTermDB;
 }
 
-function loadTerm(term, progress) {
+async function loadTerm(term, progress) {
     if (!progress) progress = function(){};
-    // Download
-    return new Promise(function(resolve, reject) {
+    // Download meta
+    var remoteTerms = await meta.getRemoteTerms();
+    if (!remoteTerms || !remoteTerms[term]) {
+        throw new Error('invalid term');
+    }
+    await new Promise(function(resolve, reject) {
         $.ajax({
-            url: endpoints.db('term_db_' + term + '.json'),
+            url: endpoints.db('termdb_' + term + '_' + remoteTerms[term] +  '.json'),
             beforeSend: function(jqXHR) {
 
             },
@@ -427,6 +431,8 @@ function loadTerm(term, progress) {
             dataType: 'json'
         });
     });
+
+    return true;
 }
 
 function checkForUpdates() {
