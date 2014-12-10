@@ -2,12 +2,15 @@ package termdb
 
 import (
 	"encoding/json"
+	"flag"
 	"github.com/zenazn/goji/web"
 	"io/ioutil"
 	"net/http"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type ClassMeetingJson struct {
@@ -72,7 +75,7 @@ func (db *TermDatabaseJson) LoadJson(dat []byte) error {
 		if _, ok := cache[course_key]; !ok {
 			cache[course_key] = true
 			item := IndexItem{
-				Title:   course_key + ": " + course.Title,
+				Title:   course.Subject + strconv.Itoa(course.Number) + ": " + course.Title,
 				Subject: course.Subject,
 				Number:  course.Number,
 			}
@@ -119,22 +122,66 @@ func (db TermDatabaseJson) GetBasket(basket []string) [][]*CourseJson {
 	return result
 }
 
-var a TermDatabaseJson
+type TermDBRepository struct {
+	DB   map[string]*TermDatabaseJson
+	Lock sync.RWMutex
+}
 
-func LoadDatabase(url string) {
-	js, err := ioutil.ReadFile(url)
+func (db TermDBRepository) Get(term string) (*TermDatabaseJson, bool) {
+	db.Lock.RLock()
+	defer db.Lock.RUnlock()
+	val, ok := db.DB[term]
+	return val, ok
+}
+
+var repo = TermDBRepository{DB: make(map[string]*TermDatabaseJson)}
+
+type MetaInfo struct {
+	RosterTime map[string]int `json:"roster_time"`
+}
+
+var termdbLocation *string
+
+func init() {
+	termdbLocation = flag.String("datapath", "", "Data Dir Location")
+}
+
+func LoadDatabase() error {
+	metaJson, err := ioutil.ReadFile(path.Join(*termdbLocation, "meta.json"))
 	if err != nil {
-		panic(err)
+		return err
 	}
-	err = a.LoadJson(js)
+	meta := MetaInfo{}
+	err = json.Unmarshal(metaJson, &meta)
 	if err != nil {
-		panic(err)
+		return err
 	}
+
+	repo.Lock.Lock()
+	defer repo.Lock.Unlock()
+	for term, time := range meta.RosterTime {
+		db := new(TermDatabaseJson)
+		content, err := ioutil.ReadFile(path.Join(*termdbLocation, "termdb_"+term+"_"+strconv.Itoa(time)+".json"))
+		if err != nil {
+			return err
+		}
+		if err := db.LoadJson(content); err != nil {
+			return err
+		}
+		repo.DB[term] = db
+	}
+	return nil
 }
 
 func BasketHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	r.ParseForm()
+
+	db, ok := repo.Get(c.URLParams["term"])
+	if !ok {
+		w.WriteHeader(404)
+		return
+	}
 
 	var basket string
 	if classes := r.Form["classes"]; len(classes) >= 1 {
@@ -142,7 +189,7 @@ func BasketHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	} else {
 		panic("No Query")
 	}
-	data, err := json.Marshal(a.GetBasket(strings.Split(basket, "|")))
+	data, err := json.Marshal(db.GetBasket(strings.Split(basket, "|")))
 	if err != nil {
 		panic("Unknown")
 	}
@@ -153,13 +200,19 @@ func SearchHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	r.ParseForm()
 
+	db, ok := repo.Get(c.URLParams["term"])
+	if !ok {
+		w.WriteHeader(404)
+		return
+	}
+
 	var query string
 	if queries := r.Form["q"]; len(queries) >= 1 {
 		query = queries[0]
 	} else {
 		panic("No Query")
 	}
-	data, err := json.Marshal(a.SearchByKeyword(query))
+	data, err := json.Marshal(db.SearchByKeyword(query))
 	if err != nil {
 		panic("Unknown")
 	}

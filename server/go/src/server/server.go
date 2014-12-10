@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"github.com/vharitonsky/iniflags"
 	"github.com/zenazn/goji"
 	"server/sync"
@@ -10,10 +9,11 @@ import (
 )
 
 func main() {
-	fn := flag.String("termdb", "", "Term DB Location")
 	iniflags.Parse()
-
-	termdb.LoadDatabase(*fn)
+	err := termdb.LoadDatabase()
+	if err != nil {
+		panic(err)
+	}
 
 	goji.Get("/endpoints/termdb/:term/search", termdb.SearchHandler)
 	goji.Get("/endpoints/termdb/:term/basket", termdb.BasketHandler)
