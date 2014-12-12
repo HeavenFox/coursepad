@@ -155,7 +155,7 @@ var Calendar = React.createClass({
 
         var meetings = [];
         this.state.meetings.forEach(function(meeting) {
-            meetings.push(SingleMeeting(meeting));
+            meetings.push(React.createElement(SingleMeeting, meeting));
         });
 
         var fullWeek = this.state.needWeekend;

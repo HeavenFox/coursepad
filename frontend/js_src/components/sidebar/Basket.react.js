@@ -154,7 +154,7 @@ var Basket = React.createClass({
 
                 var courseTitle = number + ": " + cluster[0].title;
 
-                return <div className={"basket-item " + className}>
+                return <div className={"basket-item " + className} key={number}>
                     <div className="content">
                         <div className="content-buttons">
                             <div aria-role="button" className="btn menu-btn" onClick={this._toggleMenu.bind(null, number)}></div>

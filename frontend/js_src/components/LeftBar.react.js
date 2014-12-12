@@ -6,11 +6,11 @@ var ScheduleIcon = React.createClass({
         var color = this.props.color;
         var fill = this.props.fill ? color : 'transparent';
         return <svg className="schedule-logo" width="17" height="17" version="1.1" xmlns="http://www.w3.org/2000/svg">
-          <rect x="0.5" y="0.5" width="16" height="4" fill={fill} stroke={color} stroke-width="1" />
-          <rect x="0.5" y="6.5" width="7" height="4" fill={fill} stroke={color} stroke-width="1" />
-          <rect x="0.5" y="12.5" width="7" height="4" fill={fill} stroke={color} stroke-width="1" />
-          <rect x="9.5" y="6.5" width="7" height="4" fill={fill} stroke={color} stroke-width="1" />
-          <rect x="9.5" y="12.5" width="7" height="4" fill={fill} stroke={color} stroke-width="1" />
+          <rect x="0.5" y="0.5" width="16" height="4" fill={fill} stroke={color} strokeWidth="1" />
+          <rect x="0.5" y="6.5" width="7" height="4" fill={fill} stroke={color} strokeWidth="1" />
+          <rect x="0.5" y="12.5" width="7" height="4" fill={fill} stroke={color} strokeWidth="1" />
+          <rect x="9.5" y="6.5" width="7" height="4" fill={fill} stroke={color} strokeWidth="1" />
+          <rect x="9.5" y="12.5" width="7" height="4" fill={fill} stroke={color} strokeWidth="1" />
         </svg>;
     }
 });
@@ -84,9 +84,9 @@ var ScheduleLine = React.createClass({
         var editing = [];
 
         if (this.state.editing && !this.props.isCurrent && !this.props.editing) {
-            editing.push(<div onClick={this._onDelete} className="glyphicon glyphicon-trash clickable" />);
+            editing.push(<div key="del" onClick={this._onDelete} className="glyphicon glyphicon-trash clickable" />);
         }
-        editing.push(<div onClick={this.state.editing ? this._onSave : this._onEdit} className={(this.state.editing ? "glyphicon-floppy-disk" : "glyphicon-pencil") + " glyphicon clickable"} />);
+        editing.push(<div key="save" onClick={this.state.editing ? this._onSave : this._onEdit} className={(this.state.editing ? "glyphicon-floppy-disk" : "glyphicon-pencil") + " glyphicon clickable"} />);
         return <li onClick={this.state.editing ? null : this._onClick} className={this.state.editing ? "" : "btnish"}>
                 <ScheduleIcon color={this.props.color} fill={this.props.isCurrent} />
                 <div className="schedule-listing-content">{content}</div>
