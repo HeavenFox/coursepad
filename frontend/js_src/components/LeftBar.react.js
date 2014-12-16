@@ -1,4 +1,5 @@
 var schedules = require('../store/schedules.js');
+var ana = require('../analytics/analytics.js');
 
 var ScheduleIcon = React.createClass({
     render: function() {
@@ -128,6 +129,7 @@ var LeftBar = React.createClass({
 
     _saveNewSchedule: function(name, color) {
         schedules.addSchedule(name, color);
+        ana.sevent('multischedule', 'add', schedules.numberOfSchedules());
         this.setState({creating: false});
     },
 
@@ -137,10 +139,12 @@ var LeftBar = React.createClass({
 
     _onClick: function(index) {
         schedules.setCurrentSchedule(undefined, index);
+        ana.sevent('multischedule', 'switch', index);
     },
 
     _onDelete: function(index) {
         schedules.deleteSchedule(index);
+        ana.sevent('multischedule', 'delete', schedules.numberOfSchedules());
     },
 
     _onCancelAdd: function() {

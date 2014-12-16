@@ -110,20 +110,23 @@ var store = EventEmitter({
 
         localStore.fsync(storageKey);
 
-        if (result.emit) {
-            this.emit(result.emit);
+        if (result !== undefined) {
+            return result;
         }
+    },
 
-        if (result.value) {
-            return result.value;
-        }
+    numberOfSchedules: function() {
+        return this.withStorageList(function(list) {
+            return list.length;
+        });
     },
 
     renameSchedule: function(index, name) {
         this.withStorageList(function(list) {
             list[index].name = name;
-            return {emit: 'listchange'};
         });
+
+        this.emit('listchange');
     },
 
     deleteSchedule: function(index) {
@@ -136,22 +139,20 @@ var store = EventEmitter({
             if (index < currentSchedule.index) {
                 currentSchedule.index--;
             }
-            return {emit: 'listchange'};
         }, this);
+
+        this.emit('listchange');
     },
 
     addSchedule: function(name, scheduleColor) {
-        var schedule = this.getCurrentSchedule();
-        var storageKey = schedule.term + '_schedules';
-        var list = localStore.get(storageKey, Array);
-
-        list.push({
-            color: scheduleColor,
-            name: name,
-            uniqueId: Math.floor(Math.random() * 0xFFFFFFFF)
+        this.withStorageList(function(list) {
+            list.push({
+                color: scheduleColor,
+                name: name,
+                uniqueId: Math.floor(Math.random() * 0xFFFFFFFF)
+            });
         });
 
-        localStore.fsync(storageKey);
         this.emit('listchange');
     },
 
