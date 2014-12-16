@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/vharitonsky/iniflags"
 	"github.com/zenazn/goji"
+	"server/sharing"
 	"server/sync"
 	"server/termdb"
 	"server/user"
@@ -20,5 +21,6 @@ func main() {
 	goji.Get("/endpoints/sync", sync.Handler)
 
 	goji.Get("/endpoints/user/signin/:method", user.UserSigninHandler)
+	goji.Post("/endpoints/sharing/share", sharing.ShareHandler)
 	goji.Serve()
 }

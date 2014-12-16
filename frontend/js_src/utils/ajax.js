@@ -13,15 +13,32 @@ function ajax(settings) {
     });
 }
 
-function getJson(url) {
-    var settings = {
+function getJson(url, options) {
+    if (options === undefined) {
+        options = {};
+    }
+    var settings = $.extend({
         url: url,
         dataType: 'json'
+    }, options);
+    return ajax(settings);
+}
+
+function post(url, data, options) {
+    if (options === undefined) {
+        options = {};
     }
+    var settings = $.extend({
+        method: 'POST',
+        url: url,
+        data: data,
+        dataType: 'json'
+    }, options);
     return ajax(settings);
 }
 
 module.exports = {
     ajax: ajax,
-    getJson: getJson
+    getJson: getJson,
+    post: post
 }

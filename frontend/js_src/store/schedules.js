@@ -55,6 +55,7 @@ var store = EventEmitter({
     },
 
     getCurrentSchedule: function() {
+        if (!this.ready) { return null; }
         return this.currentSchedule;
     },
 
@@ -538,16 +539,30 @@ Schedule.prototype.getColorForCourse = function(subject, number) {
     return this.colorMapping[subject + ' ' + number];
 };
 
-Schedule.prototype.serializeSections = function() {
-    return this.sections.map(function(section) {
+Schedule.prototype.serializeSections = function(sections) {
+    return sections.map(function(section) {
         return section.number;
     });
 };
 
-Schedule.prototype.serializeBasket = function() {
-    return this.basket.map(function(courses) {
+Schedule.prototype.serializeBasket = function(basket) {
+    return basket.map(function(courses) {
         return courses[0].subject + ' ' + courses[0].number;
     });
+};
+
+Schedule.prototype.serializeScheduleForSharing = function() {
+    var persist = {};
+    persist['sections'] = this.serializeSections(this.getVisibleSections());
+    persist['basket'] = this.serializeBasket(this.getVisibleClusters());
+    persist['colorMapping'] = {};
+    for (var course in this.colorMapping) {
+        if (this.colorMapping.hasOwnProperty(course) && !this.hidden[course]) {
+            persist['colorMapping'][course] = this.colorMapping[course];
+        }
+    }
+
+    return persist;
 };
 
 Schedule.prototype.persistSections = function() {
@@ -555,8 +570,8 @@ Schedule.prototype.persistSections = function() {
         localStore.get(this.getStoreKey(), Array)[this.index] = {};
     }
     var persist = localStore.get(this.getStoreKey())[this.index];
-    persist.sections = this.serializeSections();
-    persist.basket = this.serializeBasket();
+    persist.sections = this.serializeSections(this.sections);
+    persist.basket = this.serializeBasket(this.basket);
     persist.colorMapping = $.extend({}, this.colorMapping);
     persist.hidden = $.extend({}, this.hidden);
     persist.color = this.color;

@@ -15,7 +15,6 @@ var LeftBar = require('./components/LeftBar.react.js');
 var humanize = require('./consts/humanize.js');
 
 var welcome = require('./utils/welcome.js');
-var browser_check = require('./utils/browser-check.js');
 
 require('./utils/nuke.js');
 
@@ -28,7 +27,6 @@ React.render(<User />, document.getElementById('current-user'));
 React.render(<LeftBar />, document.getElementById('sidebar'));
 
 welcome();
-browser_check();
 meta.upgradeSchema();
 
 

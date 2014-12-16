@@ -34,7 +34,7 @@ var SingleMeeting = React.createClass({
     mixins: [CalendarElementMixin],
 
     componentDidMount: function() {
-        if (this._hasAlternative) {
+        if (this._mutable) {
             var self = this;
 
             $(this.refs['meeting'].getDOMNode()).draggable({
@@ -57,10 +57,10 @@ var SingleMeeting = React.createClass({
     },
 
     render: function() {
-        this._hasAlternative = !!schedules.getCurrentSchedule().getAlternateMeetings(this.props['meeting']).length;
+        this._mutable = !this.props.readOnly && !!schedules.getCurrentSchedule().getAlternateMeetings(this.props['meeting']).length;
 
         var classNames = 'meeting ' + this.getClassName();
-        if (this._hasAlternative) {
+        if (this._mutable) {
             classNames += ' mutable';   
         }
         if (this.props['length'] > this.longMeetingThreshold) {

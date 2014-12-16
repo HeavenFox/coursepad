@@ -33,7 +33,7 @@ var Calendar = React.createClass({
     },
 
     getInitialState: function() {
-        return {meetings: [], dropoffs: [], conflicts: [], needWeekend: false};
+        return {meetings: [], dropoffs: [], conflicts: [], needWeekend: false, readOnly: false};
     },
 
     componentDidMount: function() {
@@ -155,8 +155,9 @@ var Calendar = React.createClass({
 
         var meetings = [];
         this.state.meetings.forEach(function(meeting) {
+            meeting.readOnly = this.state.readOnly;
             meetings.push(React.createElement(SingleMeeting, meeting));
-        });
+        }, this);
 
         var fullWeek = this.state.needWeekend;
 

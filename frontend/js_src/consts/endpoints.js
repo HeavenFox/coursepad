@@ -26,6 +26,9 @@ module.exports = {
 
     userLogin: function(method, parameters) {
         return '/endpoints/user/signin/' + encodeURIComponent(method) + '?' + queryString(parameters);
-    }
+    },
 
+    share: function() {
+        return '/endpoints/sharing/share';
+    }
 }

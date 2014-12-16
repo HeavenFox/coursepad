@@ -59,6 +59,11 @@ type SearchResult struct {
 	Course [2]interface{} `json:"course"`
 }
 
+func IsValidTerm(term string) bool {
+	_, ok := repo.Get(term)
+	return ok
+}
+
 func (db *TermDatabaseJson) LoadJson(dat []byte) error {
 	err := json.Unmarshal(dat, db)
 	if err != nil {
