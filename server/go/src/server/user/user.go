@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"server/common/db"
 	"strconv"
 	"time"
 )
@@ -90,7 +91,7 @@ func rediskeyForUserId(s SessionId) string {
 }
 
 func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *UserBundle, error) {
-	db, err := sql.Open("postgres", "user=zhujingsi dbname=coursepad sslmode=disable")
+	conn := db.GetPostgresConn()
 
 	r.ParseForm()
 	accessToken := r.Form.Get("access_token")
@@ -117,13 +118,13 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 
 	userBundle := &UserBundle{}
 
-	err = db.QueryRow("SELECT id, slug, name, profile_picture FROM users WHERE fb_uid = $1", fqlResult.Id).Scan(&userBundle.Id, &userBundle.Slug, &userBundle.Name, &userBundle.ProfilePicture)
+	err = conn.QueryRow("SELECT id, slug, name, profile_picture FROM users WHERE fb_uid = $1", fqlResult.Id).Scan(&userBundle.Id, &userBundle.Slug, &userBundle.Name, &userBundle.ProfilePicture)
 	switch {
 	case err == sql.ErrNoRows:
 		var id int32
 		userBundle.ProfilePicture = facebookProfilePicture(fqlResult.Id)
 		userBundle.Name = fqlResult.Name
-		err = db.QueryRow("INSERT INTO users (name, profile_picture, fb_uid) VALUES ($1, $2, $3) RETURNING id",
+		err = conn.QueryRow("INSERT INTO users (name, profile_picture, fb_uid) VALUES ($1, $2, $3) RETURNING id",
 			userBundle.Name, userBundle.ProfilePicture, fqlResult.Id).Scan(&id)
 		if err != nil {
 			panic(err)

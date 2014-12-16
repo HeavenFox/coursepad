@@ -1,4 +1,5 @@
 var EventEmitter = require('event-emitter');
+var router = require('../router.js');
 var datetime = require('../utils/datetime.js');
 var conflicts = require('../model/course/conflicts.js');
 
@@ -9,24 +10,41 @@ var color = require('../utils/color.js');
 
 var ana = require('../analytics/analytics.js');
 
+const PREFER_LOCAL = 1;
+const PREFER_REMOTE = 2;
+const NO_PREFERENCE = 3;
+
+function maybeLoadTermDB(term, preference) {
+    var dbLoadedPromise;
+    if (term === undefined || (termdb.getCurrentTerm() && termdb.getCurrentTerm().term == term)) {
+        return null;
+    } else {
+        return termdb.setCurrentTerm(term);
+    }
+}
+
 var store = EventEmitter({
     ready: false,
     setCurrentSchedule: function(term, index) {
+        router.changePath('/');
+
+        var currentTermDB = termdb.getCurrentTerm();
         var self = this;
+
+        if (term === undefined) {
+            term = currentTermDB.term;
+        }
+        if (index === undefined) {
+            index = 0;
+        }
+
         if (this.currentSchedule) {
-            if ((term === undefined || this.currentSchedule.term === term) && 
-                (index === undefined || this.currentSchedule.index === index)) {
+            if ((this.currentSchedule.term === term) && 
+                (this.currentSchedule.index === index)) {
                 return Promise.resolve(false);
             }
             self.ready = false;
             self.emit('readystatechange');
-        }
-
-        if (term === undefined) {
-            term = this.currentSchedule.term;
-        }
-        if (index === undefined) {
-            index = 0;
         }
 
         var shouldCheckForUpdates = false;
@@ -40,7 +58,7 @@ var store = EventEmitter({
         }
 
         return dbLoadedPromise.then(function() {
-            self.currentSchedule = new Schedule();
+            self.currentSchedule = new MutableSchedule();
             self.currentSchedule.term = term;
             self.currentSchedule.index = index;
 
@@ -52,6 +70,27 @@ var store = EventEmitter({
                 termdb.checkForUpdates();
             }
         });
+    },
+
+    setSharedSchedule: async function(term, serialized) {
+        if (this.ready) {
+            this.ready = false;
+            this.emit('readystatechange');
+        }
+
+        var db = termdb.getRemoteTerm(term);
+
+        var schedule = new SharedSchedule();
+        schedule.term = term;
+        schedule.getTermDB = function() {
+            return db;
+        }
+
+        await schedule.deserialize(serialized);
+
+        this.currentSchedule = schedule;
+        this.ready = true;
+        this.emit('readystatechange');
     },
 
     getCurrentSchedule: function() {
@@ -161,7 +200,7 @@ var store = EventEmitter({
         if (!schedule) {
             return null;
         }
-        var storageKey = schedule.term + '_schedules';
+        var storageKey = termdb.getCurrentTerm().term + '_schedules';
         var modified = false;
         var list = localStore.get(storageKey, Array);
         var result = list.map(function(item, index) {
@@ -178,7 +217,7 @@ var store = EventEmitter({
             return {
                 color: item['color'],
                 name: item['name'],
-                isCurrent: index === schedule.index,
+                isCurrent: schedule.isMutable && (index === schedule.index),
                 uniqueId: item['uniqueId']
             };
         });
@@ -220,17 +259,9 @@ function Schedule() {
     this._conflictCache = null;
 }
 
-Schedule.prototype.setVisibility = function(courseNumber, val) {
-    this.hidden[courseNumber] = !val;
-    this.persistSections();
-    this._onChange();
-}
-
-Schedule.prototype.toggleVisibility = function(courseNumber) {
-    this.setVisibility(courseNumber, !this.getVisibility(courseNumber));
-
-    ana.sevent('course', 'toggle_visibility', courseNumber);
-}
+Schedule.prototype.getTermDB = function() {
+    return termdb.getCurrentTerm();
+};
 
 Schedule.prototype.getVisibility = function(courseNumber) {
     return !this.hidden[courseNumber];
@@ -277,7 +308,296 @@ Schedule.prototype.findSectionInBasketByNumber = function(number) {
     return null;
 };
 
-Schedule.prototype.removeCourseByNumber = function(courseNumber) {
+Schedule.prototype.getColorForCourse = function(subject, number) {
+    return this.colorMapping[subject + ' ' + number];
+};
+
+Schedule.prototype.serializeSections = function(sections) {
+    return sections.map(function(section) {
+        return section.number;
+    });
+};
+
+Schedule.prototype.serializeBasket = function(basket) {
+    return basket.map(function(courses) {
+        return courses[0].subject + ' ' + courses[0].number;
+    });
+};
+
+/**
+ * @return {Promise}
+ */
+Schedule.prototype.termDBUpdated = function() {
+    var self = this;
+    this.persistSections();
+    return this.load().then(function() {
+        self._onChange();
+    })
+}
+
+Schedule.prototype.getSelectedCourseIdsHash = function() {
+    var result = Object.create(null);
+
+    this.sections.forEach(function(section) {
+        result[section.parent.id] = true;
+    })
+
+    return result;
+}
+
+Schedule.prototype.getSelectedSectionIdsHash = function() {
+    var result = Object.create(null);
+
+    this.sections.forEach(function(section) {
+        result[section.number] = true;
+    })
+
+    return result;
+}
+
+Schedule.prototype.getVisibleSections = function() {
+    return this.sections.filter(function(section) {
+        return !this.hidden[section.parent.getNumber()];
+    }, this);
+}
+
+Schedule.prototype.getConflictIntervals = function() {
+    if (this._conflictCache === null) {
+        var rawIntervals = [];
+        var visibleSections = this.getVisibleSections();
+        for (var i=0; i < visibleSections.length; i++) {
+            for (var j=0; j < i; j++) {
+                rawIntervals.push.apply(rawIntervals, conflicts.conflictIntervals(visibleSections[i].meetings, visibleSections[j].meetings));
+            }
+        }
+
+        this._conflictCache = conflicts.normalizeIntervals(rawIntervals);
+    }
+
+    return this._conflictCache;
+}
+
+Schedule.prototype.getBasicInfo = function() {
+    var visibleSections = this.getVisibleSections();
+    var courses = [];
+    visibleSections.forEach(function(section) {
+        for (var i=0; i < courses.length; i++) {
+            if (courses[i] === section.parent) {
+                return;
+            }
+        }
+        courses.push(section.parent);
+    });
+    var totalCredits = [0, 0];
+    var totalHours = 0;
+
+    courses.forEach(function(course) {
+        totalCredits[0] += course.units[0];
+        totalCredits[1] += (course.units.length > 1 ? course.units[1] : course.units[0]);
+    });
+
+    visibleSections.forEach(function(section) {
+        section.meetings.forEach(function(meeting) {
+            if (!meeting.startTime || !meeting.endTime) {
+                return;
+            }
+            totalHours += datetime.bitmaskToDay(meeting.pattern).length * 
+                            (datetime.timeStringToHour(meeting.endTime) - 
+                            datetime.timeStringToHour(meeting.startTime));
+
+        });
+    });
+
+    return {units: totalCredits, classes: courses.length, hours: totalHours};
+};
+
+
+Schedule.prototype.getAlternateMeetings = function(meeting, returntype) {
+    if (returntype === undefined) {
+        returntype = "difftime";
+    }
+    var alternatives = [];
+
+    var course = meeting.parent.parent;
+    var type = meeting.parent.type;
+
+    // Get cluster
+    var cluster = null;
+    if (type === course.getPrimarySectionType()) {
+        for (var i=0; i < this.basket.length; i++) {
+            var curCluster = this.basket[i];
+            if (curCluster[0].subject == course.subject && curCluster[0].number == course.number) {
+                cluster = curCluster;
+                break;
+            }
+        }
+    }
+
+    function hasSameTime(curMeeting) {
+        return curMeeting.pattern == meeting.pattern && curMeeting.startTime == meeting.startTime && curMeeting.endTime == meeting.endTime;
+    }
+
+    // Get other sections of the same course
+    meeting.parent.parent.sections[type].forEach(function(component) {
+        if (component == meeting.parent) {
+            return;
+        }
+        if (component.meetings.some(hasSameTime) == (returntype == "sametime")) {
+            alternatives.push.apply(alternatives, component.meetings);
+        }
+    });
+
+    // Get sections of other courses in the cluster
+    if (cluster && cluster.length > 1) {
+        cluster.forEach(function(curCourse) {
+            if (curCourse != course) {
+                curCourse.sections[type].forEach(function(component) {
+                    if (component.meetings.some(hasSameTime) == (returntype == "sametime")) {
+                        alternatives.push.apply(alternatives, component.meetings);
+                    }
+                });
+            }
+        });
+    }
+
+    return alternatives;
+};
+
+Schedule.prototype.deserialize = async function(serialized) {
+    var perfectDeserialization = true;
+
+    this.colorMapping = serialized.colorMapping || {};
+    this.hidden = serialized.hidden || {};
+
+    if (serialized.color) this.color = serialized.color;
+    if (serialized.name) this.name = serialized.name;
+    if (serialized.uniqueId) this.uniqueId = serialized.uniqueId;
+
+    var basket = serialized.basket ? serialized.basket.slice() : [];
+        
+    var clusters = await this.getTermDB().getBasket(basket);
+    this.basket = clusters;
+
+    var hasSection = {};
+    var courseByNumber = {};
+    clusters.forEach(function(cluster) {
+        hasSection[cluster[0].getNumber()] = {};
+    });
+    var serializedSections = serialized.sections || [];
+    this.sections = serializedSections.map(function(sectionId) {
+        for (var i=0; i < clusters.length; i++) {
+            for (var j=0; j < clusters[i].length; j++) {
+                var section = clusters[i][j].findSectionByNumber(sectionId);
+                if (section) {
+                    var courseNumber = clusters[i][j].getNumber();
+                    // Make sure there's only one component chosen per section type
+                    // And sections do not cross course boundary
+                    if (hasSection[courseNumber].hasOwnProperty(section.type) ||
+                        (courseByNumber[courseNumber] && courseByNumber[courseNumber]['id'] !== clusters[i][j]['id'])) {
+                        perfectDeserialization = false;
+                        console.warn("Section " + sectionId + " is a duplicate, or crossed boundary");
+                        return null;
+                    } else {
+                        hasSection[courseNumber][section.type] = true;
+                        courseByNumber[courseNumber] = clusters[i][j];
+                        return section;
+                    }
+                }
+            }
+        }
+        perfectDeserialization = false;
+        console.warn("Section " + sectionId + " is not found.");
+        return null;
+    }).filter(function(x) {
+        return x !== null;
+    });
+
+    clusters.forEach(function(cluster) {
+        var courseNumber = cluster[0].getNumber();
+        var course;
+        var addedSections = {};
+        if (courseByNumber[courseNumber]) {
+            course = courseByNumber[courseNumber];
+            addedSections = hasSection[courseNumber];
+        } else {
+            course = cluster[0];
+        }
+
+        for (var type in course.sections) {
+            if (course.sections.hasOwnProperty(type)) {
+                if (!addedSections.hasOwnProperty(type)) {
+                    this.sections.push(course.sections[type][0]);
+                    console.warn("Section type " + type + " does not have any sections");
+                    perfectDeserialization = false;
+                }
+            }
+        }
+    });
+
+
+    return perfectDeserialization;
+};
+
+Schedule.prototype.setSectionsWithClassNumbers = function(sections) {
+    var clusters = this.basket;
+    var hasSection = {};
+    var courseByNumber = {};
+    clusters.forEach(function(cluster) {
+        hasSection[cluster[0].getNumber()] = {};
+    });
+    
+    this.sections = sections.map(function(sectionId) {
+        for (var i=0; i < clusters.length; i++) {
+            for (var j=0; j < clusters[i].length; j++) {
+                var section = clusters[i][j].findSectionByNumber(sectionId);
+                if (section) {
+                    var courseNumber = clusters[i][j].getNumber();
+                    // Make sure there's only one component chosen per section type
+                    // And sections do not cross course boundary
+                    if (hasSection[courseNumber].hasOwnProperty(section.type) ||
+                        (courseByNumber[courseNumber] && courseByNumber[courseNumber]['id'] !== clusters[i][j]['id'])) {
+                        return null;
+                    } else {
+                        hasSection[courseNumber][section.type] = true;
+                        courseByNumber[courseNumber] = clusters[i][j];
+                        return section;
+                    }
+                }
+            }
+        }
+        console.warn("Section " + sectionId + " is not found.");
+        return null;
+    }).filter(function(x) {
+        return x !== null;
+    });
+
+    this._onChange();
+};
+
+function MutableSchedule() {
+    Schedule.call(this);
+
+    this.isMutable = true;
+}
+
+MutableSchedule.prototype = Object.create(Schedule.prototype);
+MutableSchedule.prototype.constructor = MutableSchedule;
+
+MutableSchedule.prototype.setVisibility = function(courseNumber, val) {
+    this.hidden[courseNumber] = !val;
+    this.persistSections();
+    this._onChange();
+}
+
+MutableSchedule.prototype.toggleVisibility = function(courseNumber) {
+    this.setVisibility(courseNumber, !this.getVisibility(courseNumber));
+
+    ana.sevent('course', 'toggle_visibility', courseNumber);
+}
+
+
+
+MutableSchedule.prototype.removeCourseByNumber = function(courseNumber) {
     for (var i=0; i < this.basket.length; i++) {
         if (this.basket[i].length && this.basket[i][0].getNumber() == courseNumber) {
             this.basket.splice(i, 1);
@@ -297,7 +617,7 @@ Schedule.prototype.removeCourseByNumber = function(courseNumber) {
     this._onChange();
 };
 
-Schedule.prototype.changeSection = function(toNumber, fromNumber) {
+MutableSchedule.prototype.changeSection = function(toNumber, fromNumber) {
     var toSection;
     var fromIndex;
 
@@ -398,13 +718,13 @@ Schedule.prototype.changeSection = function(toNumber, fromNumber) {
     return true;
 };
 
-Schedule.prototype.changeCourse = function(to, from) {
+MutableSchedule.prototype.changeCourse = function(to, from) {
     this._changeCourse(to, from);
     this.persistSections();
     this._onChange();
 };
 
-Schedule.prototype._changeCourse = function(toCourse, fromCourse) {
+MutableSchedule.prototype._changeCourse = function(toCourse, fromCourse) {
     var i, j;
     if (!isNaN(toCourse)) {
         toCourse = this.findCourseInBasketById(toCourse);
@@ -467,7 +787,7 @@ Schedule.prototype._changeCourse = function(toCourse, fromCourse) {
     this.sections = newSections;
 };
 
-Schedule.prototype.addCluster = function(cluster) {
+MutableSchedule.prototype.addCluster = function(cluster) {
     if (cluster.length === 0) {
         throw new Error('This class does not exist');
     }
@@ -497,7 +817,7 @@ Schedule.prototype.addCluster = function(cluster) {
 
 };
 
-Schedule.prototype.addCourse = function(subject, number) {
+MutableSchedule.prototype.addCourse = function(subject, number) {
     var self = this;
     var course;
     for (var i=0; i < this.basket.length; i++) {
@@ -511,7 +831,7 @@ Schedule.prototype.addCourse = function(subject, number) {
         // Mark this course as visible
         return Promise.resolve(false);
     } else {
-        return termdb.getCurrentTerm()
+        return this.getTermDB()
               .getCoursesBySubjectAndNumber(subject, number)
               .then(function(courses) {
 
@@ -530,28 +850,7 @@ Schedule.prototype.addCourse = function(subject, number) {
     }
 };
 
-Schedule.prototype.getStoreKey = function() {
-    return this.term + '_schedules';
-
-};
-
-Schedule.prototype.getColorForCourse = function(subject, number) {
-    return this.colorMapping[subject + ' ' + number];
-};
-
-Schedule.prototype.serializeSections = function(sections) {
-    return sections.map(function(section) {
-        return section.number;
-    });
-};
-
-Schedule.prototype.serializeBasket = function(basket) {
-    return basket.map(function(courses) {
-        return courses[0].subject + ' ' + courses[0].number;
-    });
-};
-
-Schedule.prototype.serializeScheduleForSharing = function() {
+MutableSchedule.prototype.serializeScheduleForSharing = function() {
     var persist = {};
     persist['sections'] = this.serializeSections(this.getVisibleSections());
     persist['basket'] = this.serializeBasket(this.getVisibleClusters());
@@ -565,7 +864,13 @@ Schedule.prototype.serializeScheduleForSharing = function() {
     return persist;
 };
 
-Schedule.prototype.persistSections = function() {
+
+MutableSchedule.prototype.getStoreKey = function() {
+    return this.term + '_schedules';
+
+};
+
+MutableSchedule.prototype.persistSections = function() {
     if (localStore.get(this.getStoreKey(), Array)[this.index] === undefined) {
         localStore.get(this.getStoreKey(), Array)[this.index] = {};
     }
@@ -580,95 +885,8 @@ Schedule.prototype.persistSections = function() {
     localStore.fsync(this.getStoreKey());
 };
 
-Schedule.prototype.getAlternateMeetings = function(meeting, returntype) {
-    if (returntype === undefined) {
-        returntype = "difftime";
-    }
-    var alternatives = [];
 
-    var course = meeting.parent.parent;
-    var type = meeting.parent.type;
-
-    // Get cluster
-    var cluster = null;
-    if (type === course.getPrimarySectionType()) {
-        for (var i=0; i < this.basket.length; i++) {
-            var curCluster = this.basket[i];
-            if (curCluster[0].subject == course.subject && curCluster[0].number == course.number) {
-                cluster = curCluster;
-                break;
-            }
-        }
-    }
-
-    function hasSameTime(curMeeting) {
-        return curMeeting.pattern == meeting.pattern && curMeeting.startTime == meeting.startTime && curMeeting.endTime == meeting.endTime;
-    }
-
-    // Get other sections of the same course
-    meeting.parent.parent.sections[type].forEach(function(component) {
-        if (component == meeting.parent) {
-            return;
-        }
-        if (component.meetings.some(hasSameTime) == (returntype == "sametime")) {
-            alternatives.push.apply(alternatives, component.meetings);
-        }
-    });
-
-    // Get sections of other courses in the cluster
-    if (cluster && cluster.length > 1) {
-        cluster.forEach(function(curCourse) {
-            if (curCourse != course) {
-                curCourse.sections[type].forEach(function(component) {
-                    if (component.meetings.some(hasSameTime) == (returntype == "sametime")) {
-                        alternatives.push.apply(alternatives, component.meetings);
-                    }
-                });
-            }
-        });
-    }
-
-    return alternatives;
-};
-
-Schedule.prototype.setSectionsWithClassNumbers = function(sections) {
-    var clusters = this.basket;
-    var hasSection = {};
-    var courseByNumber = {};
-    clusters.forEach(function(cluster) {
-        hasSection[cluster[0].getNumber()] = {};
-    });
-    
-    this.sections = sections.map(function(sectionId) {
-        for (var i=0; i < clusters.length; i++) {
-            for (var j=0; j < clusters[i].length; j++) {
-                var section = clusters[i][j].findSectionByNumber(sectionId);
-                if (section) {
-                    var courseNumber = clusters[i][j].getNumber();
-                    // Make sure there's only one component chosen per section type
-                    // And sections do not cross course boundary
-                    if (hasSection[courseNumber].hasOwnProperty(section.type) ||
-                        (courseByNumber[courseNumber] && courseByNumber[courseNumber]['id'] !== clusters[i][j]['id'])) {
-                        return null;
-                    } else {
-                        hasSection[courseNumber][section.type] = true;
-                        courseByNumber[courseNumber] = clusters[i][j];
-                        return section;
-                    }
-                }
-            }
-        }
-        console.warn("Section " + sectionId + " is not found.");
-        return null;
-    }).filter(function(x) {
-        return x !== null;
-    });
-
-    this._onChange();
-};
-
-Schedule.prototype.load = function() {
-    var self = this;
+MutableSchedule.prototype.load = async function() {
     var serialized = localStore.get(this.getStoreKey(), Array)[this.index];
     if (serialized === undefined) {
         this.basket = [];
@@ -678,163 +896,19 @@ Schedule.prototype.load = function() {
         return Promise.resolve(false);
     }
 
-    this.colorMapping = serialized.colorMapping || {};
-    this.hidden = serialized.hidden || {};
+    await this.deserialize(serialized);
 
-    if (serialized.color) this.color = serialized.color;
-    if (serialized.name) this.name = serialized.name;
-    if (serialized.uniqueId) this.uniqueId = serialized.uniqueId;
-
-    return Promise.resolve()
-    .then(function() {
-        var basket = serialized.basket ? serialized.basket.slice() : [];
-        
-        return termdb.getCurrentTerm().getBasket(basket);
-    }).then(function(clusters) {
-        self.basket = clusters;
-        var hasSection = {};
-        var courseByNumber = {};
-        clusters.forEach(function(cluster) {
-            hasSection[cluster[0].getNumber()] = {};
-        });
-        var serializedSections = serialized.sections || [];
-        self.sections = serializedSections.map(function(sectionId) {
-            for (var i=0; i < clusters.length; i++) {
-                for (var j=0; j < clusters[i].length; j++) {
-                    var section = clusters[i][j].findSectionByNumber(sectionId);
-                    if (section) {
-                        var courseNumber = clusters[i][j].getNumber();
-                        // Make sure there's only one component chosen per section type
-                        // And sections do not cross course boundary
-                        if (hasSection[courseNumber].hasOwnProperty(section.type) ||
-                            (courseByNumber[courseNumber] && courseByNumber[courseNumber]['id'] !== clusters[i][j]['id'])) {
-                            return null;
-                        } else {
-                            hasSection[courseNumber][section.type] = true;
-                            courseByNumber[courseNumber] = clusters[i][j];
-                            return section;
-                        }
-                    }
-                }
-            }
-            console.warn("Section " + sectionId + " is not found.");
-            return null;
-        }).filter(function(x) {
-            return x !== null;
-        });
-
-        clusters.forEach(function(cluster) {
-            var courseNumber = cluster[0].getNumber();
-            var course;
-            var addedSections = {};
-            if (courseByNumber[courseNumber]) {
-                course = courseByNumber[courseNumber];
-                addedSections = hasSection[courseNumber];
-            } else {
-                course = cluster[0];
-            }
-
-            for (var type in course.sections) {
-                if (course.sections.hasOwnProperty(type)) {
-                    if (!addedSections.hasOwnProperty(type)) {
-                        self.sections.push(course.sections[type][0]);
-                    }
-                }
-            }
-        });
-
-        self.persistSections();
-
-        return true;
-    });
-}
-
-/**
- * @return {Promise}
- */
-Schedule.prototype.termDBUpdated = function() {
-    var self = this;
     this.persistSections();
-    return this.load().then(function() {
-        self._onChange();
-    })
+
 }
 
-Schedule.prototype.getSelectedCourseIdsHash = function() {
-    var result = Object.create(null);
+function SharedSchedule() {
+    Schedule.call(this);
 
-    this.sections.forEach(function(section) {
-        result[section.parent.id] = true;
-    })
-
-    return result;
+    this.isShared = true;
 }
 
-Schedule.prototype.getSelectedSectionIdsHash = function() {
-    var result = Object.create(null);
-
-    this.sections.forEach(function(section) {
-        result[section.number] = true;
-    })
-
-    return result;
-}
-
-Schedule.prototype.getVisibleSections = function() {
-    return this.sections.filter(function(section) {
-        return !this.hidden[section.parent.getNumber()];
-    }, this);
-}
-
-Schedule.prototype.getConflictIntervals = function() {
-    if (this._conflictCache === null) {
-        var rawIntervals = [];
-        var visibleSections = this.getVisibleSections();
-        for (var i=0; i < visibleSections.length; i++) {
-            for (var j=0; j < i; j++) {
-                rawIntervals.push.apply(rawIntervals, conflicts.conflictIntervals(visibleSections[i].meetings, visibleSections[j].meetings));
-            }
-        }
-
-        this._conflictCache = conflicts.normalizeIntervals(rawIntervals);
-    }
-
-    return this._conflictCache;
-}
-
-Schedule.prototype.getBasicInfo = function() {
-    var visibleSections = this.getVisibleSections();
-    var courses = [];
-    visibleSections.forEach(function(section) {
-        for (var i=0; i < courses.length; i++) {
-            if (courses[i] === section.parent) {
-                return;
-            }
-        }
-        courses.push(section.parent);
-    });
-    var totalCredits = [0, 0];
-    var totalHours = 0;
-
-    courses.forEach(function(course) {
-        totalCredits[0] += course.units[0];
-        totalCredits[1] += (course.units.length > 1 ? course.units[1] : course.units[0]);
-    });
-
-    visibleSections.forEach(function(section) {
-        section.meetings.forEach(function(meeting) {
-            if (!meeting.startTime || !meeting.endTime) {
-                return;
-            }
-            totalHours += datetime.bitmaskToDay(meeting.pattern).length * 
-                            (datetime.timeStringToHour(meeting.endTime) - 
-                            datetime.timeStringToHour(meeting.startTime));
-
-        });
-    });
-
-    return {units: totalCredits, classes: courses.length, hours: totalHours};
-};
-
+SharedSchedule.prototype = Object.create(Schedule.prototype);
+SharedSchedule.prototype.constructor = SharedSchedule;
 
 module.exports = store;

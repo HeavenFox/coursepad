@@ -5,11 +5,14 @@ var meta = require('./meta.js');
 
 var ajax = require('../utils/ajax.js');
 
-var currentTermDB = null;
-
 var Course = require('../model/Course.js');
 
+const PREFER_REMOTE = 2;
+const PREFER_FASTER = 3;
 
+
+var currentTermDB = null;
+var currentPreference = PREFER_FASTER;
 
 function TermDatabase() {
     
@@ -310,56 +313,76 @@ function useLocal() {
     return window.indexedDB && !(navigator && navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') == -1);
 }
 
-function setCurrentTerm(term) {
-    if (currentTermDB !== null && currentTermDB.term === term) {
-        return Promise.resolve(false);
+function localTermDownloaded(term) {
+    return meta.getLocalTerms().hasOwnProperty(term);
+}
+
+function downloadLocalTerm(term) {
+    var db;
+    console.log('Using indexedDB');
+    var dbLoadedPromise;
+    if (localTermDownloaded(term)) {
+        dbLoadedPromise = Promise.resolve();
+    } else {
+        console.log("start downloading");
+        dbLoadedPromise = loadTerm(term);
+    }
+
+    return dbLoadedPromise.then(function() {
+        console.log("start loading");
+        db = new LocalTermDatabase();
+        db.term = term;
+        db.titleIndex = [];
+
+        return indexeddb.getByKey('title_typeahead_index', term);
+    })
+    .then(function(index) {
+        if (index !== undefined) {
+            db.setTitleIndex(index);
+        }
+
+        currentTermDB = db;
+
+        console.log("done");
+    });
+}
+
+function getRemoteTerm(term) {
+    var db = new RemoteTermDatabase();
+    db.term = term;
+
+    return db;
+}
+
+async function setCurrentTerm(term, preference) {
+    if (preference === undefined) {
+        preference = currentPreference;
+    }
+
+    if (preference === currentPreference && currentTermDB !== null && currentTermDB.term === term) {
+        return false
     }
 
     store.ready = false;
     store.emit('readystatechange');
 
-    var done = function() {
-        meta.setSelectedTerm(term);
-        store.ready = true;
-        store.emit('readystatechange');
-    };
+    // Use Remote Term to reduce latency
+    currentTermDB = getRemoteTerm(term);
 
-    if (useLocal()) {
-        console.log('Using indexedDB');
-        var dbLoadedPromise;
-        if (meta.getLocalTerms().hasOwnProperty(term)) {
-            dbLoadedPromise = Promise.resolve();
+    if (useLocal() && preference === PREFER_FASTER) {
+        if (localTermDownloaded(term)) {
+            // Downloaded, so we can just use it
+            await downloadLocalTerm(term);
         } else {
-            console.log("start downloading");
-            dbLoadedPromise = loadTerm(term);
+            // Kick off download, but don't wait for it
+            downloadLocalTerm(term);
         }
-
-        return dbLoadedPromise.then(function() {
-            console.log("start loading");
-            currentTermDB = new LocalTermDatabase();
-            currentTermDB.term = term;
-            currentTermDB.titleIndex = [];
-
-            return indexeddb.getByKey('title_typeahead_index', term);
-        })
-        .then(function(index) {
-            if (index !== undefined) {
-                currentTermDB.setTitleIndex(index);
-            }
-
-            console.log("done");
-            done();
-        });
-    } else {
-        console.log('Using remote term database');
-        currentTermDB = new RemoteTermDatabase();
-        currentTermDB.term = term;
-
-        done();
-        return Promise.resolve();
     }
 
 
+    meta.setSelectedTerm(term);
+    store.ready = true;
+    store.emit('readystatechange');
 }
 
 function getCurrentTerm() {
@@ -473,10 +496,15 @@ function checkForUpdates() {
 }
 
 var store = new EventEmitter({
+    PREFER_REMOTE: PREFER_REMOTE,
+    PREFER_FASTER: PREFER_FASTER,
+
     ready: false,
     setCurrentTerm: setCurrentTerm,
     getCurrentTerm: getCurrentTerm,
-    loadTerm: loadTerm,
+
+    getRemoteTerm: getRemoteTerm,
+
     checkForUpdates: function() {
         if (!useLocal()) {
             return;

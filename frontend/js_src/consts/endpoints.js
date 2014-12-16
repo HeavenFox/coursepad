@@ -30,5 +30,9 @@ module.exports = {
 
     share: function() {
         return '/endpoints/sharing/share';
+    },
+
+    shared: function(slug) {
+        return '/endpoints/sharing/shared/' + slug;
     }
 }

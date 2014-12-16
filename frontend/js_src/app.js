@@ -7,6 +7,7 @@ var Sidebar = require('./components/Sidebar.react.js');
 var termdb = require('./store/termdb.js');
 
 var schedules = require('./store/schedules.js');
+var termdb = require('./store/termdb.js');
 
 var magic = require('./magic/magic.js');
 var TermSelector = require('./components/TermSelector.react.js');
@@ -15,8 +16,12 @@ var LeftBar = require('./components/LeftBar.react.js');
 var humanize = require('./consts/humanize.js');
 
 var welcome = require('./utils/welcome.js');
+require('./controllers/update.js');
 
-require('./utils/nuke.js');
+var router = require('./router.js');
+
+var ajax = require('./utils/ajax.js');
+var endpoints = require('./consts/endpoints.js');
 
 
 React.render(<Calendar />, document.getElementById('calendar'));
@@ -29,8 +34,7 @@ React.render(<LeftBar />, document.getElementById('sidebar'));
 welcome();
 meta.upgradeSchema();
 
-
-function initCurrentSchedule() {
+function initCurrentTerm() {
     var currentTerm = meta.getSelectedTerm();
     var currentTermPromise;
 
@@ -44,17 +48,30 @@ function initCurrentSchedule() {
         });
     }
 
-    var currentScheduleIndex = meta.getScheduleIndex() || 0;
-
-    return currentTermPromise.then(function(term) {
-        return schedules.setCurrentSchedule(term, currentScheduleIndex);
-    });
+    return currentTermPromise;
 }
 
 
+var currentTermPromise = initCurrentTerm();
 
-require('./controllers/update.js');
-
-$(function() {
-    initCurrentSchedule();
+router.reg(/\/$/, function() {
+    var currentScheduleIndex = meta.getScheduleIndex() || 0;
+    return schedules.setCurrentSchedule(undefined, currentScheduleIndex);
+},
+function() {
+    return currentTermPromise.then(function(term) {
+        return termdb.setCurrentTerm(term, termdb.PREFER_FASTER);
+    });
 });
+
+router.reg(/\/shared\/([a-zA-Z0-9]+)$/, async function(slug) {
+    var shared = await ajax.getJson(endpoints.shared(slug));
+    await schedules.setSharedSchedule(shared['term'], shared['schedule']);
+},
+function() {
+    return currentTermPromise.then(function(term) {
+        return termdb.setCurrentTerm(term, termdb.PREFER_REMOTE);
+    });
+});
+
+router.init();

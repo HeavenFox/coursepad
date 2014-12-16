@@ -130,7 +130,7 @@ var Calendar = React.createClass({
             });
         });
 
-        this.setState({meetings: singleMeetings, conflicts: schedule.getConflictIntervals(), needWeekend: hasWeekend});
+        this.setState({meetings: singleMeetings, conflicts: schedule.getConflictIntervals(), needWeekend: hasWeekend, readOnly: !schedule.isMutable});
     },
 
     render: function() {

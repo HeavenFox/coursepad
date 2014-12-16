@@ -16,9 +16,11 @@ var SocialNetworks = React.createClass({
             return null;
         }
 
-        return <div>
+        return <div className="sharing-social-networks">
             <div className="fb-share-button" data-href={this.props.url} data-layout="button"></div>
-            <a href="https://twitter.com/share" className="twitter-share-button" data-url={this.props.url} data-text="Check out my schedule on @CoursePadme!" data-count="none">Tweet</a>
+            <div className="twitter-share-button">
+                <a href="https://twitter.com/share" className="twitter-share-button" data-url={this.props.url} data-text="Check out my schedule on @CoursePadme!" data-count="none">Tweet</a>
+            </div>
         </div>;
     }
 })
@@ -39,6 +41,10 @@ var Sharing = React.createClass({
 
     },
 
+    _back: function() {
+        this.setState({status: 'idle', url: null});
+    },
+
     render: function() {
         var shareButton;
         var failureMessage = null;
@@ -53,7 +59,7 @@ var Sharing = React.createClass({
             shareButton = <p>Sharing...</p>;
             break;
         case 'shared':
-            shareButton = <p>Shared</p>;
+            shareButton = <p>Shared. <span className="btnish" onClick={this._back}>(Back)</span></p>;
             break;
         }
         var url = null, social = null;
@@ -69,7 +75,7 @@ var Sharing = React.createClass({
 
         return <div className="sharing utilities-item">
         <h2>Sharing</h2>
-        <div>
+        <div className="sharing-inner">
             {[shareButton, failureMessage, url, social]}
         </div>
         </div>;

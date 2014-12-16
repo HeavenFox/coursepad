@@ -29,3 +29,7 @@ func Unauthenticated(w http.ResponseWriter, response string) {
 func Malformed(w http.ResponseWriter, response string) {
 	http.Error(w, response, 400)
 }
+
+func NotFound(w http.ResponseWriter, response string) {
+	http.Error(w, response, 404)
+}

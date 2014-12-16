@@ -54,6 +54,10 @@ var currentUser = null;
 var sessionId = null;
 
 var store = EventEmitter({
+    loggedIn: function() {
+        return currentUser !== null;
+    },
+
     getCurrentUser: function() {
         return currentUser;
     },

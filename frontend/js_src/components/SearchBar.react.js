@@ -6,19 +6,20 @@ var schedules = require('../store/schedules.js');
 
 var SearchBar = React.createClass({
     componentWillMount: function() {
-        schedules.on('readystatechange', this.termDBReadyStateChange);
+        schedules.on('readystatechange', this._readyStateChanged);
     },
 
     componentDidUnmount: function() {
-        schedules.off('readystatechange', this.termDBReadyStateChange);
+        schedules.off('readystatechange', this._readyStateChanged);
     },
 
-    termDBReadyStateChange: function() {
-        this.setState({available: schedules.ready});
+    _readyStateChanged: function() {
+        var curSchedule = schedules.getCurrentSchedule();
+        this.setState({available: schedules.ready, disabled: curSchedule && !curSchedule.isMutable});
     },
 
     getInitialState: function() {
-        return {available: schedules.ready};
+        return {available: schedules.ready, disabled: false};
     },
 
     renderItem: function(ul, item) {
@@ -66,7 +67,7 @@ var SearchBar = React.createClass({
         }).autocomplete("instance")._renderItem = this.renderItem;
     },
     render: function() {
-        return <input type="text" autoComplete="off" disabled={!this.state.available} placeholder={this.state.available ? "Search for Class (e.g. CS3110; Intro to Photography)" : "Loading Available Classes..."} />;
+        return <input type="text" autoComplete="off" disabled={!this.state.available || this.state.disabled} placeholder={this.state.available ? "Search for Class (e.g. CS3110; Intro to Photography)" : "Loading Available Classes..."} />;
     }
 });
 

@@ -1,6 +1,16 @@
+var user = require('../../store/user.js');
+
 var IfLoginStatus = React.createClass({
     getInitialState: function() {
-        return {loggedIn: true};
+        return {loggedIn: user.loggedIn()};
+    },
+
+    _update: function() {
+        this.setState({loggedIn: user.loggedIn()});
+    },
+
+    componentDidMount: function() {
+        user.on('loginstatuschange', this._update);
     },
 
     shouldComponentUpdate: function(nextProps, nextState) {
