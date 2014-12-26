@@ -4,6 +4,7 @@ var uglify = require('gulp-uglify');
 var sass = require('gulp-ruby-sass');
 var del = require('del');
 var jshint = require('gulp-jshint');
+var insert = require('gulp-insert');
 var react = require('gulp-react');
 var sourcemaps = require('gulp-sourcemaps');
 var gutil = require('gulp-util');
@@ -48,9 +49,8 @@ gulp.task('lint', function() {
 
 gulp.task('js', function() {
     gulp.src('js_src/app.js')
-        .pipe(DEV ? sourcemaps.init() : gutil.noop())
         .pipe(webpack(webpack_conf()))
-        .pipe(DEV ? sourcemaps.write() : gutil.noop())
+        .pipe(DEV ? insert.prepend('const PROD=false;\n') : gutil.noop())
         .pipe(DEV ? gutil.noop() : uglify({
                 mangle: {
                     except: ['GeneratorFunction']
