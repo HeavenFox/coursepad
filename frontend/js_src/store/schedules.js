@@ -19,7 +19,7 @@ function maybeLoadTermDB(term, preference) {
     if (term === undefined || (termdb.getCurrentTerm() && termdb.getCurrentTerm().term == term)) {
         return null;
     } else {
-        return termdb.setCurrentTerm(term);
+        return termdb.setCurrentTerm(term, termdb.PREFER_FASTER);
     }
 }
 
