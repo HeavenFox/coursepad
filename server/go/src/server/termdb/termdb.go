@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"path"
 	"regexp"
+	"server/common/httpcache"
 	"strconv"
 	"strings"
 	"sync"
@@ -175,11 +176,11 @@ type MetaInfo struct {
 var termdbLocation *string
 
 func init() {
-	termdbLocation = flag.String("datapath", "", "Data Dir Location")
+	termdbLocation = flag.String("termdbpath", "", "TermDB Data Dir Location")
 }
 
 func LoadDatabase() error {
-	metaJson, err := ioutil.ReadFile(path.Join(*termdbLocation, "meta.json"))
+	metaJson, err := ioutil.ReadFile(path.Join(*termdbLocation, "data_index", "meta.json"))
 	if err != nil {
 		return err
 	}
@@ -193,7 +194,7 @@ func LoadDatabase() error {
 	defer repo.Lock.Unlock()
 	for term, time := range meta.RosterTime {
 		db := new(TermDatabaseJson)
-		content, err := ioutil.ReadFile(path.Join(*termdbLocation, "termdb_"+term+"_"+strconv.Itoa(time)+".json"))
+		content, err := ioutil.ReadFile(path.Join(*termdbLocation, "data", "termdb_"+term+"_"+strconv.Itoa(time)+".json"))
 		if err != nil {
 			return err
 		}
@@ -207,6 +208,7 @@ func LoadDatabase() error {
 
 func BasketHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	httpcache.CachePublic(w, 5*60)
 	r.ParseForm()
 
 	db, ok := Get(c.URLParams["term"])
@@ -230,6 +232,7 @@ func BasketHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 func SearchHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	httpcache.CachePublic(w, 5*60)
 	r.ParseForm()
 
 	db, ok := Get(c.URLParams["term"])

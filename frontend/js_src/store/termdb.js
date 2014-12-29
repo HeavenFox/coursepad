@@ -466,7 +466,7 @@ function checkForUpdates() {
             var localTerms = meta.getLocalTerms();
             if (remoteTerms[term_id] > localTerms[term_id]) {
                 // Need upgrade
-                return ajax.getJson(endpoints.db('version_history.json')).then(function(history) {
+                return ajax.getJson(endpoints.dbIndex('version_history.json')).then(function(history) {
                     var timestamps = history['term_db'][term_id];
                     var index = timestamps.indexOf(localTerms[term_id]);
                     if (index < 0) {

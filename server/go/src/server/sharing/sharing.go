@@ -5,17 +5,19 @@ import (
 	"code.google.com/p/draw2d/draw2d"
 	"code.google.com/p/freetype-go/freetype/truetype"
 	"encoding/json"
+	"flag"
 	"github.com/lib/pq"
 	"github.com/zenazn/goji/web"
 	"image"
 	"image/color"
 	"image/png"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 	"os"
+	"path"
 	"server/common/db"
+	"server/common/httpcache"
 	"server/common/httperror"
 	"server/termdb"
 	"server/user"
@@ -64,6 +66,12 @@ var ColorPalette = map[string]color.Color{
 	"yellow":     premultiply(229, 234, 200, 0.75),
 }
 
+var dataLocation *string
+
+func init() {
+	dataLocation = flag.String("datapath", "", "Server Data Dir Location")
+}
+
 func strToTime(str string) float64 {
 	t, err := time.Parse("03:04PM", str)
 	if err != nil {
@@ -98,7 +106,7 @@ func DrawClass(gc *draw2d.ImageGraphicContext, x, y, w, h float64, c color.Color
 }
 
 func generateImage(meetings []singleMeeting) []byte {
-	fontBytes, err := ioutil.ReadFile("Roboto-Light.ttf")
+	fontBytes, err := ioutil.ReadFile(path.Join(*dataLocation, "sharing", "Roboto-Light.ttf"))
 	if err != nil {
 		panic(err)
 	}
@@ -107,7 +115,7 @@ func generateImage(meetings []singleMeeting) []byte {
 		panic(err)
 	}
 
-	sharing_logo_file, err := os.Open("sharing_logo.png")
+	sharing_logo_file, err := os.Open(path.Join(*dataLocation, "sharing", "sharing_logo.png"))
 	if err != nil {
 		panic(err)
 	}
@@ -157,7 +165,6 @@ func generateImage(meetings []singleMeeting) []byte {
 	const CLASS_START = 8
 
 	for _, meeting := range meetings {
-		log.Printf("course color %v", meeting.color)
 		DrawClass(context, calendarX+float64((CLASS_WIDTH+CLASS_GUTTER)*meeting.day), calendarY+(meeting.start-CLASS_START)*STRIPE_HEIGHT, CLASS_WIDTH, meeting.duration*STRIPE_HEIGHT, meeting.color, meeting.name, meeting.time)
 	}
 
@@ -167,6 +174,8 @@ func generateImage(meetings []singleMeeting) []byte {
 }
 
 func GetSharedImageHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "image/png")
+
 	key := c.URLParams["slug"]
 	conn := db.GetPostgresConn()
 
@@ -188,8 +197,6 @@ func GetSharedImageHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 			httperror.NotFound(w, "")
 			return
 		}
-
-		log.Printf("shared %v", shared)
 
 		splitMeetings := make([]singleMeeting, 0)
 
@@ -216,6 +223,7 @@ func GetSharedImageHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		httpcache.CachePublic(w, 5*24*60*60)
 		w.Write(generateImage(splitMeetings))
 	}
 }
@@ -235,6 +243,7 @@ func GetSharedHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
+		httpcache.CachePublic(w, 1*24*60*60)
 		w.Write(response)
 	}
 

@@ -14,16 +14,16 @@ $right-column-width-small: 200px;
 @import '_helpers';
 
 @import '_glyph';
-@import '_modal';
 
 @import '_leftbar';
-@import '_rightbar';
 @import '_schedule';
 @import '_topbar';
 @import '_footer';
 
-@import '_modal_windows';
-@import '_banner';
+#main {
+    padding: 12px;
+}
 
-@import '_jquery-ui';
-@import '_drop';
+#main h2 {
+    margin-top: 4px;
+}

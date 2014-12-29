@@ -51,7 +51,7 @@ var meta = EventEmitter({
 
     getRemoteMeta: function(noCache) {
         if (noCache || remoteMetaPromise === null) {
-            remoteMetaPromise = ajax.getJson(endpoints.db('meta.json'));
+            remoteMetaPromise = ajax.getJson(endpoints.dbIndex('meta.json'));
         }
         return remoteMetaPromise;
     },

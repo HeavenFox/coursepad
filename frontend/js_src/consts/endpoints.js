@@ -16,6 +16,10 @@ module.exports = {
         return '/static/data/' + path;
 	},
 
+    dbIndex: function(path) {
+        return '/static/data_index/' + path;
+    },
+
     termdbSearch: function(term, query) {
         return '/endpoints/termdb/' + encodeURIComponent(term) + '/search?q=' + encodeURIComponent(query);
     },

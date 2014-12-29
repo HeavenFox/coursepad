@@ -10,6 +10,9 @@ var sourcemaps = require('gulp-sourcemaps');
 var gutil = require('gulp-util');
 var postcss = require('gulp-postcss');
 var autoprefixer = require('autoprefixer-core');
+var rev = require('gulp-rev');
+var revCollector = require('gulp-rev-collector');
+var minifyHTML   = require('gulp-minify-html');
 
 var DEV = false;
 
@@ -39,8 +42,15 @@ function webpack_conf() {
     return conf;
 }
 
+function prod(t) {
+    if (DEV) {
+        return gutil.noop();
+    }
+    return t;
+}
+
 gulp.task('lint', function() {
-    gulp.src('./js_src/**/*.js')
+    return gulp.src('./js_src/**/*.js')
         .pipe(react())
         .pipe(jshint())
         .pipe(jshint.reporter('default'))
@@ -48,7 +58,7 @@ gulp.task('lint', function() {
 })
 
 gulp.task('js', function() {
-    gulp.src('js_src/app.js')
+    return gulp.src('js_src/app.js')
         .pipe(webpack(webpack_conf()))
         .pipe(DEV ? insert.prepend('const PROD=false;\n') : gutil.noop())
         .pipe(DEV ? gutil.noop() : uglify({
@@ -60,7 +70,10 @@ gulp.task('js', function() {
                     global_defs: {PROD: true}
                 }
              }))
-        .pipe(gulp.dest(target() + 'js/'));
+        .pipe(prod(rev()))
+        .pipe(gulp.dest(target() + 'js/'))
+        .pipe(prod(rev.manifest()))
+        .pipe(prod(gulp.dest( '/tmp/rev/js' )));
 });
 
 gulp.task('css', function() {
@@ -69,14 +82,17 @@ gulp.task('css', function() {
         sourcemap: DEV ? 'none' : 'none'
     };
 
-    gulp.src('sass_src/**/*.scss')
+    return gulp.src('sass_src/**/*.scss')
         .pipe(sass(sassConf))
         .pipe(postcss([autoprefixer({})]))
-        .pipe(gulp.dest(target() + 'css/'));
+        .pipe(prod(rev()))
+        .pipe(gulp.dest(target() + 'css/'))
+        .pipe( prod(rev.manifest()) )
+        .pipe( prod(gulp.dest( '/tmp/rev/css' )) );
 });
 
 gulp.task('static', function() {
-    gulp.src('static/**').pipe(gulp.dest(target()));
+    return gulp.src('static/**').pipe(gulp.dest(target()));
 });
 
 gulp.task('default', function() {
@@ -92,8 +108,23 @@ gulp.task('clean', function() {
     del(['_build/prod/**']);
 });
 
+gulp.task('rev-index', ['js', 'css', 'static'], function() {
+    return gulp.src(['/tmp/rev/**/*.json', target() + 'index.html'])
+        .pipe(revCollector({
+            replaceReved: true
+        }))
+        .pipe(gulp.dest(target()))
+});
+
+gulp.task('rev-static', ['rev-index'], function() {
+    return gulp.src(['/tmp/rev/**/*.json', target() + 'static/*.html'])
+        .pipe(revCollector({
+            replaceReved: true
+        }))
+        .pipe(gulp.dest(target() + 'static/'))
+});
+
 gulp.task('build', function() {
     DEV = false;
-    gulp.run('clean');
-    gulp.run('js', 'css', 'static');
+    gulp.run('rev-static');
 });
