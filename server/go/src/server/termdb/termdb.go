@@ -40,9 +40,11 @@ type CourseJson struct {
 }
 
 type TermDatabaseJson struct {
-	Roster            []CourseJson
-	titleIndex        []IndexItem
-	courseNumberIndex map[string][]*CourseJson
+	Roster              []CourseJson
+	titleIndex          []IndexItem
+	courseNumberIndex   map[string][]*CourseJson
+	classNumberIndex    map[int]*ClassComponentJson
+	classNumberToCourse map[int]*CourseJson
 }
 
 type IndexItem struct {
@@ -59,8 +61,22 @@ type SearchResult struct {
 	Course [2]interface{} `json:"course"`
 }
 
+func (c CourseJson) CourseKey() string {
+	return c.Subject + " " + strconv.Itoa(c.Number)
+}
+
+func (db TermDatabaseJson) GetCourseByClassNumber(classNo int) (*CourseJson, bool) {
+	r, ok := db.classNumberToCourse[classNo]
+	return r, ok
+}
+
+func (db TermDatabaseJson) GetComponentByClassNumber(classNo int) (*ClassComponentJson, bool) {
+	r, ok := db.classNumberIndex[classNo]
+	return r, ok
+}
+
 func IsValidTerm(term string) bool {
-	_, ok := repo.Get(term)
+	_, ok := Get(term)
 	return ok
 }
 
@@ -70,10 +86,21 @@ func (db *TermDatabaseJson) LoadJson(dat []byte) error {
 		return err
 	}
 	db.courseNumberIndex = make(map[string][]*CourseJson)
+	db.classNumberIndex = make(map[int]*ClassComponentJson)
+	db.classNumberToCourse = make(map[int]*CourseJson)
 	db.titleIndex = make([]IndexItem, 0)
+
 	cache := make(map[string]bool)
 	for i, course := range db.Roster {
-		course_key := course.Subject + " " + strconv.Itoa(course.Number)
+		for _, sections := range course.Sections {
+			for j, section := range sections {
+				db.classNumberIndex[section.ClassNumber] = &sections[j]
+				db.classNumberToCourse[section.ClassNumber] = &db.Roster[i]
+			}
+		}
+
+		// Title Index
+		course_key := course.CourseKey()
 
 		db.courseNumberIndex[course_key] = append(db.courseNumberIndex[course_key], &db.Roster[i])
 
@@ -132,14 +159,14 @@ type TermDBRepository struct {
 	Lock sync.RWMutex
 }
 
-func (db TermDBRepository) Get(term string) (*TermDatabaseJson, bool) {
-	db.Lock.RLock()
-	defer db.Lock.RUnlock()
-	val, ok := db.DB[term]
+var repo = TermDBRepository{DB: make(map[string]*TermDatabaseJson)}
+
+func Get(term string) (*TermDatabaseJson, bool) {
+	repo.Lock.RLock()
+	defer repo.Lock.RUnlock()
+	val, ok := repo.DB[term]
 	return val, ok
 }
-
-var repo = TermDBRepository{DB: make(map[string]*TermDatabaseJson)}
 
 type MetaInfo struct {
 	RosterTime map[string]int `json:"roster_time"`
@@ -182,7 +209,7 @@ func BasketHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	r.ParseForm()
 
-	db, ok := repo.Get(c.URLParams["term"])
+	db, ok := Get(c.URLParams["term"])
 	if !ok {
 		w.WriteHeader(404)
 		return
@@ -205,7 +232,7 @@ func SearchHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	r.ParseForm()
 
-	db, ok := repo.Get(c.URLParams["term"])
+	db, ok := Get(c.URLParams["term"])
 	if !ok {
 		w.WriteHeader(404)
 		return
