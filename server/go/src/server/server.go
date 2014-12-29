@@ -23,6 +23,9 @@ func main() {
 	goji.Get("/endpoints/user/signin/:method", user.UserSigninHandler)
 	goji.Post("/endpoints/sharing/share", sharing.ShareHandler)
 	goji.Get("/endpoints/sharing/shared/:slug", sharing.GetSharedHandler)
-	goji.Get("/endpoints/sharing/shared/:slug/image.png", sharing.GetSharedImageHandler)
+
+	goji.Get("/shared/:slug/image.png", sharing.GetSharedImageHandler)
+	goji.Get("/shared/:slug", sharing.SharedPageHandler)
+
 	goji.Serve()
 }

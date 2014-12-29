@@ -5,22 +5,28 @@ import (
 	"code.google.com/p/draw2d/draw2d"
 	"code.google.com/p/freetype-go/freetype/truetype"
 	"encoding/json"
+	"errors"
 	"flag"
+	"fmt"
 	"github.com/lib/pq"
 	"github.com/zenazn/goji/web"
+	"html"
 	"image"
 	"image/color"
 	"image/png"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
+	"server/common"
 	"server/common/db"
 	"server/common/httpcache"
 	"server/common/httperror"
 	"server/termdb"
 	"server/user"
+	"strings"
 	"time"
 )
 
@@ -40,6 +46,7 @@ type ShareResponse struct {
 }
 
 type Schedule struct {
+	Basket       []string
 	Sections     []int
 	ColorMapping map[string]string
 }
@@ -67,9 +74,11 @@ var ColorPalette = map[string]color.Color{
 }
 
 var dataLocation *string
+var frontendLocation *string
 
 func init() {
 	dataLocation = flag.String("datapath", "", "Server Data Dir Location")
+	frontendLocation = flag.String("frontendpath", "", "Server Data Dir Location")
 }
 
 func strToTime(str string) float64 {
@@ -173,16 +182,24 @@ func generateImage(meetings []singleMeeting) []byte {
 	return writer.Bytes()
 }
 
-func GetSharedImageHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "image/png")
-
-	key := c.URLParams["slug"]
+func getSharedTermSchedule(key string) (string, []byte, error) {
 	conn := db.GetPostgresConn()
-
 	var term string
 	var schedule []byte
 
 	if err := conn.QueryRow("SELECT term, schedule FROM shared WHERE slug = $1", key).Scan(&term, &schedule); err != nil {
+		return "", nil, err
+	}
+
+	return term, schedule, nil
+}
+
+func GetSharedImageHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "image/png")
+
+	key := c.URLParams["slug"]
+
+	if term, schedule, err := getSharedTermSchedule(key); err != nil {
 		httperror.NotFound(w, "")
 	} else {
 		var shared Schedule
@@ -230,12 +247,8 @@ func GetSharedImageHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 func GetSharedHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	key := c.URLParams["slug"]
-	conn := db.GetPostgresConn()
 
-	var term string
-	var schedule []byte
-
-	if err := conn.QueryRow("SELECT term, schedule FROM shared WHERE slug = $1", key).Scan(&term, &schedule); err != nil {
+	if term, schedule, err := getSharedTermSchedule(key); err != nil {
 		httperror.NotFound(w, httperror.ErrorMsgToJson("Schedule does not exist"))
 	} else {
 		raw := json.RawMessage(schedule)
@@ -247,6 +260,65 @@ func GetSharedHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		w.Write(response)
 	}
 
+}
+
+func termToName(term string) (string, error) {
+	var semester string
+	switch term[:2] {
+	case "fa":
+		semester = "Fall"
+	case "sp":
+		semester = "Spring"
+	case "su":
+		semester = "Summer"
+	case "wi":
+		semester = "Winter"
+	default:
+		return "", errors.New("Invalid Semester")
+	}
+
+	return semester + " 20" + term[2:], nil
+
+}
+
+func SharedPageHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	key := c.URLParams["slug"]
+
+	if term, schedule, err := getSharedTermSchedule(key); err != nil {
+		httperror.NotFound(w, "")
+	} else {
+		var shared Schedule
+		if err := json.Unmarshal(schedule, &shared); err != nil {
+			httperror.NotFound(w, "")
+			return
+		}
+
+		if !termdb.IsValidTerm(term) {
+			httperror.NotFound(w, "")
+			return
+		}
+
+		name, err := termToName(term)
+		if err != nil {
+			httperror.NotFound(w, "")
+			return
+		}
+
+		title := name + " Schedule on CoursePad.me"
+		description := "I have these courses on my " + name + " schedule: " + strings.Join(shared.Basket, ", ")
+		image := common.WEBSITE_ROOT + "shared/" + key + "/image.png"
+
+		meta := fmt.Sprintf(`<meta property="og:title" content="%s" /><meta property="og:description" content="%s" /><meta property="og:site_name" content="CoursePad.me" /><meta property="og:image" content="%s" />`, html.EscapeString(title), html.EscapeString(description), html.EscapeString(image))
+
+		indexHtml, err := ioutil.ReadFile(path.Join(*frontendLocation, "index.html"))
+
+		if err != nil {
+			panic(err)
+		}
+
+		httpcache.CachePublic(w, 5*24*60*60)
+		w.Write(bytes.Replace(indexHtml, []byte("</head>"), []byte(meta+"</head>"), 1))
+	}
 }
 
 func ShareHandler(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -303,7 +375,20 @@ func ShareHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	resp := ShareResponse{"http://coursepadtest.me/shared/" + string(slug)}
+	sharedUrl := common.WEBSITE_ROOT + "shared/" + slug
+
+	// Asynchronously try to prefetch shared url for Facebook
+	go func() {
+		client := http.Client{}
+		form := make(url.Values)
+		form.Set("id", sharedUrl)
+		form.Set("scrape", "true")
+
+		client.PostForm("http://graph.facebook.com", form)
+
+	}()
+
+	resp := ShareResponse{sharedUrl}
 	data, err := json.Marshal(resp)
 	if err != nil {
 		panic(err)
