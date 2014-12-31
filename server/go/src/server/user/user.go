@@ -90,6 +90,22 @@ func rediskeyForUserId(s SessionId) string {
 	return "session:" + string(s) + ":uid"
 }
 
+type fqlSingleFriend struct {
+	Name string
+	Id   string
+}
+
+type fqlPaging struct {
+	next     *string
+	previous *string
+}
+
+type fqlFriendResponse struct {
+	Data   []fqlSingleFriend
+	Error  *fqlError
+	Paging *fqlPaging
+}
+
 func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *UserBundle, error) {
 	conn := db.GetPostgresConn()
 
@@ -136,9 +152,6 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 	}
 
 	redisConn := redisPool.Get()
-	if err != nil {
-		panic(err)
-	}
 	defer redisConn.Close()
 
 	sessionId := makeSessionId()
@@ -149,6 +162,51 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 	if err != nil {
 		panic(err)
 	}
+
+	// Fetch friend list
+	go func() {
+		userIds := make([]string, 0)
+
+		url := "https://graph.facebook.com/v2.2/me/friends?access_token=" + accessToken
+
+		for {
+			fqlResponse := fqlFriendResponse{}
+
+			resp, err := http.Get(url)
+			if err != nil {
+				return
+			}
+			defer resp.Body.Close()
+
+			data, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return
+			}
+
+			err = json.Unmarshal(data, &fqlResponse)
+
+			if err != nil {
+				return
+			}
+
+			for _, friend := range fqlResponse.Data {
+				userIds = append(userIds, friend.Id)
+			}
+
+		}
+
+		tx, err := conn.Begin()
+		if err != nil {
+			return
+		}
+		tx.Exec("DELETE FROM fb_friends WHERE user = $1", userBundle.Id)
+		for _, id := range userIds {
+			tx.Exec("INSERT INTO fb_friends (user, friend_fbid) VALUES ($1, $2)", userBundle.Id, id)
+		}
+
+		tx.Commit()
+
+	}()
 
 	return sessionId, userBundle, nil
 }

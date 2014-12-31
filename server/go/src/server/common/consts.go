@@ -1,3 +1,7 @@
 package common
 
-const WEBSITE_ROOT = "https://preview.coursepad.me/"
+import (
+	"flag"
+)
+
+var WEBSITE_ROOT = flag.String("url", "https://coursepad.me/", "Web URL")

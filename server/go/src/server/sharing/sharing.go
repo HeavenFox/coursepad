@@ -22,6 +22,7 @@ import (
 	"path"
 	"server/common"
 	"server/common/db"
+	"server/common/fb"
 	"server/common/httpcache"
 	"server/common/httperror"
 	"server/termdb"
@@ -306,7 +307,7 @@ func SharedPageHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 		title := name + " Schedule on CoursePad.me"
 		description := "I have these courses on my " + name + " schedule: " + strings.Join(shared.Basket, ", ")
-		image := common.WEBSITE_ROOT + "shared/" + key + "/image.png"
+		image := *common.WEBSITE_ROOT + "shared/" + key + "/image.png"
 
 		meta := fmt.Sprintf(`<meta property="og:title" content="%s" /><meta property="og:description" content="%s" /><meta property="og:site_name" content="CoursePad.me" /><meta property="og:image" content="%s" />`, html.EscapeString(title), html.EscapeString(description), html.EscapeString(image))
 
@@ -375,17 +376,14 @@ func ShareHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	sharedUrl := common.WEBSITE_ROOT + "shared/" + slug
+	sharedUrl := *common.WEBSITE_ROOT + "shared/" + slug
 
 	// Asynchronously try to prefetch shared url for Facebook
 	go func() {
-		client := http.Client{}
-		form := make(url.Values)
-		form.Set("id", sharedUrl)
-		form.Set("scrape", "true")
-
-		client.PostForm("http://graph.facebook.com", form)
-
+		resp, err := http.Get("https://graph.facebook.com/v2.2/?id=" + url.QueryEscape(sharedUrl) + "&access_token=" + url.QueryEscape(fb.AppToken()))
+		if err == nil {
+			resp.Body.Close()
+		}
 	}()
 
 	resp := ShareResponse{sharedUrl}
