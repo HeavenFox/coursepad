@@ -93,6 +93,13 @@ var store = EventEmitter({
         this.emit('readystatechange');
     },
 
+
+    setSchedule: function(schedule, by) {
+        this.currentSchedule = schedule;
+
+        this.emit('change', {by: by});
+    },
+
     getCurrentSchedule: function() {
         if (!this.ready) { return null; }
         return this.currentSchedule;
@@ -257,6 +264,20 @@ function Schedule() {
     this.uniqueId = Math.floor(Math.random() * 0xFFFFFFFF);
 
     this._conflictCache = null;
+}
+
+Schedule.prototype.clone = function() {
+    var clone = new this.constructor();
+
+    clone.colorMapping = $.extend({}, this.colorMapping);
+    clone.basket = this.basket.slice(0);
+    clone.sections = this.sections.slice(0);
+    clone.hidden = $.extend({}, this.hidden);
+    clone.color = this.color;
+    clone.name = this.name;
+    clone.uniqueId = this.uniqueId;
+
+    return clone;
 }
 
 Schedule.prototype.getTermDB = function() {

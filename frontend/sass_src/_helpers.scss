@@ -31,3 +31,12 @@
     cursor: pointer;
     touch-action: manipulation;
 }
+
+.linkish {
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.linkish:hover {
+    text-decoration: underline;
+}

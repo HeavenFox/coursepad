@@ -47,6 +47,7 @@
     "regenerator": "HeavenFox/regenerator#no_funexpr",
     "regenerator-loader": "git://github.com/CoursePad/regenerator-loader#cp",
     "uglify-js": "^2.4.15",
-    "webpack": "^1.4.3"
+    "webpack": "^1.4.3",
+    "worker-loader": "^0.5.7"
   }
 }

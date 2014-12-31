@@ -13,6 +13,7 @@ var autoprefixer = require('autoprefixer-core');
 var rev = require('gulp-rev');
 var revCollector = require('gulp-rev-collector');
 var minifyHTML   = require('gulp-minify-html');
+var gulpFilter = require('gulp-filter');
 
 var DEV = false;
 
@@ -27,7 +28,8 @@ function target() {
 function webpack_conf() {
     var conf = {
         output: {
-            filename: "main.js"
+            filename: "main.js",
+            publicPath: "/js/"
         },
         module: {
             loaders: [
@@ -58,6 +60,7 @@ gulp.task('lint', function() {
 })
 
 gulp.task('js', function() {
+    var filter = gulpFilter(['main.js']);
     return gulp.src('js_src/app.js')
         .pipe(webpack(webpack_conf()))
         .pipe(DEV ? insert.prepend('const PROD=false;\n') : gutil.noop())
@@ -70,7 +73,10 @@ gulp.task('js', function() {
                     global_defs: {PROD: true}
                 }
              }))
-        .pipe(prod(rev()))
+        .pipe(prod(filter))
+            .pipe(prod(rev()))
+        .pipe(prod(filter.restore()))
+
         .pipe(gulp.dest(target() + 'js/'))
         .pipe(prod(rev.manifest()))
         .pipe(prod(gulp.dest( '/tmp/rev/js' )));

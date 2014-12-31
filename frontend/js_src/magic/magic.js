@@ -1,85 +1,33 @@
-var schedules = require('../store/schedules.js');
 var datetime = require('../utils/datetime.js');
 
-function printSchedule(clusters) {
-    function time2str(time) {
-        return '' + Math.floor(time) + ':' + (60*(time-Math.floor(time))).toFixed(0);
+var getNext;
+
+function reset() {
+    getNext = undefined;
+}
+
+function nextSchedule() {
+    if (getNext === undefined) {
+        return null;
     }
 
-    function meetings2str(section) {
-        if (section.meetings.length == 0) {
-            return 'no meetings';
-        }
-        return section.number + ' ' + section.meetings.map(function(meeting) {
-            return datetime.bitmaskToDay(meeting.pattern) + ' ' + time2str(meeting.startTimeHrs) + '-' + time2str(meeting.endTimeHrs);
-        }).join(', ') + (section.fixed ? ' (fixed)' : '');
-    }
-
-
-    clusters.forEach(function(cluster) {
-        console.group(cluster.name);
-        cluster.forEach(function(course) {
-            console.group('Components');
-            course.forEach(function(sections) {
-                console.group('Classes');
-                sections.forEach(function(section) {
-                    console.log(meetings2str(section));
-                });
-                console.groupEnd();
-            });
-            console.groupEnd();
-        });
-        console.groupEnd();
-    })
+    return getNext();
 }
 
-function arrayForSection(section) {
-    return {
-        number: section.number,
-        meetings: section.meetings.map(function(meeting) {
-            return {
-                startTimeHrs: meeting.startTimeHrs,
-                endTimeHrs: meeting.endTimeHrs,
-                pattern: meeting.pattern
-            };
-        })
-    };
+function hasNextSchedule() {
+    return getNext !== undefined;
 }
 
-function arrayForSchedule() {
-    var schedule = schedules.getCurrentSchedule();
-    return schedule.basket.filter(function(course) {
-        return schedule.getVisibility(course[0].getNumber());
-    }).map(function(cluster) {
-        var result = cluster.map(function(course) {
-            var result = [];
-            for (var type in course.sections) {
-                if (course.sections.hasOwnProperty(type)) {
-                    result.push(course.sections[type].map(arrayForSection));
-                }
-            }
-            return result;
-        });
-        result.name = cluster[0].getNumber();
-        return result;
-    });
+function makeSchedule(clusters, selected, priorities) {
+    reset();
 
-}
-
-window.arrayForSchedule = arrayForSchedule;
-window.printSchedule = printSchedule;
-
-function makeSchedule(priorities) {
-    priorityLateStart = priorities.lateStart;
-    priorityEarlyEnd = priorities.earlyEnd;
-    priorityNoFriday = priorities.noFriday;
-    priorityLunchBreak = priorities.lunchBreak;
+    priorityLateStart = priorities['lateStart'];
+    priorityEarlyEnd = priorities['earlyEnd'];
+    priorityNoFriday = priorities['noFriday'];
+    priorityLunchBreak = priorities['lunchBreak'];
     var n = performance.now();
-    var clusters = arrayForSchedule(), fixed = [];
-    var selected = {};
-    schedules.getCurrentSchedule().sections.forEach(function(section) {
-        selected[section.number] = true;
-    });
+    var fixed = [];
+
     removeTBASections(clusters, selected);
     checkIfImpossible(clusters);
 
@@ -89,26 +37,19 @@ function makeSchedule(priorities) {
         start = fixed.length;
         if (checkIfImpossible(clusters)) {
             console.warn("Impossible");
-            return;
+            return null;
         }
     }
 
     var result = searchForSolution(clusters, fixed);
-    if (result) {
-        applySolution(result);
-    }
+
     console.log('Time elapsed:', performance.now() - n);
+
+    return result;
 }
 
 exports.makeSchedule = makeSchedule;
-
-function applySolution(sections) {
-    var s = schedules.getCurrentSchedule();
-    s.sections = sections;
-    s.setSectionsWithClassNumbers(sections);
-}
-
-window.applySolution = applySolution;
+exports.nextSchedule = nextSchedule;
 
 //---------------------------------------------------------------
 // Days starting <= this time gets 0
@@ -268,13 +209,13 @@ function scoreSolution(soln, startTimesFixed, endTimesFixed, lunchMeetingsFixed)
     return finalScore;
 }
 
+/*
 function scoreCurrentSchedule() {
     var s = schedules.getCurrentSchedule();
     var soln = s.getVisibleSections().map(arrayForSection);
     return scoreSolution(soln, new Array(5), new Array(5), [[], [], [], [], []]);
 }
-
-window.scoreCurrentSchedule = scoreCurrentSchedule;
+*/
 
 function searchBySimulatedAnnealing(clusters, fixed, startTimesFixed, endTimesFixed, lunchMeetingsFixed) {
     var rand = function(n) {
@@ -442,25 +383,25 @@ function searchByEnumeration(clusters, fixed, startTimesFixed, endTimesFixed, lu
 
     chooseCourses(0);
 
-    console.log(solutions.length);
-
-    if (solutions.length === 0) return null;
-
     var maxScore = 0;
-    var bestSolution;
-    solutions.forEach(function(solution) {
-        if (solution.score > maxScore) {
-            maxScore = solution.score;
-            bestSolution = solution.sections;
-        }
+
+    if (solutions.length === 0) {
+        return null;
+    }
+
+    solutions.sort(function(a, b) {
+        return b.score - a.score;
     });
 
-    var fixedSectionNumbers = fixed.map(function(section) {
-                            return section.number;
-                    });
-    Array.prototype.push.apply(bestSolution, fixedSectionNumbers);
 
-    return bestSolution;
+    var fixedSectionNumbers = fixed.map(function(section) {
+        return section.number;
+    });
+
+    return solutions.slice(0, 10).map(function(solution) {
+        Array.prototype.push.apply(solution.sections, fixedSectionNumbers);
+        return solution.sections;
+    });
 }
 
 function searchForSolution(clusters, fixed) {
@@ -489,17 +430,32 @@ function searchForSolution(clusters, fixed) {
     console.log('Size of Search Space: ', possibilities);
 
     if (possibilities < 10000) {
-        return searchByEnumeration(clusters, fixed, startTimesFixed, endTimesFixed, lunchMeetingsFixed);
-    } else {
-        // Simulated annealing
-        var result = searchBySimulatedAnnealing(clusters, fixed, startTimesFixed, endTimesFixed, lunchMeetingsFixed);
-        fixed.forEach(function(section) {
-            result.push(section.number);
-        });
+        var candidate = searchByEnumeration(clusters, fixed, startTimesFixed, endTimesFixed, lunchMeetingsFixed);
 
-        return result;
+        if (candidate === null) {
+            return null;
+        }
+
+        var candidateIndex = -1;
+
+        getNext = function() {
+            candidateIndex = (candidateIndex + 1) % candidate.length;
+
+            return candidate[candidateIndex];
+        };
+    } else {
+        getNext = function() {
+            // Simulated annealing
+            var result = searchBySimulatedAnnealing(clusters, fixed, startTimesFixed, endTimesFixed, lunchMeetingsFixed);
+            fixed.forEach(function(section) {
+                result.push(section.number);
+            });
+
+            return result;
+        }
     }
 
+    return getNext();
 }
 
 
@@ -523,7 +479,7 @@ function removeTBASections(clusters, selected) {
                 });
             });
         });
-    })
+    });
 }
 
 

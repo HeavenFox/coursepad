@@ -13,6 +13,7 @@ var Sidebar = React.createClass({
             <IfLoginStatus>
                 <Sharing />
             </IfLoginStatus>
+            <Magic />
             <Tools />
         </div>
     }
