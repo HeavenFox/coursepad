@@ -28,8 +28,12 @@ module.exports = {
         return '/endpoints/termdb/' + encodeURIComponent(term) + '/basket?classes=' + encodeURIComponent(basket);
     },
 
-    userLogin: function(method, parameters) {
-        return '/endpoints/user/signin/' + encodeURIComponent(method) + '?' + queryString(parameters);
+    userLogin: function(method) {
+        return '/endpoints/user/signin/' + encodeURIComponent(method);
+    },
+
+    bundleFromSession: function(session) {
+        return '/endpoints/user/session?sid=' + encodeURIComponent(session);
     },
 
     share: function() {

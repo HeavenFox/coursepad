@@ -1,6 +1,7 @@
 package user
 
 import (
+	"crypto/md5"
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
@@ -9,15 +10,26 @@ import (
 	"github.com/garyburd/redigo/redis"
 	_ "github.com/lib/pq"
 	"github.com/zenazn/goji/web"
+	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"server/common/db"
+	"server/common/httperror"
 	"strconv"
+	"strings"
 	"time"
 )
 
 const SESSION_TIMEOUT_EPHEMERAL = 7200
+
+func mustMarshal(v interface{}) []byte {
+	r, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+	return r
+}
 
 func GetUserIdForHeader(r *http.Request) (int, error) {
 	sessionIdString := r.Header.Get("Authorization")
@@ -106,6 +118,48 @@ type fqlFriendResponse struct {
 	Paging *fqlPaging
 }
 
+func MakeSession(bundle *UserBundle, expire int) SessionId {
+
+	redisConn := redisPool.Get()
+	defer redisConn.Close()
+	sessionId := makeSessionId()
+
+	redisKey := rediskeyForUserId(sessionId)
+
+	_, err := redisConn.Do("SET", redisKey, strconv.Itoa(int(bundle.Id)), "EX", SESSION_TIMEOUT_EPHEMERAL)
+	if err != nil {
+		panic(err)
+	}
+
+	return sessionId
+}
+
+func handleEmailLogin(w http.ResponseWriter, r *http.Request) (SessionId, *UserBundle, error) {
+	email := r.PostForm.Get("email")
+	password := r.PostForm.Get("password")
+	userBundle := &UserBundle{}
+	hashedPassword := []byte{}
+
+	noUser := false
+
+	conn := db.GetPostgresConn()
+	err := conn.QueryRow("SELECT id, password, slug, name, profile_picture FROM users WHERE email = $1", email).Scan(&userBundle.Id, &hashedPassword, &userBundle.Slug, &userBundle.Name, &userBundle.ProfilePicture)
+	switch {
+	case err == sql.ErrNoRows:
+		noUser = true
+
+	case err != nil:
+		panic(err)
+	}
+
+	if !noUser && bcrypt.CompareHashAndPassword(hashedPassword, []byte(password)) == nil {
+		session := MakeSession(userBundle, SESSION_TIMEOUT_EPHEMERAL)
+		return session, userBundle, nil
+	}
+
+	return SessionId(""), nil, errors.New("Wrong Email / Password Combination")
+}
+
 func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *UserBundle, error) {
 	conn := db.GetPostgresConn()
 
@@ -116,7 +170,7 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 
 	resp, err := http.Get("https://graph.facebook.com/v2.2/me?" + query.Encode())
 	if err != nil {
-		return SessionId(""), nil, err
+		return SessionId(""), nil, errors.New("Unable to communicate with Facebook")
 	}
 
 	defer resp.Body.Close()
@@ -129,7 +183,7 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 	}
 
 	if fqlResult.Error != nil {
-		return SessionId(""), nil, errors.New(fqlResult.Error.Message)
+		return SessionId(""), nil, errors.New("Unable to authenticate with Facebook")
 	}
 
 	userBundle := &UserBundle{}
@@ -151,17 +205,7 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 		panic(err)
 	}
 
-	redisConn := redisPool.Get()
-	defer redisConn.Close()
-
-	sessionId := makeSessionId()
-
-	redisKey := rediskeyForUserId(sessionId)
-
-	_, err = redisConn.Do("SET", redisKey, strconv.Itoa(int(userBundle.Id)), "EX", SESSION_TIMEOUT_EPHEMERAL)
-	if err != nil {
-		panic(err)
-	}
+	sessionId := MakeSession(userBundle, SESSION_TIMEOUT_EPHEMERAL)
 
 	// Fetch friend list
 	go func() {
@@ -211,6 +255,50 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 	return sessionId, userBundle, nil
 }
 
+func UserRegistrationHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	name := r.PostForm.Get("name")
+	email := r.PostForm.Get("email")
+	password := r.PostForm.Get("password")
+	hash := md5.Sum([]byte(strings.ToLower(strings.TrimSpace(email))))
+	picture := "https://www.gravatar.com/avatar/" + hex.EncodeToString(hash[:])
+
+	passwordHashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
+	if err != nil {
+		panic(err)
+	}
+
+	conn := db.GetPostgresConn()
+
+	bundle := UserBundle{
+		Id:             0,
+		Name:           name,
+		ProfilePicture: picture,
+	}
+
+	if err := conn.QueryRow(
+		"INSERT INTO users (name, email, password, profile_picture) VALUES ($1, $2, $3, $4) RETURNING id",
+		name, email, passwordHashed, picture).Scan(&bundle.Id); err != nil {
+		// Duplicate email
+		httperror.Malformed(w, httperror.ErrorMsgToJson("Email address already registered. You may try to log in first"))
+		return
+	}
+
+	result := SigninResult{
+		SessionId: MakeSession(&bundle, SESSION_TIMEOUT_EPHEMERAL),
+		User:      &bundle,
+	}
+
+	data, err := json.Marshal(result)
+	if err != nil {
+		panic(err)
+	}
+
+	w.Write(data)
+}
+
 type SigninResult struct {
 	SessionId SessionId   `json:"session_id"`
 	User      *UserBundle `json:"user"`
@@ -219,13 +307,43 @@ type SigninResult struct {
 func UserSigninHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	var err error
 	reply := SigninResult{}
-	reply.SessionId, reply.User, err = handleFacebookLogin(w, r)
+	r.ParseForm()
+	switch c.URLParams["method"] {
+	case "fb":
+		reply.SessionId, reply.User, err = handleFacebookLogin(w, r)
+	case "email":
+		reply.SessionId, reply.User, err = handleEmailLogin(w, r)
+	}
 	if err != nil {
-		panic(err)
+		httperror.Unauthenticated(w, httperror.ErrorMsgToJson(err.Error()))
 	}
 	data, err := json.Marshal(reply)
 	if err != nil {
 		panic(err)
 	}
 	w.Write(data)
+}
+
+func BundleFromSessionHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	id, err := GetUserIdForSession(r.Form.Get("sid"))
+	if err != nil {
+		httperror.Unauthenticated(w, "")
+		return
+	}
+	userBundle := &UserBundle{}
+
+	conn := db.GetPostgresConn()
+	err = conn.QueryRow("SELECT id, slug, name, profile_picture FROM users WHERE id = $1", id).Scan(&userBundle.Id, &userBundle.Slug, &userBundle.Name, &userBundle.ProfilePicture)
+	switch {
+	case err == sql.ErrNoRows:
+		httperror.Unauthenticated(w, "")
+		return
+
+	case err != nil:
+		panic(err)
+	}
+
+	w.Write(mustMarshal(userBundle))
+
 }

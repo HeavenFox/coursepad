@@ -2,28 +2,24 @@ var EventEmitter = require('event-emitter');
 
 var ajax = require('../utils/ajax.js');
 var endpoints = require('../consts/endpoints.js');
+var cookies = require('cookies-js');
 
 // Facebook Integration
 const FB_APP_ID = '399310430207216';
 const SCOPE = 'public_profile,email,user_friends';
 
-window.fbAsyncInit = function() {
-    FB.init({
-        appId : FB_APP_ID,
-        xfbml : false,
-        cookie : false,
-        version : 'v2.2'
-    });
-    FB.getLoginStatus(function(response) {
-        fbStatusChange(response);
-    });
-};
+function storeSession(sessionId, isPersistent) {
+    cookies.set('sessionId', sessionId, isPersistent ? {expires: 30 * 24 * 60 * 60} : {});
+}
 
-function userLoggedIn(session, user) {
-    currentUser = user;
-    sessionId = session;
+async function facebookLogin(accessToken) {
+    try {
+        var result = await ajax.post(endpoints.userLogin('fb'), {'access_token' : accessToken});
+        userLoggedIn(result['session_id'], new User().fromBundle(result['user']));
+        storeSession(result['session_id']);
+    } catch (e) {
 
-    store.emit('loginstatuschange');
+    }
 }
 
 function fbStatusChange(response) {
@@ -32,10 +28,62 @@ function fbStatusChange(response) {
     }
 }
 
-async function facebookLogin(accessToken) {
-    var result = await ajax.getJson(endpoints.userLogin('fb', {'access_token' : accessToken}));
-    userLoggedIn(result['session_id'], new User().fromBundle(result['user']));
+function initFacebookLogin() {
+
+    var fbInit = function() {
+        FB.init({
+            appId : FB_APP_ID,
+            xfbml : false,
+            cookie : false,
+            version : 'v2.2'
+        });
+        FB.getLoginStatus(function(response) {
+            fbStatusChange(response);
+        });
+    };
+
+    if (window.FB) {
+        fbInit();
+    } else {
+        window.fbAsyncInit = fbInit;
+    }
+
 }
+
+async function initSessionLogin(session) {
+    try {
+        var bundle = await ajax.getJson(endpoints.bundleFromSession(session));
+        userLoggedIn(session, new User().fromBundle(bundle));
+        return true;
+    } catch (e) {
+        console.log(e);
+        return false;
+    }
+}
+
+async function initLogin() {
+    // Check session first
+    var sessionId = cookies.get('sessionId');
+    if (sessionId) {
+        var sessionResult = await initSessionLogin(sessionId);
+        if (sessionResult) {
+            return;
+        } else {
+            cookies.expire('sessionId');
+        }
+    }
+    // Session not good
+    initFacebookLogin();
+}
+
+
+function userLoggedIn(session, user) {
+    currentUser = user;
+    sessionId = session;
+
+    store.emit('loginstatuschange');
+}
+
 
 function User() {
 
@@ -79,7 +127,20 @@ var store = EventEmitter({
                 fbStatusChange(response);
             }, {'scope': SCOPE});
         }
+    },
+
+    emailLogin: async function(email, password, rememberMe) {
+        var result = await ajax.post(endpoints.userLogin('email'), {'email' : email, 'password' : password});
+
+        userLoggedIn(result['session_id'], new User().fromBundle(result['user']));
+        storeSession(result['session_id'], rememberMe);
+    },
+
+    register: async function(userinfo) {
+
     }
 });
 
 module.exports = store;
+
+initLogin();

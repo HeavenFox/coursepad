@@ -114,3 +114,70 @@ header {
     border-radius: 12px;
     margin-right: 8px;
 }
+
+.user-menu {
+    background-color: white;
+    border: 1px solid #CBCBCB;
+    margin: 5px;
+    width: 180px;
+}
+
+.user-menu .user-avatar {
+    background-image: url('../img/mystery-man.jpg');
+    background-size: cover;
+    width: 32px;
+    height: 32px;
+    border: 2px solid #ccc;
+    border-radius: 18px;
+    margin: 5px auto;
+}
+
+.user-options {
+    padding-bottom: 6px;
+}
+
+.user-options p {
+    margin: 2px 4px;
+}
+
+.user-options hr {
+    border: 0;
+    height: 1px;
+    background-color: #CBCBCB;
+}
+
+.user-info {
+    text-align: center;
+    margin: 12px 0;
+}
+
+.user-info .user-name {
+    font-weight: normal;
+}
+
+.user-menu.guest {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.user-menu.guest > div {
+    width: 100%;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.user-loginform-inner {
+    padding: 5px;
+
+    label {
+        display: block;
+    }
+}
+
+.user-menu.guest > div:first-child {
+    transition: margin 0.5s;
+}
+
+.user-menu.two > div:first-child {
+    margin-left: -100%;
+}
