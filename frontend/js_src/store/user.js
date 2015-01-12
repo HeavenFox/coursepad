@@ -110,6 +110,10 @@ var store = EventEmitter({
         return currentUser;
     },
 
+    getSession: function() {
+        return sessionId;
+    },
+
     signHeader: function(header) {
         if (typeof header !== 'object') {
             header = {};

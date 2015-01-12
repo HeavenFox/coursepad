@@ -4,7 +4,11 @@ var datetime = require('../utils/datetime.js');
 var conflicts = require('../model/course/conflicts.js');
 
 var termdb = require('./termdb.js');
+var user = require('./user.js');
+
 var localStore = require('../persist/localStorage.js');
+
+var endpoints = require('../consts/endpoints.js');
 
 var color = require('../utils/color.js');
 
@@ -13,15 +17,6 @@ var ana = require('../analytics/analytics.js');
 const PREFER_LOCAL = 1;
 const PREFER_REMOTE = 2;
 const NO_PREFERENCE = 3;
-
-function maybeLoadTermDB(term, preference) {
-    var dbLoadedPromise;
-    if (term === undefined || (termdb.getCurrentTerm() && termdb.getCurrentTerm().term == term)) {
-        return null;
-    } else {
-        return termdb.setCurrentTerm(term, termdb.PREFER_FASTER);
-    }
-}
 
 var store = EventEmitter({
     ready: false,
@@ -47,6 +42,11 @@ var store = EventEmitter({
             self.emit('readystatechange');
         }
 
+        if (!this.currentStorage || this.currentStorage.term !== term) {
+            this.currentStorage = new ScheduleStorage(term);
+            getWebSocket();
+        }
+
         var shouldCheckForUpdates = false;
 
         var dbLoadedPromise;
@@ -57,13 +57,17 @@ var store = EventEmitter({
             shouldCheckForUpdates = true;
         }
 
+        var schedule;
         return dbLoadedPromise.then(function() {
-            self.currentSchedule = new MutableSchedule();
-            self.currentSchedule.term = term;
-            self.currentSchedule.index = index;
+            schedule = new MutableSchedule();
+            schedule.term = term;
+            schedule.index = index;
+            schedule.storage = self.currentStorage;
 
-            return self.currentSchedule.load();
+            return self.currentStorage.loadSchedule(schedule);
         }).then(function() {
+            self._setCurrentSchedule(schedule);
+
             self.ready = true;
             self.emit('readystatechange');
             if (shouldCheckForUpdates) {
@@ -88,16 +92,29 @@ var store = EventEmitter({
 
         await schedule.deserialize(serialized);
 
-        this.currentSchedule = schedule;
+        this._setCurrentSchedule(schedule);
+
         this.ready = true;
         this.emit('readystatechange');
     },
 
 
     setSchedule: function(schedule, by) {
-        this.currentSchedule = schedule;
+        this._setCurrentSchedule(schedule);
 
         this.emit('change', {by: by});
+    },
+
+    _setCurrentSchedule: function(schedule) {
+        this.currentSchedule = schedule;
+        schedule.on('change', this.getOnScheduleChange());
+    },
+
+    getOnScheduleChange: function() {
+        var self = this;
+        return this.__onScheduleChange || (this.__onScheduleChange = function(v) {
+            self.emit('change', v);
+        });
     },
 
     getCurrentSchedule: function() {
@@ -234,9 +251,228 @@ var store = EventEmitter({
         // }
 
         return result;
+    },
+
+    onTermDBChange: function() {
+        this.currentSchedule.onTermDBChange();
     }
 });
 
+termdb.on('change', store.onTermDBChange.bind(store));
+
+
+var webSocketPromise, socketSession;
+
+function clientIdGenerator() {
+    return Math.floor(Math.random() * 0x7FFFFFFF);
+}
+
+function makeSocket(sessionId, clientId) {
+    return new Promise(function(resolve, reject) {
+        var ws = new WebSocket(endpoints.sync(sessionId, clientId));
+        ws.onopen = function() {
+            resolve(ws);
+        };
+
+        ws.onmessage = function(e) {
+            var reply = JSON.parse(e.data);
+            if (reply['action'] === 'ack' || reply['action'] === 'conflict') {
+                while (ackCallbacks.length > 0) {
+                    var cb = ackCallbacks.pop();
+                    cb(reply);
+                }
+            } else if (reply['action'] === 'update') {
+                if (store.currentStorage.term === reply['term']) {
+                    store.currentStorage.receive(reply);
+                }
+            }
+        };
+    });
+}
+
+async function getWebSocket() {
+    // Check current user
+    if (!user.getCurrentUser()) {
+        throw new Error('Not Logged In');
+    }
+
+    if (user.getSession() !== socketSession) {
+        socketSession = user.getSession();
+
+        if (webSocketPromise) {
+            webSocketPromise.then(function(s) { s.close(); });
+            webSocketPromise = null;
+        }
+    }
+
+    var clientId = localStore.get('client_id', clientIdGenerator);
+
+    var socket;
+    while (true) {
+        if (!webSocketPromise) {
+            webSocketPromise = makeSocket(socketSession, clientId);
+        }
+
+        socket = await webSocketPromise;
+
+        if (socket.readyState === WebSocket.OPEN) {
+            break;
+        } else {
+            webSocketPromise = null;
+        }
+
+    }
+    
+    return socket;
+}
+
+var ackCallbacks = [];
+
+const SAVE_INTERVAL = 1000;
+
+function ScheduleStorage(term) {
+    this.term = term;
+    this.timeout = null;
+}
+
+ScheduleStorage.prototype = EventEmitter({});
+
+ScheduleStorage.prototype.loadSchedule = async function(schedule) {
+    var stored = localStore.get(this.getStoreKey(), Array);
+    if (stored[schedule.index] !== undefined) {
+        return await schedule.deserialize(stored[schedule.index]);
+    }
+    return null;
+}
+
+ScheduleStorage.prototype.reloadSchedule = async function(schedule) {
+    var stored = localStore.get(this.getStoreKey(), Array);
+    var index = schedule.index;
+    if (stored[index]['uniqueId'] !== schedule.uniqueId) {
+        for (index = 0; index < stored.length; index++) {
+            if (stored[index]['uniqueId'] === schedule.uniqueId) {
+                break;
+            }
+        }
+
+        if (index === stored.length) {
+            return null;
+        }
+    }
+
+    return await schedule.deserialize(stored[index]);
+};
+
+ScheduleStorage.prototype.persistAndDirtySchedule = function(schedule) {
+    var stored = localStore.get(this.getStoreKey(), Array);
+    stored[schedule.index] = schedule.serialize();
+    localStore.fsync(this.getStoreKey());
+    if (self.inflight) {
+        this.dirtySinceSync = true;
+    } else {
+        this.getSyncStatus()['dirty'] = true;
+        this.persistSyncStatus();
+    }
+};
+
+ScheduleStorage.prototype.getStoreKey = function() {
+    return this.term + '_schedules';
+};
+
+ScheduleStorage.prototype.getSyncStatusKey = function() {
+    return this.term + '_sync_status';
+};
+
+ScheduleStorage.prototype.serialize = function() {
+    return localStore.get(this.getStoreKey());
+};
+
+ScheduleStorage.prototype.getSyncStatus = function() {
+    return localStore.get(this.getSyncStatusKey(), {});
+};
+
+ScheduleStorage.prototype.persistSyncStatus = function() {
+    return localStore.fsync(this.getSyncStatusKey());
+};
+
+ScheduleStorage.prototype.schedulePublish = function() {
+    if (this.timeout) {
+        window.clearTimeout(this.timeout);
+    }
+
+    var self = this;
+    this.timeout = window.setTimeout(function() {
+        self.timeout = null;
+        self.maybePublish();
+    }, SAVE_INTERVAL);
+};
+
+ScheduleStorage.prototype.maybePublish = function() {
+    if (!this.inflight && this.getSyncStatus()['dirty']) {
+        this.publish();
+    }
+};
+
+ScheduleStorage.prototype.publish = async function() {
+    var serialized = this.serialize();
+
+    var syncStatus = this.getSyncStatus();
+
+    var message = {
+        'version' : syncStatus['version'] || 0,
+        'term' : this.term,
+        'schedule' : serialized
+    };
+
+    // Do not update if it is the same thing
+    var text = JSON.stringify(serialized);
+
+    if (this.lastText !== text) {
+        this.lastText = text;
+
+        var socket = await getWebSocket();
+        socket.send(JSON.stringify(message));
+
+        this.inflight = true;
+
+        var self = this;
+        ackCallbacks.push(function(data) {
+            if (data['term'] === self.term) {
+                self.inflight = false;
+                var syncStatus = self.getSyncStatus(); 
+                syncStatus['version'] = data['version'];
+                syncStatus['dirty'] = !!self.dirtySinceSync;
+                self.dirtySinceSync = false;
+                self.persistSyncStatus();
+
+                if (syncStatus['dirty']) {
+                    self.schedulePublish();
+                }
+            }
+        });
+    }
+
+
+    this.persistSyncStatus();
+}
+
+
+ScheduleStorage.prototype.receive = function(data) {
+    var syncStatus = this.getSyncStatus();
+    if (!syncStatus['dirty']) {
+        if (data['version'] > (syncStatus['version'] || 0)) {
+
+            localStore.set(this.getStoreKey(), data['schedule']);
+            syncStatus['version'] = data['version'];
+            this.persistSyncStatus();
+
+            var schedule = store.getCurrentSchedule();
+            if (schedule.isMutable) {
+                store.getCurrentSchedule().onLocalStorageChange();
+            }
+        }
+    }
+};
 
 var palette = [
     'lavender',
@@ -261,10 +497,12 @@ function Schedule() {
 
     this.color = '#979797';
     this.name = 'My Schedule';
-    this.uniqueId = Math.floor(Math.random() * 0xFFFFFFFF);
+    this.uniqueId = Math.floor(Math.random() * 0x7FFFFFFF);
 
     this._conflictCache = null;
 }
+
+Schedule.prototype = EventEmitter({});
 
 Schedule.prototype.clone = function() {
     var clone = new this.constructor();
@@ -305,7 +543,7 @@ Schedule.prototype.getVisibleMeetings = function() {
 
 Schedule.prototype._onChange = function() {
     this._conflictCache = null;
-    store.emit('change');
+    this.emit('change');
 };
 
 Schedule.prototype.findCourseInBasketById = function(id) {
@@ -345,15 +583,8 @@ Schedule.prototype.serializeBasket = function(basket) {
     });
 };
 
-/**
- * @return {Promise}
- */
-Schedule.prototype.termDBUpdated = function() {
-    var self = this;
-    this.persistSections();
-    return this.load().then(function() {
-        self._onChange();
-    })
+Schedule.prototype.onTermDBChange = function() {
+
 }
 
 Schedule.prototype.getSelectedCourseIdsHash = function() {
@@ -603,6 +834,12 @@ function MutableSchedule() {
 
 MutableSchedule.prototype = Object.create(Schedule.prototype);
 MutableSchedule.prototype.constructor = MutableSchedule;
+
+MutableSchedule.prototype.clone = function() {
+    var superclone = Schedule.prototype.clone.call(this);
+    superclone.storage = this.storage;
+    return superclone;
+}
 
 MutableSchedule.prototype.setVisibility = function(courseNumber, val) {
     this.hidden[courseNumber] = !val;
@@ -885,43 +1122,54 @@ MutableSchedule.prototype.serializeScheduleForSharing = function() {
     return persist;
 };
 
+MutableSchedule.prototype.serialize = function() {
+    var persist = {}
+    persist['sections'] = this.serializeSections(this.sections);
+    persist['basket'] = this.serializeBasket(this.basket);
+    persist['colorMapping'] = $.extend({}, this.colorMapping);
+    persist['hidden'] = $.extend({}, this.hidden);
+    persist['color'] = this.color;
+    persist['name'] = this.name;
+    persist['uniqueId'] = this.uniqueId;
 
-MutableSchedule.prototype.getStoreKey = function() {
-    return this.term + '_schedules';
-
-};
+    return persist;
+}
 
 MutableSchedule.prototype.persistSections = function() {
-    if (localStore.get(this.getStoreKey(), Array)[this.index] === undefined) {
-        localStore.get(this.getStoreKey(), Array)[this.index] = {};
+    this.storage.persistAndDirtySchedule(this);
+    if (user.getCurrentUser()) {
+        this.storage.schedulePublish();
     }
-    var persist = localStore.get(this.getStoreKey())[this.index];
-    persist.sections = this.serializeSections(this.sections);
-    persist.basket = this.serializeBasket(this.basket);
-    persist.colorMapping = $.extend({}, this.colorMapping);
-    persist.hidden = $.extend({}, this.hidden);
-    persist.color = this.color;
-    persist.name = this.name;
-    persist.uniqueId = this.uniqueId;
-    localStore.fsync(this.getStoreKey());
 };
 
 
-MutableSchedule.prototype.load = async function() {
-    var serialized = localStore.get(this.getStoreKey(), Array)[this.index];
-    if (serialized === undefined) {
-        this.basket = [];
-        this.sections = [];
-        this.persistSections();
-        // Done here
-        return Promise.resolve(false);
-    }
-
-    await this.deserialize(serialized);
-
-    this.persistSections();
-
+MutableSchedule.prototype.reload = function() {
+    return this.storage.reloadSchedule(this);
 }
+
+MutableSchedule.prototype.onTermDBChange = function() {
+    var self = this;
+    return this.reload().then(function() {
+        self._onChange();
+    });
+}
+
+MutableSchedule.prototype.onLocalStorageChange = function() {
+    var self = this;
+    return this.reload().then(function() {
+        self._onChange();
+    });
+}
+
+localStore.on('change', function(e) {
+    var chunks = e.key.split('_', 2);
+    if (chunks[1] === 'schedules') {
+        var schedule = store.getCurrentSchedule();
+        if (schedule.constructor === MutableSchedule && schedule.term === chunks[0]) {
+            schedule.onLocalStorageChange();
+        }
+    }
+});
 
 function SharedSchedule() {
     Schedule.call(this);

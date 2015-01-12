@@ -42,5 +42,9 @@ module.exports = {
 
     shared: function(slug) {
         return '/endpoints/sharing/shared/' + slug;
-    }
+    },
+
+    sync: function(session, clientId) {
+        return 'ws://ws-test.coursepad.me/endpoints/sync/websocket?sid=' + encodeURIComponent(session) + '&clientid=' + encodeURIComponent(clientId);
+    },
 }

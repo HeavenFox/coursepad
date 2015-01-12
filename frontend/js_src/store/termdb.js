@@ -18,6 +18,8 @@ function TermDatabase() {
     
 }
 
+TermDatabase.prototype = EventEmitter({});
+
 TermDatabase.prototype.searchIn = function(toSearch, keywords) {
     var results = [];
     var i, j;
@@ -296,6 +298,7 @@ LocalTermDatabase.prototype.applyUpdates = function(updates) {
     })
     .then(function() {
         self.setTitleIndex(index);
+        self.emit('update');
     })
     .then(null, function(e) {
         console.error('Error when Applying Updates: ', e);
@@ -333,6 +336,10 @@ function downloadLocalTerm(term) {
         db = new LocalTermDatabase();
         db.term = term;
         db.titleIndex = [];
+
+        db.on('update', function() {
+            store.emit('change');
+        });
 
         return indexeddb.getByKey('title_typeahead_index', term);
     })

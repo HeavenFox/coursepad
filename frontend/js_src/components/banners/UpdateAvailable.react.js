@@ -6,14 +6,11 @@ var UpdateAvailable = React.createClass({
         return {updating: false};
     },
 
-    _update: function() {
+    _update: async function() {
         var self = this;
         this.setState({updating: true});
-        termdb.getCurrentTerm().applyUpdates(this.props.updates).then(function() {
-            return schedules.getCurrentSchedule().termDBUpdated();
-        }).then(function() {
-            self.props.onFinish();
-        });
+        await termdb.getCurrentTerm().applyUpdates(this.props.updates);
+        self.props.onFinish();
     },
 
     render: function() {

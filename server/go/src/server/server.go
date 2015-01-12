@@ -18,7 +18,6 @@ func main() {
 
 	goji.Get("/endpoints/termdb/:term/search", termdb.SearchHandler)
 	goji.Get("/endpoints/termdb/:term/basket", termdb.BasketHandler)
-	goji.Get("/endpoints/sync", sync.Handler)
 
 	goji.Post("/endpoints/user/signin/:method", user.UserSigninHandler)
 	goji.Post("/endpoints/user/register", user.UserRegistrationHandler)
@@ -26,6 +25,9 @@ func main() {
 
 	goji.Post("/endpoints/sharing/share", sharing.ShareHandler)
 	goji.Get("/endpoints/sharing/shared/:slug", sharing.GetSharedHandler)
+
+	goji.Handle("/endpoints/sync/websocket", sync.SyncSocketHandler)
+	goji.Get("/endpoints/sync/schedule", sync.GetScheduleHandler)
 
 	goji.Get("/shared/:slug/image.png", sharing.GetSharedImageHandler)
 	goji.Get("/shared/:slug", sharing.SharedPageHandler)
