@@ -509,6 +509,7 @@ MutableSchedule.prototype.constructor = MutableSchedule;
 MutableSchedule.prototype.clone = function() {
     var superclone = Schedule.prototype.clone.call(this);
     superclone.storage = this.storage;
+    superclone.index = this.index;
     return superclone;
 }
 

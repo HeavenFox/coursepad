@@ -277,36 +277,26 @@ ScheduleStorage.prototype.publish = async function() {
         'schedule' : serialized
     };
 
-    // Do not update if it is the same thing
-    var text = JSON.stringify(serialized);
+    var socket = await getWebSocket();
+    socket.send(JSON.stringify(message));
 
-    if (this.lastText !== text) {
-        this.lastText = text;
+    this.inflight = true;
 
-        var socket = await getWebSocket();
-        socket.send(JSON.stringify(message));
+    var self = this;
+    ackCallbacks.push(function(data) {
+        if (data['term'] === self.term) {
+            self.inflight = false;
+            var syncStatus = self.getSyncStatus(); 
+            syncStatus['version'] = data['version'];
+            syncStatus['dirty'] = !!self.dirtySinceSync;
+            self.dirtySinceSync = false;
+            self.persistSyncStatus();
 
-        this.inflight = true;
-
-        var self = this;
-        ackCallbacks.push(function(data) {
-            if (data['term'] === self.term) {
-                self.inflight = false;
-                var syncStatus = self.getSyncStatus(); 
-                syncStatus['version'] = data['version'];
-                syncStatus['dirty'] = !!self.dirtySinceSync;
-                self.dirtySinceSync = false;
-                self.persistSyncStatus();
-
-                if (syncStatus['dirty']) {
-                    self.schedulePublish();
-                }
+            if (syncStatus['dirty']) {
+                self.schedulePublish();
             }
-        });
-    }
-
-
-    this.persistSyncStatus();
+        }
+    });
 }
 
 const LOCAL_UPDATED = 1, REMOTE_NEED_UPDATE = 1 << 1;
