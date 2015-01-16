@@ -78,10 +78,14 @@ async function initLogin() {
 
 
 function userLoggedIn(session, user) {
+    var previousUser = currentUser;
     currentUser = user;
     sessionId = session;
 
-    store.emit('loginstatuschange');
+    store.emit('loginstatuschange', {
+        oldUser: previousUser,
+        newUser: currentUser
+    });
 }
 
 

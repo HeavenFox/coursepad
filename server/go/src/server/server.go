@@ -27,7 +27,7 @@ func main() {
 	goji.Get("/endpoints/sharing/shared/:slug", sharing.GetSharedHandler)
 
 	goji.Handle("/endpoints/sync/websocket", sync.SyncSocketHandler)
-	goji.Get("/endpoints/sync/schedule", sync.GetScheduleHandler)
+	goji.Get("/endpoints/sync/schedule/:term", sync.GetScheduleHandler)
 
 	goji.Get("/shared/:slug/image.png", sharing.GetSharedImageHandler)
 	goji.Get("/shared/:slug", sharing.SharedPageHandler)

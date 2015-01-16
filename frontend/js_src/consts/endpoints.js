@@ -47,4 +47,8 @@ module.exports = {
     sync: function(session, clientId) {
         return 'ws://ws-test.coursepad.me/endpoints/sync/websocket?sid=' + encodeURIComponent(session) + '&clientid=' + encodeURIComponent(clientId);
     },
+
+    getSchedule: function(term) {
+        return '/endpoints/sync/schedule/' + encodeURIComponent(term);
+    },
 }

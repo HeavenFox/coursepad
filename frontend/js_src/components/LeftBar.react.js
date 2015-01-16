@@ -1,4 +1,5 @@
 var schedules = require('../store/schedules.js');
+var schedulestorage = require('../store/schedulestorage.js');
 var ana = require('../analytics/analytics.js');
 
 var ScheduleIcon = React.createClass({
@@ -116,11 +117,11 @@ var LeftBar = React.createClass({
     componentDidMount: function() {
         var handler = (function(){
             if (schedules.ready) {
-                this.setState({schedules: schedules.getAllSchedules()});
+                this.setState({schedules: schedulestorage.getAllSchedules()});
             }
         }).bind(this);
         schedules.on('readystatechange', handler);
-        schedules.on('listchange', handler);
+        schedulestorage.on('listchange', handler);
     },
 
     _addSchedule: function() {
@@ -128,13 +129,13 @@ var LeftBar = React.createClass({
     },
 
     _saveNewSchedule: function(name, color) {
-        schedules.addSchedule(name, color);
-        ana.sevent('multischedule', 'add', schedules.numberOfSchedules());
+        schedulestorage.addSchedule(name, color);
+        ana.sevent('multischedule', 'add', schedulestorage.numberOfSchedules());
         this.setState({creating: false});
     },
 
     _saveExistingSchedule: function(index, name) {
-        schedules.renameSchedule(index, name);
+        schedulestorage.renameSchedule(index, name);
     },
 
     _onClick: function(index) {
@@ -143,8 +144,8 @@ var LeftBar = React.createClass({
     },
 
     _onDelete: function(index) {
-        schedules.deleteSchedule(index);
-        ana.sevent('multischedule', 'delete', schedules.numberOfSchedules());
+        schedulestorage.deleteSchedule(index);
+        ana.sevent('multischedule', 'delete', schedulestorage.numberOfSchedules());
     },
 
     _onCancelAdd: function() {
@@ -154,11 +155,12 @@ var LeftBar = React.createClass({
     render: function() {
         var lis = [];
         var allSchedules = this.state.schedules;
+        var curSchedule = schedules.getCurrentSchedule();
         if (allSchedules) {
             lis = allSchedules.map(function(schedule, index) {
                 return <ScheduleLine name={schedule.name}
                                      color={schedule.color}
-                                     isCurrent={schedule.isCurrent}
+                                     isCurrent={curSchedule && curSchedule.uniqueId === schedule.uniqueId}
                                      editing={false}
                                      onSave={this._saveExistingSchedule.bind(null, index)}
                                      onClick={this._onClick.bind(null, index)}
@@ -167,7 +169,7 @@ var LeftBar = React.createClass({
             }, this);
 
             if (this.state.creating) {
-                var nameAndColor = schedules.getNewScheduleNameAndColor();
+                var nameAndColor = schedulestorage.getNewScheduleNameAndColor();
                 lis.push(<ScheduleLine name={nameAndColor.name}
                                        color={nameAndColor.color}
                                        isCurrent={false}

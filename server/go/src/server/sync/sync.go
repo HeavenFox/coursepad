@@ -1,6 +1,7 @@
 package sync
 
 import (
+	"database/sql"
 	"encoding/json"
 	"github.com/garyburd/redigo/redis"
 	"github.com/gorilla/websocket"
@@ -50,27 +51,35 @@ type serverMessage struct {
 }
 
 type getScheduleReply struct {
-	Version  int64
-	Schedule *json.RawMessage
+	Version  int64            `json:"version"`
+	Schedule *json.RawMessage `json:"schedule"`
 }
 
 func GetScheduleHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	uid := 1
 	term := c.URLParams["term"]
+	dbconn := db.GetPostgresConn()
 	var schedule []byte
 	var version int64
-	if err := dbconn.QueryRow("SELECT version, schedule FROM schedules WHERE author = $1 AND term = $2", uid, term).Scan(&version, &schedule); err != nil {
-		log.Println(err)
+	err := dbconn.QueryRow("SELECT version, schedule FROM schedules WHERE author = $1 AND term = $2", uid, term).Scan(&version, &schedule)
+	switch {
+	case err == nil:
+	case err == sql.ErrNoRows:
+		w.Write([]byte("{}"))
+		return
+	case err != nil:
+		panic(err)
 	}
-	result = getScheduleReply{
+
+	result := getScheduleReply{
 		Version:  version,
-		Schedule: (*json.RawMessage)(schedule),
+		Schedule: (*json.RawMessage)(&schedule),
 	}
 	resultJson, err := json.Marshal(&result)
 	if err != nil {
 		panic(err)
 	}
-	r.Write(resultJson)
+	w.Write(resultJson)
 }
 
 func SyncSocketHandler(w http.ResponseWriter, r *http.Request) {

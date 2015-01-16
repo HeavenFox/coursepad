@@ -8,11 +8,9 @@ var user = require('./user.js');
 
 var localStore = require('../persist/localStorage.js');
 
-var endpoints = require('../consts/endpoints.js');
-
-var color = require('../utils/color.js');
 
 var ana = require('../analytics/analytics.js');
+var schedulestorage = require('./schedulestorage.js');
 
 const PREFER_LOCAL = 1;
 const PREFER_REMOTE = 2;
@@ -20,7 +18,7 @@ const NO_PREFERENCE = 3;
 
 var store = EventEmitter({
     ready: false,
-    setCurrentSchedule: function(term, index) {
+    setCurrentSchedule: async function(term, index) {
         router.changePath('/');
 
         var currentTermDB = termdb.getCurrentTerm();
@@ -34,46 +32,39 @@ var store = EventEmitter({
         }
 
         if (this.currentSchedule) {
-            if ((this.currentSchedule.term === term) && 
-                (this.currentSchedule.index === index)) {
-                return Promise.resolve(false);
+            if ((this.currentSchedule.term === term) && (this.currentSchedule.index === index)) {
+                return false;
             }
             self.ready = false;
             self.emit('readystatechange');
         }
 
-        if (!this.currentStorage || this.currentStorage.term !== term) {
-            this.currentStorage = new ScheduleStorage(term);
-            getWebSocket();
-        }
+        schedulestorage.setStorage(term);
 
         var shouldCheckForUpdates = false;
 
         var dbLoadedPromise;
-        if (term === undefined || (termdb.getCurrentTerm() && termdb.getCurrentTerm().term == term)) {
-            dbLoadedPromise = Promise.resolve();
-        } else {
-            dbLoadedPromise = termdb.setCurrentTerm(term);
+        if (!termdb.getCurrentTerm() || termdb.getCurrentTerm().term !== term) {
+            await termdb.setCurrentTerm(term);
             shouldCheckForUpdates = true;
         }
 
-        var schedule;
-        return dbLoadedPromise.then(function() {
-            schedule = new MutableSchedule();
-            schedule.term = term;
-            schedule.index = index;
-            schedule.storage = self.currentStorage;
+        var schedule = new MutableSchedule();
+        schedule.term = term;
+        schedule.index = index;
+        schedule.storage = schedulestorage.getStorage();
 
-            return self.currentStorage.loadSchedule(schedule);
-        }).then(function() {
-            self._setCurrentSchedule(schedule);
+        await schedulestorage.getStorage().loadSchedule(schedule);
 
-            self.ready = true;
-            self.emit('readystatechange');
-            if (shouldCheckForUpdates) {
-                termdb.checkForUpdates();
-            }
-        });
+        self._setCurrentSchedule(schedule);
+
+        self.ready = true;
+        self.emit('readystatechange');
+        if (shouldCheckForUpdates) {
+            termdb.checkForUpdates();
+        }
+
+        return true;
     },
 
     setSharedSchedule: async function(term, serialized) {
@@ -107,10 +98,10 @@ var store = EventEmitter({
 
     _setCurrentSchedule: function(schedule) {
         this.currentSchedule = schedule;
-        schedule.on('change', this.getOnScheduleChange());
+        schedule.on('change', this._getOnScheduleChange());
     },
 
-    getOnScheduleChange: function() {
+    _getOnScheduleChange: function() {
         var self = this;
         return this.__onScheduleChange || (this.__onScheduleChange = function(v) {
             self.emit('change', v);
@@ -122,357 +113,37 @@ var store = EventEmitter({
         return this.currentSchedule;
     },
 
-    getNewScheduleNameAndColor: function() {
-        var schedule = this.getCurrentSchedule();
-        var storageKey = schedule.term + '_schedules';
-        var list = localStore.get(storageKey, Array);
-        var nameHash = Object.create(null);
-        var colorHash = Object.create(null);
-
-        this.getAllSchedules().forEach(function(schedule) {
-            nameHash[schedule.name] = true;
-            colorHash[schedule.color] = true;
-        });
-
-        var name;
-        var nameSn = 1;
-        while (true) {
-            name = 'Schedule (' + nameSn + ')';
-            if (!nameHash[name]) {
-                break;
-            }
-            nameSn++;
-        }
-
-        var scheduleColor;
-
-        var colorDistance = 1/8;
-        var currentHue = 0;
-        while (true) {
-            scheduleColor = color.hsvToHex(currentHue, 0.25, 0.54);
-            if (!colorHash[scheduleColor]) {
-                break;
-            }
-            currentHue += colorDistance;
-            if (currentHue >= 1) {
-                colorDistance /= 2;
-                currentHue = colorDistance;
-            }
-        }
-
-        return {name: name, color: scheduleColor};
-    },
-
-    withStorageList: function(cb, thisArg) {
-        if (thisArg === undefined) thisArg = null;
-        var schedule = this.getCurrentSchedule();
-        var storageKey = schedule.term + '_schedules';
-        var list = localStore.get(storageKey, Array);
-
-        var result = cb.call(thisArg, list);
-
-        localStore.fsync(storageKey);
-
-        if (result !== undefined) {
-            return result;
-        }
-    },
-
-    numberOfSchedules: function() {
-        return this.withStorageList(function(list) {
-            return list.length;
-        });
-    },
-
-    renameSchedule: function(index, name) {
-        this.withStorageList(function(list) {
-            list[index].name = name;
-        });
-
-        this.emit('listchange');
-    },
-
-    deleteSchedule: function(index) {
-        this.withStorageList(function(list) {
-            var currentSchedule = this.getCurrentSchedule();
-            if (currentSchedule.index === index) {
-                throw new Error();
-            }
-            list.splice(index, 1);
-            if (index < currentSchedule.index) {
-                currentSchedule.index--;
-            }
-        }, this);
-
-        this.emit('listchange');
-    },
-
-    addSchedule: function(name, scheduleColor) {
-        this.withStorageList(function(list) {
-            list.push({
-                color: scheduleColor,
-                name: name,
-                uniqueId: Math.floor(Math.random() * 0xFFFFFFFF)
-            });
-        });
-
-        this.emit('listchange');
-    },
-
-    getAllSchedules: function() {
-        var schedule = this.getCurrentSchedule();
-        if (!schedule) {
-            return null;
-        }
-        var storageKey = termdb.getCurrentTerm().term + '_schedules';
-        var modified = false;
-        var list = localStore.get(storageKey, Array);
-        var result = list.map(function(item, index) {
-            // if (!item['scheduleColor']) {
-            //     modified = true;
-            //     item['scheduleColor'] = '';
-            // }
-
-            // if (!item['scheduleName']) {
-            //     modified = true;
-            //     item['scheduleName'] = 'My Schedule';
-            // }
-
-            return {
-                color: item['color'],
-                name: item['name'],
-                isCurrent: schedule.isMutable && (index === schedule.index),
-                uniqueId: item['uniqueId']
-            };
-        });
-
-        // if (modified) {
-        //     localStore.fsync(storageKey);
-        // }
-
-        return result;
-    },
-
-    onTermDBChange: function() {
+    _onTermDBChange: function() {
         this.currentSchedule.onTermDBChange();
+    },
+
+});
+
+termdb.on('change', store._onTermDBChange.bind(store));
+
+schedulestorage.on('change', function(e) {
+    function handler() {
+        if (!store.ready) {
+            store.once('readystatechange', handler);
+        } else {
+            var schedule = store.getCurrentSchedule();
+            if (schedule.isMutable && schedule.term === e.term) {
+                schedule.onLocalStorageChange();
+            }
+        }
+    }
+
+    handler();
+});
+
+schedulestorage.on('listchange', function() {
+    // Update the current schedule's name
+    var schedule = store.getCurrentSchedule();
+    if (schedule && schedule.isMutable) {
+        schedule.updateNameAndIndex();
     }
 });
 
-termdb.on('change', store.onTermDBChange.bind(store));
-
-
-var webSocketPromise, socketSession;
-
-function clientIdGenerator() {
-    return Math.floor(Math.random() * 0x7FFFFFFF);
-}
-
-function makeSocket(sessionId, clientId) {
-    return new Promise(function(resolve, reject) {
-        var ws = new WebSocket(endpoints.sync(sessionId, clientId));
-        ws.onopen = function() {
-            resolve(ws);
-        };
-
-        ws.onmessage = function(e) {
-            var reply = JSON.parse(e.data);
-            if (reply['action'] === 'ack' || reply['action'] === 'conflict') {
-                while (ackCallbacks.length > 0) {
-                    var cb = ackCallbacks.pop();
-                    cb(reply);
-                }
-            } else if (reply['action'] === 'update') {
-                if (store.currentStorage.term === reply['term']) {
-                    store.currentStorage.receive(reply);
-                }
-            }
-        };
-    });
-}
-
-async function getWebSocket() {
-    // Check current user
-    if (!user.getCurrentUser()) {
-        throw new Error('Not Logged In');
-    }
-
-    if (user.getSession() !== socketSession) {
-        socketSession = user.getSession();
-
-        if (webSocketPromise) {
-            webSocketPromise.then(function(s) { s.close(); });
-            webSocketPromise = null;
-        }
-    }
-
-    var clientId = localStore.get('client_id', clientIdGenerator);
-
-    var socket;
-    while (true) {
-        if (!webSocketPromise) {
-            webSocketPromise = makeSocket(socketSession, clientId);
-        }
-
-        socket = await webSocketPromise;
-
-        if (socket.readyState === WebSocket.OPEN) {
-            break;
-        } else {
-            webSocketPromise = null;
-        }
-
-    }
-    
-    return socket;
-}
-
-var ackCallbacks = [];
-
-const SAVE_INTERVAL = 1000;
-
-function ScheduleStorage(term) {
-    this.term = term;
-    this.timeout = null;
-}
-
-ScheduleStorage.prototype = EventEmitter({});
-
-ScheduleStorage.prototype.loadSchedule = async function(schedule) {
-    var stored = localStore.get(this.getStoreKey(), Array);
-    if (stored[schedule.index] !== undefined) {
-        return await schedule.deserialize(stored[schedule.index]);
-    }
-    return null;
-}
-
-ScheduleStorage.prototype.reloadSchedule = async function(schedule) {
-    var stored = localStore.get(this.getStoreKey(), Array);
-    var index = schedule.index;
-    if (stored[index]['uniqueId'] !== schedule.uniqueId) {
-        for (index = 0; index < stored.length; index++) {
-            if (stored[index]['uniqueId'] === schedule.uniqueId) {
-                break;
-            }
-        }
-
-        if (index === stored.length) {
-            return null;
-        }
-    }
-
-    return await schedule.deserialize(stored[index]);
-};
-
-ScheduleStorage.prototype.persistAndDirtySchedule = function(schedule) {
-    var stored = localStore.get(this.getStoreKey(), Array);
-    stored[schedule.index] = schedule.serialize();
-    localStore.fsync(this.getStoreKey());
-    if (self.inflight) {
-        this.dirtySinceSync = true;
-    } else {
-        this.getSyncStatus()['dirty'] = true;
-        this.persistSyncStatus();
-    }
-};
-
-ScheduleStorage.prototype.getStoreKey = function() {
-    return this.term + '_schedules';
-};
-
-ScheduleStorage.prototype.getSyncStatusKey = function() {
-    return this.term + '_sync_status';
-};
-
-ScheduleStorage.prototype.serialize = function() {
-    return localStore.get(this.getStoreKey());
-};
-
-ScheduleStorage.prototype.getSyncStatus = function() {
-    return localStore.get(this.getSyncStatusKey(), {});
-};
-
-ScheduleStorage.prototype.persistSyncStatus = function() {
-    return localStore.fsync(this.getSyncStatusKey());
-};
-
-ScheduleStorage.prototype.schedulePublish = function() {
-    if (this.timeout) {
-        window.clearTimeout(this.timeout);
-    }
-
-    var self = this;
-    this.timeout = window.setTimeout(function() {
-        self.timeout = null;
-        self.maybePublish();
-    }, SAVE_INTERVAL);
-};
-
-ScheduleStorage.prototype.maybePublish = function() {
-    if (!this.inflight && this.getSyncStatus()['dirty']) {
-        this.publish();
-    }
-};
-
-ScheduleStorage.prototype.publish = async function() {
-    var serialized = this.serialize();
-
-    var syncStatus = this.getSyncStatus();
-
-    var message = {
-        'version' : syncStatus['version'] || 0,
-        'term' : this.term,
-        'schedule' : serialized
-    };
-
-    // Do not update if it is the same thing
-    var text = JSON.stringify(serialized);
-
-    if (this.lastText !== text) {
-        this.lastText = text;
-
-        var socket = await getWebSocket();
-        socket.send(JSON.stringify(message));
-
-        this.inflight = true;
-
-        var self = this;
-        ackCallbacks.push(function(data) {
-            if (data['term'] === self.term) {
-                self.inflight = false;
-                var syncStatus = self.getSyncStatus(); 
-                syncStatus['version'] = data['version'];
-                syncStatus['dirty'] = !!self.dirtySinceSync;
-                self.dirtySinceSync = false;
-                self.persistSyncStatus();
-
-                if (syncStatus['dirty']) {
-                    self.schedulePublish();
-                }
-            }
-        });
-    }
-
-
-    this.persistSyncStatus();
-}
-
-
-ScheduleStorage.prototype.receive = function(data) {
-    var syncStatus = this.getSyncStatus();
-    if (!syncStatus['dirty']) {
-        if (data['version'] > (syncStatus['version'] || 0)) {
-
-            localStore.set(this.getStoreKey(), data['schedule']);
-            syncStatus['version'] = data['version'];
-            this.persistSyncStatus();
-
-            var schedule = store.getCurrentSchedule();
-            if (schedule.isMutable) {
-                store.getCurrentSchedule().onLocalStorageChange();
-            }
-        }
-    }
-};
 
 var palette = [
     'lavender',
@@ -497,7 +168,7 @@ function Schedule() {
 
     this.color = '#979797';
     this.name = 'My Schedule';
-    this.uniqueId = Math.floor(Math.random() * 0x7FFFFFFF);
+    this.uniqueId = -1;
 
     this._conflictCache = null;
 }
@@ -1130,6 +801,9 @@ MutableSchedule.prototype.serialize = function() {
     persist['hidden'] = $.extend({}, this.hidden);
     persist['color'] = this.color;
     persist['name'] = this.name;
+    if (this.uniqueId === -1) {
+        this.uniqueId = randomInt31();
+    }
     persist['uniqueId'] = this.uniqueId;
 
     return persist;
@@ -1137,9 +811,6 @@ MutableSchedule.prototype.serialize = function() {
 
 MutableSchedule.prototype.persistSections = function() {
     this.storage.persistAndDirtySchedule(this);
-    if (user.getCurrentUser()) {
-        this.storage.schedulePublish();
-    }
 };
 
 
@@ -1161,15 +832,14 @@ MutableSchedule.prototype.onLocalStorageChange = function() {
     });
 }
 
-localStore.on('change', function(e) {
-    var chunks = e.key.split('_', 2);
-    if (chunks[1] === 'schedules') {
-        var schedule = store.getCurrentSchedule();
-        if (schedule.constructor === MutableSchedule && schedule.term === chunks[0]) {
-            schedule.onLocalStorageChange();
-        }
+MutableSchedule.prototype.updateNameAndIndex = function() {
+    var serialized = this.storage.getSerializedByUniqueId(this.uniqueId);
+    if (serialized) {
+        this.name = serialized[1]['name'];
+        this.color = serialized[1]['color'];
+        this.index = serialized[0];
     }
-});
+}
 
 function SharedSchedule() {
     Schedule.call(this);
