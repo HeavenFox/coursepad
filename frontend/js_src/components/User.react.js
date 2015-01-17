@@ -2,11 +2,31 @@ var Drop = require('drop');
 
 var user = require('../store/user.js');
 
+var UserAvatar = React.createClass({
+    render: function() {
+        var cls = this.props.className || '';
+        if (this.props.pic) {
+            var style = {'backgroundImage' : 'url("' + this.props.pic.replace('"', '\\"') + '")',
+                         'top' : '0',
+                         'right': '0',
+                         'left' : '0',
+                         'bottom': '0',
+                         'position': 'absolute',
+                         'backgroundSize': 'cover'};
+            return <div className={cls} style={{'position': 'relative', 'overflow': 'hidden'}}>
+                    <div style={style} />
+                </div>;
+        }
+
+        return <div className={cls} />;
+    }
+});
+
 var UserInfoBox = React.createClass({
     render: function() {
         var style = this.props.profilePicture ? {'backgroundImage' : 'url("' + this.props.profilePicture.replace('"', '\\"') + '")'} : {};
-        return <div className="user-info" style={style}>
-                    <div className="user-avatar" />
+        return <div className="user-info">
+                    <UserAvatar className="user-avatar" pic={this.props.profilePicture} />
                     <div className="user-name">{this.props.name ? this.props.name : 'Guest'}</div>
                 </div>;
     }
@@ -18,7 +38,7 @@ var UserMenu = React.createClass({
     },
 
     getInitialState: function() {
-        return {};
+        return {user: user.getCurrentUser()};
     },
 
     _toggleEmail: function() {
@@ -31,37 +51,63 @@ var UserMenu = React.createClass({
         user.emailLogin(elements['email'].value, elements['password'].value);
     },
 
+    _logout: function() {
+
+    },
+
+    _onUserChange: function() {
+        this.setState({user: user.getCurrentUser()});
+    },
+
+    componentDidMount: function() {
+        user.on('loginstatuschange', this._onUserChange);
+    },
+
+    componentWillUnmount: function() {
+        user.off('loginstatuschange', this._onUserChange);
+    },
+
     render: function() {
-        var className = "user-menu guest";
-        if (this.state.pane) {
-            className += (" " + this.state.pane);
-        }
-        return <div className={className}>
-            <div className="user-options">
-                <UserInfoBox />
-                <hr />
+        if (this.state.user) {
+            return <div className="user-menu">
+                <div className="user-options">
+                    <UserInfoBox profilePicture={this.state.user.profilePicture} name={this.state.user.name} />
+                    <hr />
 
-                <p className="linkish" onClick={this._fbLogin}>Login with Facebook</p>
-                <p className="linkish" onClick={this._toggleEmail}>Login with Email</p>
-                <hr />
-                <p className="linkish">Register with Email</p>
-            </div>
-            <div className="user-loginform">
-                <div className="user-loginform-inner">
-                <p>Login with Email</p>
-                <form onSubmit={this._emailLogin}>
-                <label>Email
-                    <input name="email" type="email" placeholder="e.g. admin@coursepad.me" />
-                </label>
-                <label>Password
-                    <input name="password" type="password" />
-                </label>
-                <input type="submit" value="Login" />
-                </form>
+                    <p className="linkish" onClick={this._logout}>Logout</p>
                 </div>
-            </div>
-        </div>;
+            </div>;
+        } else {
+            var className = "user-menu guest";
+            if (this.state.pane) {
+                className += (" " + this.state.pane);
+            }
+            return <div className={className}>
+                <div className="user-options">
+                    <UserInfoBox />
+                    <hr />
 
+                    <p className="linkish" onClick={this._fbLogin}>Login with Facebook</p>
+                    <p className="linkish" onClick={this._toggleEmail}>Login with Email</p>
+                    <hr />
+                    <p className="linkish">Register with Email</p>
+                </div>
+                <div className="user-loginform">
+                    <div className="user-loginform-inner">
+                    <p>Login with Email</p>
+                    <form onSubmit={this._emailLogin}>
+                    <label>Email
+                        <input name="email" type="email" placeholder="e.g. admin@coursepad.me" />
+                    </label>
+                    <label>Password
+                        <input name="password" type="password" />
+                    </label>
+                    <input type="submit" value="Login" />
+                    </form>
+                    </div>
+                </div>
+            </div>;
+        }
     }
 });
 
@@ -107,12 +153,8 @@ var User = React.createClass({
         if (this.state.user) {
             userName = this.state.user.name;
         }
-        var profilePicture = {};
-        if (this.state.user && this.state.user.profilePicture) {
-            profilePicture['backgroundImage'] = 'url(' + this.state.user.profilePicture + ')';
-        }
         return <div className="current-user-inner"><span ref="trigger" className="btnish">
-            <div className="topbar-user-icon" style={profilePicture} />
+            <UserAvatar className="topbar-user-icon" pic={this.state.user && this.state.user.profilePicture} />
             {userName + ' \u25BE'}</span></div>
     }
 });
