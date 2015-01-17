@@ -8,6 +8,7 @@ var ConflictIndicator = require('./ConflictIndicator.react.js');
 var schedules = require('../store/schedules.js');
 
 var datetime = require('../utils/datetime.js');
+var humanize = require('../consts/humanize.js');
 
 var DropoffSet = React.createClass({
     getInitialState: function() {
@@ -84,9 +85,23 @@ var Calendar = React.createClass({
             var startHour = datetime.timeStringToHour(meeting.startTime);
             var length = datetime.timeStringToHour(meeting.endTime) - startHour;
             var time = meeting.startTime + ' \u2013 ' + meeting.endTime;
-            var location = meeting.building;
+            var location;
+            var shortBuilding = humanize.getShortBuildingName(meeting.building);
+            if (shortBuilding) {
+                location = shortBuilding;
+            } else {
+                location = meeting.building;
+            }
             if (meeting.room) {
                 location += (' ' + meeting.room);
+            }
+
+            var longBuilding = humanize.getLongBuildingName(meeting.building);
+            if (longBuilding) {
+                longBuilding = longBuilding + ' (' + meeting.building + ')';
+                if (meeting.room) {
+                    longBuilding += (', ' + meeting.room);
+                }
             }
             var title = meeting.parent.parent.subject + ' ' + meeting.parent.parent.number;
             for (var day = 0; day < 7; day++) {
@@ -96,6 +111,7 @@ var Calendar = React.createClass({
                         nbr: meeting.parent.number,
                         title: title,
                         location: location,
+                        longLocation: longBuilding,
                         time: time,
                         day: days[day],
                         st_offset: startHour - 8,

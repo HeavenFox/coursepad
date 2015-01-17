@@ -69,11 +69,15 @@ var SingleMeeting = React.createClass({
         classNames += ' ' + this.props['color'];
 
         var style = this.getLayoutStyle();
+        var extra = {};
+        if (this.props['longLocation']) {
+            extra['title'] = this.props['longLocation'];
+        }
 
         return <div style={style} className={classNames} ref="meeting" data-nbr={this.props['nbr']}>
             <p className='meeting-title'>{this.props['title']}</p>
             <p className='meeting-time'>{this.props['time']}</p>
-            <p className='meeting-loc'>{this.props['location']}</p>
+            <p className='meeting-loc' {...extra}>{this.props['location']}</p>
         </div>;
     }
 });
