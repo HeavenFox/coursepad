@@ -46,7 +46,6 @@ var store = EventEmitter({
         var dbLoadedPromise;
         if (!termdb.getCurrentTerm() || termdb.getCurrentTerm().term !== term) {
             await termdb.setCurrentTerm(term);
-            shouldCheckForUpdates = true;
         }
 
         var schedule = new MutableSchedule();
@@ -60,9 +59,6 @@ var store = EventEmitter({
 
         self.ready = true;
         self.emit('readystatechange');
-        if (shouldCheckForUpdates) {
-            termdb.checkForUpdates();
-        }
 
         return true;
     },

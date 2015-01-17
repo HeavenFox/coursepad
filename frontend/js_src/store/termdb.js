@@ -380,6 +380,7 @@ async function setCurrentTerm(term, preference) {
         if (localTermDownloaded(term)) {
             // Downloaded, so we can just use it
             await downloadLocalTerm(term);
+            this.checkForUpdates();
         } else {
             // Kick off download, but don't wait for it
             downloadLocalTerm(term);
@@ -513,9 +514,6 @@ var store = new EventEmitter({
     getRemoteTerm: getRemoteTerm,
 
     checkForUpdates: function() {
-        if (!useLocal()) {
-            return;
-        }
         var self = this;
         checkForUpdates().then(function(result) {
             if (result !== false) {
