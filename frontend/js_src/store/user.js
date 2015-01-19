@@ -146,7 +146,20 @@ var store = EventEmitter({
 
     register: async function(userinfo) {
 
-    }
+    },
+
+    logout: function() {
+        var prev = currentUser;
+        currentUser = null;
+
+        sessionId = null;
+        cookies.expire('sessionId');
+
+        this.emit('loginstatuschange', {
+            oldUser: prev,
+            newUser: currentUser
+        });
+    },
 });
 
 module.exports = store;

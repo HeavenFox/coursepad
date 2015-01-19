@@ -84,6 +84,17 @@ var store = EventEmitter({
     getAllSchedules: function() {
         return this.getStorage().getAllSchedules.apply(this.getStorage(), arguments);
     },
+
+    deleteLocal: function() {
+        var pattern = /^[a-z]{2}[0-9]{2}_(sync_status|schedules)$/;
+        localStore.keys().forEach(function(key) {
+            if (key.match(pattern)) {
+                localStore.del(key);
+            }
+        });
+        this._emitChange();
+        this._emitListChange();
+    },
 });
 
 
@@ -187,7 +198,7 @@ ScheduleStorage.prototype.loadSchedule = async function(schedule) {
 ScheduleStorage.prototype.reloadSchedule = async function(schedule) {
     var stored = localStore.get(this.getStoreKey(), Array);
     var index = schedule.index;
-    if (stored[index]['uniqueId'] !== schedule.uniqueId && schedule.uniqueId !== -1) {
+    if ((!stored[index] || stored[index]['uniqueId'] !== schedule.uniqueId) && schedule.uniqueId !== -1) {
         for (index = 0; index < stored.length; index++) {
             if (stored[index]['uniqueId'] === schedule.uniqueId) {
                 break;
@@ -195,12 +206,17 @@ ScheduleStorage.prototype.reloadSchedule = async function(schedule) {
         }
 
         if (index === stored.length) {
-            return null;
+            schedule.clear();
+            return false;
         }
 
         schedule.index = index;
     }
 
+    if (!stored[index]) {
+        schedule.clear();
+        return false;
+    }
     return await schedule.deserialize(stored[index]);
 };
 

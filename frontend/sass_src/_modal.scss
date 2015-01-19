@@ -44,3 +44,28 @@ span.modal-close {
     display: block;
     float: right;
 }
+
+
+.modal-alert > h2 {
+  font-weight: normal;
+  font-size: 16px;
+  padding: 10px;
+}
+
+.modal-alert .btn-row {
+    text-align: center;
+    padding: 0;
+}
+
+.modal-alert .btn-row .btn {
+    margin: 5px 3px;
+    padding: 5px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    background-color: #eee;
+    min-width: 50px;
+}
+
+.modal-alert-content {
+    padding: 3px 10px;
+}

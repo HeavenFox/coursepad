@@ -496,6 +496,7 @@ Schedule.prototype.setSectionsWithClassNumbers = function(sections) {
 function MutableSchedule() {
     Schedule.call(this);
 
+    this.index = 0;
     this.isMutable = true;
 }
 
@@ -814,6 +815,10 @@ MutableSchedule.prototype.persistSections = function() {
 MutableSchedule.prototype.reload = function() {
     return this.storage.reloadSchedule(this);
 }
+
+MutableSchedule.prototype.clear = function() {
+    MutableSchedule.call(this);
+};
 
 MutableSchedule.prototype.onTermDBChange = function() {
     var self = this;

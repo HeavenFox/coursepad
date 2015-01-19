@@ -1,6 +1,8 @@
 var Drop = require('drop');
 
 var user = require('../store/user.js');
+var schedulestorage = require('../store/schedulestorage.js');
+var modal = require('../utils/modal.js');
 
 var UserAvatar = React.createClass({
     render: function() {
@@ -51,8 +53,17 @@ var UserMenu = React.createClass({
         user.emailLogin(elements['email'].value, elements['password'].value);
     },
 
-    _logout: function() {
-
+    _logout: async function() {
+        var result = await modal.alert('Delete Local Schedule', 'Do you want to remove your schedules from local computer as well?', {
+            'y': 'Yes',
+            'n': 'No',
+        }, {}, true);
+        if (result !== null) {
+            user.logout();
+            if (result) {
+                schedulestorage.deleteLocal();
+            }
+        }
     },
 
     _onUserChange: function() {

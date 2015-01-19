@@ -3,7 +3,9 @@ var EventEmitter = require('event-emitter');
 var localStore = EventEmitter({
     get: get,
     set: set,
-    fsync: fsync
+    fsync: fsync,
+    keys: keys,
+    del: del,
 });
 
 var cache = {};
@@ -11,7 +13,7 @@ var cache = {};
 function get(key, def) {
     if (!cache.hasOwnProperty(key)) {
         if (window.localStorage[key] !== undefined) {
-            cache[key] = JSON.parse(window.localStorage[key]);
+            cache[key] = JSON.parse(window.localStorage.getItem(key));
         } else {
             if (def !== undefined) {
                 if (typeof def == "function") {
@@ -31,8 +33,23 @@ function set(key, value) {
     fsync(key);
 }
 
+function del(key) {
+    window.localStorage.removeItem(key);
+    delete cache[key];
+}
+
 function fsync(key) {
-    window.localStorage[key] = JSON.stringify(cache[key]);
+    if (cache.hasOwnProperty(key)) {
+        window.localStorage.setItem(key, JSON.stringify(cache[key]));
+    }
+}
+
+function keys() {
+    var result = [];
+    for (var i=0; i < window.localStorage.length; i++) {
+        result.push(window.localStorage.key(i));
+    }
+    return result;
 }
 
 module.exports = localStore;
