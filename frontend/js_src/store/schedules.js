@@ -8,6 +8,7 @@ var user = require('./user.js');
 
 var localStore = require('../persist/localStorage.js');
 
+var randomInt31 = require('../utils/rand.js').int31;
 
 var ana = require('../analytics/analytics.js');
 var schedulestorage = require('./schedulestorage.js');
