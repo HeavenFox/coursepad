@@ -3,10 +3,12 @@ package main
 import (
 	"github.com/vharitonsky/iniflags"
 	"github.com/zenazn/goji"
+	"github.com/zenazn/goji/graceful"
 	"server/sharing"
 	"server/sync"
 	"server/termdb"
 	"server/user"
+	"time"
 )
 
 func main() {
@@ -15,6 +17,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	graceful.Timeout(30 * time.Second)
 
 	goji.Get("/endpoints/termdb/:term/search", termdb.SearchHandler)
 	goji.Get("/endpoints/termdb/:term/basket", termdb.BasketHandler)
