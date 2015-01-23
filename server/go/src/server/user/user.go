@@ -23,6 +23,8 @@ import (
 
 const SESSION_TIMEOUT_EPHEMERAL = 7200
 
+var ErrNotLoggedIn = errors.New("Not Logged In")
+
 func mustMarshal(v interface{}) []byte {
 	r, err := json.Marshal(v)
 	if err != nil {
@@ -34,7 +36,7 @@ func mustMarshal(v interface{}) []byte {
 func GetUserIdForHeader(r *http.Request) (int, error) {
 	sessionIdString := r.Header.Get("Authorization")
 	if sessionIdString == "" {
-		return 0, errors.New("Not Logged In")
+		return 0, ErrNotLoggedIn
 	}
 
 	return GetUserIdForSession(sessionIdString)

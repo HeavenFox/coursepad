@@ -9,3 +9,4 @@ deploy.sh
 *.swp
 *.pyc
 *.bak
+*sublime*

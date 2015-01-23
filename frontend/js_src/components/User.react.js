@@ -60,7 +60,7 @@ var UserMenu = React.createClass({
         }, {}, true);
         if (result !== null) {
             user.logout();
-            if (result) {
+            if (result === 'y') {
                 schedulestorage.deleteLocal();
             }
         }

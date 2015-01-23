@@ -471,7 +471,20 @@ ScheduleStorage.prototype.getSerializedByUniqueId = function(uniqueId) {
 };
 
 ScheduleStorage.prototype.firstSync = async function() {
-    if (user.getCurrentUser()) {
+    var curUser;
+    if (curUser = user.getCurrentUser()) {
+        // If owner changed, reset
+        var syncStatus = this.getSyncStatus();
+        if (syncStatus['owner'] !== curUser.id) {
+            if (localStore.get(this.getStoreKey(), Array).length > 0) {
+                syncStatus['dirty'] = true;
+            }
+            syncStatus['version'] = 0;
+            syncStatus['owner'] = curUser.id;
+            this.persistSyncStatus();
+        }
+
+
         try {
             var data = await ajax.getJson(endpoints.getSchedule(this.term), {'headers' : user.signHeader()});
         } catch (e) {
@@ -479,6 +492,7 @@ ScheduleStorage.prototype.firstSync = async function() {
         }
 
         if (!data['version']) {
+            this.schedulePublish();
             return false;
         }
 

@@ -56,12 +56,16 @@ type getScheduleReply struct {
 }
 
 func GetScheduleHandler(c web.C, w http.ResponseWriter, r *http.Request) {
-	uid := 1
+	uid, err := user.GetUserIdForHeader(r)
+	if err != nil {
+		httperror.Unauthenticated(w, "")
+		return
+	}
 	term := c.URLParams["term"]
 	dbconn := db.GetPostgresConn()
 	var schedule []byte
 	var version int64
-	err := dbconn.QueryRow("SELECT version, schedule FROM schedules WHERE author = $1 AND term = $2", uid, term).Scan(&version, &schedule)
+	err = dbconn.QueryRow("SELECT version, schedule FROM schedules WHERE author = $1 AND term = $2", uid, term).Scan(&version, &schedule)
 	switch {
 	case err == nil:
 	case err == sql.ErrNoRows:
