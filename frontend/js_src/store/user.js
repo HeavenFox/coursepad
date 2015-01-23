@@ -4,6 +4,8 @@ var ajax = require('../utils/ajax.js');
 var endpoints = require('../consts/endpoints.js');
 var cookies = require('cookies-js');
 
+const LOGIN_EMAIL = 1, LOGIN_FB = 2;
+
 // Facebook Integration
 const FB_APP_ID = '399310430207216';
 const SCOPE = 'public_profile,email,user_friends';
@@ -15,8 +17,9 @@ function storeSession(sessionId, isPersistent) {
 async function facebookLogin(accessToken) {
     try {
         var result = await ajax.post(endpoints.userLogin('fb'), {'access_token' : accessToken});
-        userLoggedIn(result['session_id'], new User().fromBundle(result['user']));
+        loginMethod = LOGIN_FB;
         storeSession(result['session_id']);
+        userLoggedIn(result['session_id'], new User().fromBundle(result['user']));
     } catch (e) {
 
     }
@@ -102,8 +105,8 @@ User.prototype.fromBundle = function(bundle) {
 }
 
 var currentUser = null;
-
 var sessionId = null;
+var loginMethod = null;
 
 var store = EventEmitter({
     loggedIn: function() {
@@ -140,8 +143,10 @@ var store = EventEmitter({
     emailLogin: async function(email, password, rememberMe) {
         var result = await ajax.post(endpoints.userLogin('email'), {'email' : email, 'password' : password});
 
-        userLoggedIn(result['session_id'], new User().fromBundle(result['user']));
+
+        loginMethod = LOGIN_EMAIL;
         storeSession(result['session_id'], rememberMe);
+        userLoggedIn(result['session_id'], new User().fromBundle(result['user']));
     },
 
     register: async function(userinfo) {
@@ -154,6 +159,10 @@ var store = EventEmitter({
 
         sessionId = null;
         cookies.expire('sessionId');
+
+        if (loginMethod === LOGIN_FB) {
+            FB.logout();
+        }
 
         this.emit('loginstatuschange', {
             oldUser: prev,
