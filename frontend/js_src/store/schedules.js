@@ -71,6 +71,7 @@ var store = EventEmitter({
         }
 
         var db = termdb.getRemoteTerm(term);
+        schedulestorage.setStorage(term);
 
         var schedule = new SharedSchedule();
         schedule.term = term;

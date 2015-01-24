@@ -26,8 +26,11 @@ var BasicInfo = React.createClass({
     },
 
     _update: function() {
-        var newState = schedules.getCurrentSchedule().getBasicInfo();
-        newState['conflicts'] = schedules.getCurrentSchedule().getConflictIntervals().length > 0;
+        var curSchedule = schedules.getCurrentSchedule();
+        var newState = curSchedule.getBasicInfo();
+        newState.conflicts = curSchedule.getConflictIntervals().length > 0;
+        newState.isSharing = curSchedule.isShared;
+        newState.isMutable = curSchedule.isMutable;
         this.setState(newState);
     },
 
@@ -64,8 +67,9 @@ var BasicInfo = React.createClass({
     },
 
     getInitialState: function() {
-        return {units: [0,0], classes: 0, hours: 0, conflicts: false, showConflicts: false};
+        return {units: [0,0], classes: 0, hours: 0, conflicts: false, showConflicts: false, isSharing: false, isMutable: false};
     },
+
     render: function() {
         var conflict = null;
         if (this.state.conflicts) {
@@ -78,8 +82,11 @@ var BasicInfo = React.createClass({
                         </div>
         }
 
+        var isSharing = this.state.isSharing ? <h2>Shared Schedule</h2> : null;
+
         var creditIsRange = this.state['units'][0] != this.state['units'][1];
-        return <div className={"basic-info-container" + (this.state.conflicts ? ' conflicts' : '')}>
+        return <div className={"utilities-item basic-info-container" + (this.state.conflicts ? ' conflicts' : '') + (this.state.isMutable ? ' mutable' : '')}>
+            {isSharing}
             <div className="basic-info-stats">
             <div className="basic-info">
                 <p className={'basic-info-value total-credit' + (creditIsRange ? ' total-credit-range' : '')}>
@@ -99,7 +106,9 @@ var BasicInfo = React.createClass({
             </div>
             <div style={{clear: 'both'}} />
             </div>
+            <div className="basic-info-conflict-container">
             {conflict}
+            </div>
         </div>
     }
 });

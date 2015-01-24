@@ -1,18 +1,23 @@
 .basic-info-container {
-    height: 100px;
+    /*height: 100px;*/
     padding: 1px;
+    margin-top: 6px;
+}
+
+.utilities-item.basic-info-container > h2 {
+    margin-top: 5px;
 }
 
 .basic-info-container .basic-info-stats {
-    margin-top: 16px;
+    margin-top: 10px;
 }
 
 .basic-info-container.conflicts .basic-info-stats {
     margin-top: 0;
 }
 
-.basic-info-conflict-container {
-    height: 38px;
+.mutable .basic-info-conflict-container {
+    min-height: 38px;
 }
 
 .basic-info-conflict {
