@@ -12,6 +12,7 @@ import (
 	"github.com/zenazn/goji/web"
 	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"server/common/db"
@@ -110,8 +111,8 @@ type fqlSingleFriend struct {
 }
 
 type fqlPaging struct {
-	next     *string
-	previous *string
+	Next     *string
+	Previous *string
 }
 
 type fqlFriendResponse struct {
@@ -220,18 +221,21 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 
 			resp, err := http.Get(url)
 			if err != nil {
+				log.Println(err)
 				return
 			}
 			defer resp.Body.Close()
 
 			data, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
+				log.Println(err)
 				return
 			}
 
 			err = json.Unmarshal(data, &fqlResponse)
 
 			if err != nil {
+				log.Println(err)
 				return
 			}
 
@@ -239,19 +243,27 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 				userIds = append(userIds, friend.Id)
 			}
 
+			if fqlResponse.Paging.Next == nil {
+				break
+			} else {
+				url = *fqlResponse.Paging.Next
+			}
 		}
 
 		tx, err := conn.Begin()
 		if err != nil {
+			log.Println(err)
 			return
 		}
-		tx.Exec("DELETE FROM fb_friends WHERE user = $1", userBundle.Id)
+		tx.Exec("DELETE FROM fb_friends WHERE id = $1", userBundle.Id)
 		for _, id := range userIds {
-			tx.Exec("INSERT INTO fb_friends (user, friend_fbid) VALUES ($1, $2)", userBundle.Id, id)
+			_, err := tx.Exec("INSERT INTO fb_friends (id, friend_fbid) VALUES ($1, $2)", userBundle.Id, id)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 
 		tx.Commit()
-
 	}()
 
 	return sessionId, userBundle, nil
