@@ -15,7 +15,10 @@ var revCollector = require('gulp-rev-collector');
 var minifyHTML   = require('gulp-minify-html');
 var gulpFilter = require('gulp-filter');
 
-var DEV = false;
+var LEVEL = +process.env.LEVEL;
+if (!LEVEL) LEVEL = 1;
+
+var DEV = LEVEL == 1;
 
 function target() {
     if (DEV) {
@@ -63,14 +66,14 @@ gulp.task('js', function() {
     var filter = gulpFilter(['main.js']);
     return gulp.src('js_src/app.js')
         .pipe(webpack(webpack_conf()))
-        .pipe(DEV ? insert.prepend('const PROD=false;\n') : gutil.noop())
+        .pipe(DEV ? insert.prepend('const LEVEL=' + LEVEL + ';\n') : gutil.noop())
         .pipe(DEV ? gutil.noop() : uglify({
                 mangle: {
                     except: ['GeneratorFunction']
                 },
                 compress: {
                     drop_console: true,
-                    global_defs: {PROD: true}
+                    global_defs: {'LEVEL': LEVEL}
                 }
              }))
         .pipe(prod(filter))

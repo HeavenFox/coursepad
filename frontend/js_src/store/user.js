@@ -32,7 +32,6 @@ function fbStatusChange(response) {
 }
 
 function initFacebookLogin() {
-
     var fbInit = function() {
         FB.init({
             appId : FB_APP_ID,

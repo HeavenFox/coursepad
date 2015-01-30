@@ -1,3 +1,14 @@
+var WS_SERVER;
+if (LEVEL == 1) {
+    WS_SERVER = 'ws://ws-test.coursepad.me/';
+}
+if (LEVEL == 5) {
+    WS_SERVER = 'wss://staging-ws.coursepad.me/';
+}
+if (LEVEL == 9) {
+    WS_SERVER = 'wss://ws.coursepad.me/';
+}
+
 function queryString(p) {
     var result = '';
     for (var k in p) {
@@ -45,7 +56,7 @@ module.exports = {
     },
 
     sync: function(session, clientId) {
-        return 'ws://ws-test.coursepad.me/endpoints/sync/websocket?sid=' + encodeURIComponent(session) + '&clientid=' + encodeURIComponent(clientId);
+        return WS_SERVER + 'endpoints/sync/websocket?sid=' + encodeURIComponent(session) + '&clientid=' + encodeURIComponent(clientId);
     },
 
     getSchedule: function(term) {
