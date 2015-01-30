@@ -6,7 +6,6 @@ import (
 	"code.google.com/p/freetype-go/freetype/truetype"
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"github.com/lib/pq"
 	"github.com/zenazn/goji/web"
@@ -74,14 +73,6 @@ var ColorPalette = map[string]color.Color{
 	"yellow":     premultiply(229, 234, 200, 0.75),
 }
 
-var dataLocation *string
-var frontendLocation *string
-
-func init() {
-	dataLocation = flag.String("datapath", "", "Server Data Dir Location")
-	frontendLocation = flag.String("frontendpath", "", "Server Data Dir Location")
-}
-
 func strToTime(str string) float64 {
 	t, err := time.Parse("03:04PM", str)
 	if err != nil {
@@ -116,7 +107,7 @@ func DrawClass(gc *draw2d.ImageGraphicContext, x, y, w, h float64, c color.Color
 }
 
 func generateImage(meetings []singleMeeting) []byte {
-	fontBytes, err := ioutil.ReadFile(path.Join(*dataLocation, "sharing", "Roboto-Light.ttf"))
+	fontBytes, err := ioutil.ReadFile(path.Join(*common.DATA_LOCATION, "sharing", "Roboto-Light.ttf"))
 	if err != nil {
 		panic(err)
 	}
@@ -125,7 +116,7 @@ func generateImage(meetings []singleMeeting) []byte {
 		panic(err)
 	}
 
-	sharing_logo_file, err := os.Open(path.Join(*dataLocation, "sharing", "sharing_logo.png"))
+	sharing_logo_file, err := os.Open(path.Join(*common.DATA_LOCATION, "sharing", "sharing_logo.png"))
 	if err != nil {
 		panic(err)
 	}
@@ -311,7 +302,7 @@ func SharedPageHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 		meta := fmt.Sprintf(`<meta property="og:title" content="%s" /><meta property="og:description" content="%s" /><meta property="og:site_name" content="CoursePad.me" /><meta property="og:image" content="%s" />`, html.EscapeString(title), html.EscapeString(description), html.EscapeString(image))
 
-		indexHtml, err := ioutil.ReadFile(path.Join(*frontendLocation, "index.html"))
+		indexHtml, err := ioutil.ReadFile(path.Join(*common.FRONTEND_LOCATION, "index.html"))
 
 		if err != nil {
 			panic(err)

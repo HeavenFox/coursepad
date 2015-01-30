@@ -4,6 +4,7 @@ import (
 	"github.com/vharitonsky/iniflags"
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/graceful"
+	"server/conduit"
 	"server/sharing"
 	"server/sync"
 	"server/termdb"
@@ -35,6 +36,8 @@ func main() {
 
 	goji.Get("/shared/:slug/image.png", sharing.GetSharedImageHandler)
 	goji.Get("/shared/:slug", sharing.SharedPageHandler)
+
+	goji.Post("/endpoints/conduit/", conduit.ConduitHandler)
 
 	goji.Serve()
 }

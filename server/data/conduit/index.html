@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="/css/normalize-1.1.3.css">
+        <style>
+body {
+font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-weight: 300;
+background-color: #2B2B2B;
+}
+
+.wrapper {
+    width: 600px;
+    margin: 0 auto;
+}
+
+header {
+margin: 0;
+padding: 0;
+height: 70px;
+color: white;
+}
+
+
+#logo {
+  width: 170px;
+  height: 70px;
+  margin: 0 0 0 10px;
+  background-image: url("../img/logo.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 170px 24px;
+  float: left;
+}
+
+@media print, (-o-min-device-pixel-ratio: 5 / 4), (-webkit-min-device-pixel-ratio: 1.25), (min-resolution: 120dpi) {
+    #logo {
+        background-image: url("../img/logo@2x.png"); 
+    } 
+}
+
+
+h1 {
+    font-size: 16px;
+    text-align: right;
+    float: right;
+    line-height: 70px;
+    margin: 0;
+}
+
+#main {
+    width: 100%;
+    background-color: white;
+}
+
+#main-inner {
+    padding: 10px;
+}
+        </style>
+        <script src="/js/vendor/modernizr-2.6.2.min.js"></script>
+    </head>
+    <body>
+        <div class="wrapper">
+        <header>
+            <div id="logo"></div>
+            <h1>Schedule Migration</h1>
+        </header>
+        <div id="main">
+        <div id="main-inner">
+        <h2>Just One Step...</h2>
+        <p>We will migrate these schedules from beta CoursePad.me</p>
+        <p id="migratecontent"></p>
+        <p id="overwritewarning" class="hidden">Warning: your existing schedules on next-generation CoursePad.me will be overwritten!</p>
+        <div class="btn">Migrate Now &amp; Start Using New CoursePad.me</div>
+        </div>
+        </div>
+        </div>
+
+        <script>
+        function nonempty(s) {
+            return s && s != "[]" && s != "{}";
+        }
+        var dataStr = '<DATA>';
+        var data = JSON.parse(dataStr);
+        var localStore = data['schedules'];
+        var overwrite = false;
+        var schedules = [];
+        for (var key in localStore) {
+            if (localStore.hasOwnProperty(key)) {
+                if (nonempty(localStore[key])) {
+                    if (!nonempty(window.localStorage[key])) {
+                        overwrite = true;
+                    }
+                    var term = key.split('_')[0];
+                    schedules.push({
+                        term: term,
+                        schedule: localStore[key]
+                    });
+                }
+            }
+        }
+
+        function migrate() {
+            
+        }
+        </script>
+
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-55674274-2', 'auto');
+          ga('send', 'pageview');
+
+        </script>
+    </body>
+</html>
