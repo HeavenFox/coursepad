@@ -35,7 +35,7 @@ color: white;
   width: 170px;
   height: 70px;
   margin: 0 0 0 10px;
-  background-image: url("../img/logo.png");
+  background-image: url("/img/logo.png");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 170px 24px;
@@ -44,7 +44,7 @@ color: white;
 
 @media print, (-o-min-device-pixel-ratio: 5 / 4), (-webkit-min-device-pixel-ratio: 1.25), (min-resolution: 120dpi) {
     #logo {
-        background-image: url("../img/logo@2x.png"); 
+        background-image: url("/img/logo@2x.png"); 
     } 
 }
 
@@ -65,6 +65,25 @@ h1 {
 #main-inner {
     padding: 10px;
 }
+
+.btn {
+    display: inline-block;
+    margin: 5px 3px;
+    padding: 5px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    background-color: #eee;
+    min-width: 50px;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+
+#overwritewarning {
+    color: red;
+}
         </style>
         <script src="/js/vendor/modernizr-2.6.2.min.js"></script>
     </head>
@@ -77,10 +96,10 @@ h1 {
         <div id="main">
         <div id="main-inner">
         <h2>Just One Step...</h2>
-        <p>We will migrate these schedules from beta CoursePad.me</p>
-        <p id="migratecontent"></p>
-        <p id="overwritewarning" class="hidden">Warning: your existing schedules on next-generation CoursePad.me will be overwritten!</p>
-        <div class="btn">Migrate Now &amp; Start Using New CoursePad.me</div>
+        <p>We're ready to migrate your schedules from CoursePad.me Beta</p>
+        <p>After migration, you shall start accessing CoursePad.me at https://coursepad.me</p>
+        <p id="overwritewarning" class="hidden">Warning: your existing schedules on new CoursePad.me will be overwritten!</p>
+        <div class="btn" id="migrate">Migrate Now &amp; Start Using New CoursePad.me</div>
         </div>
         </div>
         </div>
@@ -91,27 +110,38 @@ h1 {
         }
         var dataStr = '<DATA>';
         var data = JSON.parse(dataStr);
-        var localStore = data['schedules'];
+        var localStore = data['localStorage'];
         var overwrite = false;
         var schedules = [];
         for (var key in localStore) {
             if (localStore.hasOwnProperty(key)) {
                 if (nonempty(localStore[key])) {
-                    if (!nonempty(window.localStorage[key])) {
+                    if (nonempty(window.localStorage[key])) {
                         overwrite = true;
                     }
                     var term = key.split('_')[0];
                     schedules.push({
                         term: term,
-                        schedule: localStore[key]
+                        schedules: localStore[key]
                     });
                 }
             }
         }
 
-        function migrate() {
-            
+        if (overwrite) {
+            document.getElementById('overwritewarning').className = '';
+
         }
+
+        function migrate() {
+            schedules.forEach(function(item) {
+                window.localStorage[item.term + '_schedules'] = item.schedules;
+                window.localStorage[item.term + '_sync_status'] = JSON.stringify({'dirty' : true});
+            });
+
+            window.location = 'https://coursepad.me/#redirect';
+        }
+        document.getElementById('migrate').addEventListener('click', migrate);
         </script>
 
         <script>
