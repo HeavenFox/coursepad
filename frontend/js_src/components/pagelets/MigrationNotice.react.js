@@ -30,7 +30,7 @@ var MigrationNotice = React.createClass({
             <h2>A New Version of CoursePad.me is Available</h2>
             <p>Click the button below to migrate your schedules to the new version</p>
 
-            <form method="post" action="https://coursepad.me/conduit/" ref="form">
+            <form method="post" action="https://coursepad.me/endpoints/conduit/" ref="form">
             <input type="hidden" name="data" ref="data" />
             </form>
             <div className="start-using-btn-container">
