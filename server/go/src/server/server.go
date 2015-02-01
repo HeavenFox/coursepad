@@ -25,7 +25,7 @@ func main() {
 	goji.Get("/endpoints/termdb/:term/basket", termdb.BasketHandler)
 
 	goji.Post("/endpoints/user/signin/:method", user.UserSigninHandler)
-	goji.Post("/endpoints/user/register", user.UserRegistrationHandler)
+	// goji.Post("/endpoints/user/register", user.UserRegistrationHandler)
 	goji.Get("/endpoints/user/session", user.BundleFromSessionHandler)
 
 	goji.Post("/endpoints/sharing/share", sharing.ShareHandler)

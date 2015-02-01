@@ -99,11 +99,12 @@ var UserMenu = React.createClass({
                     <hr />
 
                     <p className="linkish" onClick={this._fbLogin}>Login with Facebook</p>
-                    <p className="linkish" onClick={this._toggleEmail}>Login with Email</p>
+                    {/*<p className="linkish" onClick={this._toggleEmail}>Login with Email</p>
                     <hr />
-                    <p className="linkish">Register with Email</p>
+                    <p className="linkish">Register with Email</p>*/}
                 </div>
                 <div className="user-loginform">
+                {/*
                     <div className="user-loginform-inner">
                     <p>Login with Email</p>
                     <form onSubmit={this._emailLogin}>
@@ -116,6 +117,7 @@ var UserMenu = React.createClass({
                     <input type="submit" value="Login" />
                     </form>
                     </div>
+                */}
                 </div>
             </div>;
         }
