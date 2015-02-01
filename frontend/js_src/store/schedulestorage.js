@@ -221,16 +221,19 @@ ScheduleStorage.prototype.reloadSchedule = async function(schedule) {
 };
 
 ScheduleStorage.prototype.persistAndDirtySchedule = function(schedule) {
+    var listChanged = (this.numberOfSchedules() === 0)
+    
     var stored = localStore.get(this.getStoreKey(), Array);
     stored[schedule.index] = schedule.serialize();
     this.persistAndDirtyStorage();
+
+    if (listChanged) {
+        store._emitListChange();
+    }
 };
 
 ScheduleStorage.prototype.persistAndDirtyStorage = function() {
     localStore.fsync(this.getStoreKey());
-    if (store.numberOfSchedules() === 0) {
-        store._emitListChange();
-    }
 
     if (self.inflight) {
         this.dirtySinceSync = true;
