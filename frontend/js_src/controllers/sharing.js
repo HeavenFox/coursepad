@@ -7,7 +7,7 @@ async function shareSchedule() {
     var curUser = user.getCurrentUser();
     var curSchedule = schedule.getCurrentSchedule();
     if (!curUser) {
-        //throw new Error('Need Sign In');
+        throw new Error('Need Sign In');
     }
     if (!curSchedule) {
         throw new Error('Schedule not ready');
@@ -17,8 +17,6 @@ async function shareSchedule() {
     var options = {
         'headers': user.signHeader({})
     };
-
-    console.log(JSON.stringify(JSON.stringify(json)));
 
     return await ajax.post(endpoints.share(), {
         'schedule': JSON.stringify(json),

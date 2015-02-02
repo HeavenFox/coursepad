@@ -1,14 +1,21 @@
 var sharing = require('../../controllers/sharing.js');
+var fb = require('../../thirdparty/fb.js');
+var twitter = require('../../thirdparty/twitter.js');
 
 var SocialNetworks = React.createClass({
     componentDidMount: function() {
         var root = this.getDOMNode();
-        if (window.twttr) {
+        (async function() {
+            await twitter.init();
+
             window.twttr.widgets.load(root);
-        }
-        if (window.FB) {
+        })();
+
+        (async function() {
+            await fb.init();
+
             window.FB.XFBML.parse(root);
-        }
+        })();
     },
 
     render: function() {
@@ -19,7 +26,7 @@ var SocialNetworks = React.createClass({
         return <div className="sharing-social-networks">
             <div className="fb-share-button" data-href={this.props.url} data-layout="button"></div>
             <div className="twitter-share-button">
-                <a href="https://twitter.com/share" className="twitter-share-button" data-url={this.props.url} data-text="Check out my schedule on @CoursePadme!" data-count="none">Tweet</a>
+                <a href="https://twitter.com/share" className="twitter-share-button" data-url={this.props.url} data-text="Check out my schedule on @CoursePadme!" data-count="none"></a>
             </div>
         </div>;
     }
@@ -31,12 +38,16 @@ var Sharing = React.createClass({
     },
 
     _share: async function() {
+        // Initialize FB and Twitter
+        fb.init();
+        twitter.init();
+
         this.setState({status: 'sending', url: null});
         try {
             var result = await sharing.shareSchedule();
             this.setState({status: 'shared', url: result['url']});
         } catch (e) {
-            this.setState({status: 'failed'});
+            this.setState({status: 'failed', url: null});
         }
 
     },
@@ -67,10 +78,8 @@ var Sharing = React.createClass({
         if (this.state.url) {
             url = <div>
                 <input value={this.state.url} />
-                
             </div>;
-            social = 
-            <SocialNetworks url={this.state.url} />;
+            social = <SocialNetworks url={this.state.url} />;
         }
 
         return <div className="sharing utilities-item">

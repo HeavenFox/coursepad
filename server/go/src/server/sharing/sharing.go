@@ -14,6 +14,7 @@ import (
 	"image/color"
 	"image/png"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -374,6 +375,8 @@ func ShareHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		resp, err := http.Get("https://graph.facebook.com/v2.2/?id=" + url.QueryEscape(sharedUrl) + "&access_token=" + url.QueryEscape(fb.AppToken()))
 		if err == nil {
 			resp.Body.Close()
+		} else {
+			log.Println(err)
 		}
 	}()
 

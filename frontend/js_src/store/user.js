@@ -4,6 +4,8 @@ var ajax = require('../utils/ajax.js');
 var endpoints = require('../consts/endpoints.js');
 var cookies = require('cookies-js');
 
+var fb = require('../thirdparty/fb.js');
+
 const LOGIN_EMAIL = 1, LOGIN_FB = 2;
 
 // Facebook Integration
@@ -31,25 +33,11 @@ function fbStatusChange(response) {
     }
 }
 
-function initFacebookLogin() {
-    var fbInit = function() {
-        FB.init({
-            appId : FB_APP_ID,
-            xfbml : false,
-            cookie : false,
-            version : 'v2.2'
-        });
-        FB.getLoginStatus(function(response) {
-            fbStatusChange(response);
-        });
-    };
-
-    if (window.FB) {
-        fbInit();
-    } else {
-        window.fbAsyncInit = fbInit;
-    }
-
+async function initFacebookLogin() {
+    await fb.init();
+    FB.getLoginStatus(function(response) {
+        fbStatusChange(response);
+    });
 }
 
 async function initSessionLogin(session) {
