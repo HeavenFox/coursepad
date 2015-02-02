@@ -83,6 +83,7 @@ type fqlError struct {
 type fqlUserResult struct {
 	Id    string
 	Name  string `json:"name"`
+	Email string
 	Error *fqlError
 }
 
@@ -197,8 +198,8 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 		var id int32
 		userBundle.ProfilePicture = facebookProfilePicture(fqlResult.Id)
 		userBundle.Name = fqlResult.Name
-		err = conn.QueryRow("INSERT INTO users (name, profile_picture, fb_uid) VALUES ($1, $2, $3) RETURNING id",
-			userBundle.Name, userBundle.ProfilePicture, fqlResult.Id).Scan(&id)
+		err = conn.QueryRow("INSERT INTO users (name, email, profile_picture, fb_uid) VALUES ($1, $2, $3, $4) RETURNING id",
+			userBundle.Name, fqlResult.Email, userBundle.ProfilePicture, fqlResult.Id).Scan(&id)
 		if err != nil {
 			panic(err)
 		}
@@ -214,7 +215,7 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 	go func() {
 		userIds := make([]string, 0)
 
-		url := "https://graph.facebook.com/v2.2/me/friends?access_token=" + accessToken
+		url := "https://graph.facebook.com/v2.2/me/friends?" + query.Encode()
 
 		for {
 			fqlResponse := fqlFriendResponse{}
