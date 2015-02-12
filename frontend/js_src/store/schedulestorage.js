@@ -30,7 +30,6 @@ var store = EventEmitter({
     _setStorage: function(term) {
         currentStorage = new ScheduleStorage(term);
         if (user.getCurrentUser()) {
-            getWebSocket();
             this.firstSync();
         }
     },
@@ -99,8 +98,10 @@ var store = EventEmitter({
 
 
 user.on('loginstatuschange', function(e) {
+    closeSocket();
     var newUser = e.newUser;
     if (newUser) {
+        initSocket();
         store.firstSync();
     }
 });
@@ -115,16 +116,38 @@ localStore.on('change', function(e) {
     }
 });
 
-var webSocketPromise, socketSession;
+const WEBSOCKET_OPEN_TIMEOUT = 10*1000, WEBSOCKET_HEARTBEAT_INTERVAL = 60*1000;
+
+var webSocketPromise, socketSession, webSocket;
+var heartbeatTimeout;
+var socketKeepAlive;
+
+var CONN_TIME_OUT_ERR = new Error('connection timeout');
 
 function makeSocket(sessionId, clientId) {
+    webSocket = null;
     return new Promise(function(resolve, reject) {
+        var timeout = window.setTimeout(function() {
+            reject(CONN_TIME_OUT_ERR);
+        }, WEBSOCKET_OPEN_TIMEOUT);
+
         var ws = new WebSocket(endpoints.sync(sessionId, clientId));
         ws.onopen = function() {
+            window.clearTimeout(timeout);
+            webSocket = ws;
+            socketKeepAlive = window.setTimeout(socketHeartbeat, WEBSOCKET_HEARTBEAT_INTERVAL);
+
+            console.log('WebSocket initiated!');
             resolve(ws);
         };
 
         ws.onmessage = function(e) {
+            if (e.data === 'PONG') {
+                console.log('Received WebSocket Heartbeat');
+
+                window.clearTimeout(heartbeatTimeout);
+                return;
+            }
             var reply = JSON.parse(e.data);
             if (reply['action'] === 'ack' || reply['action'] === 'conflict') {
                 while (ackCallbacks.length > 0) {
@@ -140,40 +163,75 @@ function makeSocket(sessionId, clientId) {
     });
 }
 
-async function getWebSocket() {
+function closeSocket() {
+    if (socketKeepAlive) {
+        window.clearTimeout(socketKeepAlive);
+        socketKeepAlive = null;
+    }
+
+    if (webSocket) {
+        webSocket.close();
+    }
+
+    webSocket = webSocketPromise = socketSession = null;
+}
+
+var NOT_LOGGED_IN_ERR = new Error('Not Logged In');
+
+function initSocket() {
+    console.log('Preparing to init new socket...')
     // Check current user
     if (!user.getCurrentUser()) {
-        throw new Error('Not Logged In');
+        throw NOT_LOGGED_IN_ERR;
     }
 
-    if (user.getSession() !== socketSession) {
-        socketSession = user.getSession();
+    socketSession = user.getSession();
 
-        if (webSocketPromise) {
-            webSocketPromise.then(function(s) { s.close(); });
-            webSocketPromise = null;
-        }
-    }
+    console.assert(socketSession);
 
+    console.log('Making new socket...')
     var clientId = localStore.get('client_id', randomInt31);
 
-    var socket;
-    while (true) {
-        if (!webSocketPromise) {
-            webSocketPromise = makeSocket(socketSession, clientId);
+    webSocketPromise = makeSocket(socketSession, clientId);
+    return webSocketPromise;
+}
+
+function isSocketHealthy() {
+    return webSocket && webSocket.readyState === WebSocket.OPEN && user.getSession() === socketSession;
+}
+
+async function getWebSocket() {
+    var timeoutCounter = 3;
+    while (!isSocketHealthy()) {
+        try {
+            await initSocket();
+        } catch (e) {
+            if (e === CONN_TIME_OUT_ERR && timeoutCounter > 0) {
+                timeoutCounter--;
+            } else {
+                throw e;
+            }
         }
-
-        socket = await webSocketPromise;
-
-        if (socket.readyState === WebSocket.OPEN) {
-            break;
-        } else {
-            webSocketPromise = null;
-        }
-
     }
     
-    return socket;
+    return webSocket;
+}
+
+function socketHeartbeat() {
+    if (!webSocket) {
+        return;
+    }
+
+    console.log('Sending WebSocket Heartbeat');
+
+    webSocket.send('PING');
+    heartbeatTimeout = window.setTimeout(function() {
+        console.log('WebSocket Heartbeat Timeout. Resetting...');
+        closeSocket();
+        initSocket();
+    }, WEBSOCKET_OPEN_TIMEOUT);
+
+    socketKeepAlive = window.setTimeout(socketHeartbeat, WEBSOCKET_HEARTBEAT_INTERVAL);
 }
 
 var ackCallbacks = [];
