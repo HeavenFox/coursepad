@@ -1,5 +1,10 @@
 // Facebook Integration
-const FB_APP_ID = '399310430207216';
+var FB_APP_ID;
+if (LEVEL > 5) {
+	FB_APP_ID = '399310256873900';
+} else {
+	FB_APP_ID = '399310430207216';
+}
 
 var loadAwaitable, initialized;
 
