@@ -27,6 +27,10 @@
   },
   "devDependencies": {
     "autoprefixer-core": "^4.0.1",
+    "babel": "^5.6.14",
+    "babel-core": "^5.6.15",
+    "babel-loader": "^5.3.0",
+    "babel-runtime": "^5.6.15",
     "del": "^0.1.3",
     "gulp": "^3.8.8",
     "gulp-filter": "^2.0.0",
@@ -41,7 +45,6 @@
     "gulp-sourcemaps": "^1.2.8",
     "gulp-uglify": "^1.0.1",
     "gulp-util": "^3.0.1",
-    "gulp-webpack": "^0.4.1",
     "jshint": "^2.5.10",
     "json-loader": "^0.5.1",
     "jsx-loader": "^0.12.0",
@@ -49,6 +52,7 @@
     "regenerator-loader": "git://github.com/CoursePad/regenerator-loader#cp",
     "uglify-js": "^2.4.15",
     "webpack": "^1.4.3",
+    "webpack-stream": "^2.0.0",
     "worker-loader": "^0.5.7"
   }
 }

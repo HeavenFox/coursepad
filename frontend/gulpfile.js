@@ -1,5 +1,5 @@
 var gulp = require('gulp');
-var webpack = require('gulp-webpack');
+var webpack = require('webpack-stream');
 var uglify = require('gulp-uglify');
 var sass = require('gulp-ruby-sass');
 var del = require('del');
@@ -29,6 +29,18 @@ function target() {
 }
 
 function webpack_conf() {
+    var babel_query = {
+        optional: ['runtime'],
+        stage: 1
+    };
+
+    if (DEV) {
+        // Target chrome
+        babel_query = {
+            optional: ['runtime', 'asyncToGenerator'],
+            blacklist: ['es6.constants', 'es6.classes', 'es6.blockScoping'],
+        }
+    };
     var conf = {
         output: {
             filename: "main.js",
@@ -36,11 +48,8 @@ function webpack_conf() {
         },
         module: {
             loaders: [
-                { test: /\.js$/, loader: "jsx-loader" },
+                { test: /\.js$/, exclude: /node_modules/, loader: "babel", query: babel_query},
                 { test: /\.json/, loader: "json-loader"}
-            ],
-            postLoaders: [
-                { test: /\.js$/, loader: "regenerator" }
             ]
         }
     };
@@ -133,7 +142,4 @@ gulp.task('rev-static', ['rev-index'], function() {
         .pipe(gulp.dest(target() + 'static/'))
 });
 
-gulp.task('build', function() {
-    DEV = false;
-    gulp.run('rev-static');
-});
+gulp.task('build', ['rev-static']);
