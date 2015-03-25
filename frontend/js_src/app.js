@@ -1,4 +1,3 @@
-/** @jsx React.DOM **/
 var meta = require('./store/meta.js');
 
 var Calendar = require('./components/Calendar.react.js');

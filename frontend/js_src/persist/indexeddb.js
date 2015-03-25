@@ -7,8 +7,7 @@ function open() {
         dbPromise = new Promise(function(resolve, reject) {
             var request = window.indexedDB.open('coursepad', VERSION);
             request.onsuccess = function(e) {
-                db = e.target.result;
-                resolve(db);
+                resolve(e.target.result);
             };
 
             request.onupgradeneeded = function(e) {
