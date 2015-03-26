@@ -301,7 +301,16 @@ func SharedPageHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		description := "I have these courses on my " + name + " schedule: " + strings.Join(shared.Basket, ", ")
 		image := *common.WEBSITE_ROOT + "shared/" + key + "/image.png"
 
-		meta := fmt.Sprintf(`<meta property="og:title" content="%s" /><meta property="og:description" content="%s" /><meta property="og:site_name" content="CoursePad.me" /><meta property="og:image" content="%s" />`, html.EscapeString(title), html.EscapeString(description), html.EscapeString(image))
+		meta := fmt.Sprintf(`
+			<meta property="og:title" content="%s" />
+			<meta property="og:description" content="%s" />
+			<meta property="og:site_name" content="CoursePad.me" />
+			<meta property="og:image" content="%s" />
+			<meta property="og:image:width" content="%d" />
+			<meta property="og:image:height" content="%d" />
+			<meta name="twitter:card" content="summary_large_image">
+			<meta name="twitter:site" content="@CoursePadme">`,
+			html.EscapeString(title), html.EscapeString(description), html.EscapeString(image), IMAGE_WIDTH, IMAGE_HEIGHT)
 
 		indexHtml, err := ioutil.ReadFile(path.Join(*common.FRONTEND_LOCATION, "index.html"))
 
