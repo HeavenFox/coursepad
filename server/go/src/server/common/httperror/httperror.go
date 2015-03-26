@@ -23,7 +23,8 @@ func ErrorMsgToJson(msg string) string {
 }
 
 func Unauthenticated(w http.ResponseWriter, response string) {
-	http.Error(w, response, 403)
+	w.Header().Set("WWW-Authenticate", "Bearer")
+	http.Error(w, response, 401)
 }
 
 func Malformed(w http.ResponseWriter, response string) {
