@@ -26,7 +26,7 @@ var TermList = React.createClass({
 
     render: function() {
         var local = this.state.localTerms || [];
-        var terms = humanize.sortTerms(this.state.remoteTerms || this.state.localTerms || []);
+        var terms = humanize.sortTerms(this.state.remoteTerms || this.state.localTerms || [], true);
         var lis;
         if (terms.length === 0) {
             lis = <li className="loading">Loading Terms...</li>;

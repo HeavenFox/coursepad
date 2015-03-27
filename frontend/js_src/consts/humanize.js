@@ -281,9 +281,11 @@ module.exports = {
 
     sortTerms: function(terms, desc) {
         var termOrder = {
-            fa: 1,
-            sp: 3
-        }
+            'wi': 1,
+            'sp': 2,
+            'su': 3,
+            'fa': 4
+        };
         return terms.sort(function(a, b) {
             return (desc ? -1 : 1) * ((+a.slice(2) - b.slice(2)) || (termOrder[a.slice(0, 2)] - termOrder[b.slice(0, 2)]));
         });
