@@ -10,7 +10,12 @@ data_folder = sys.argv[1]
 semester = sys.argv[2]
 base = os.path.join(data_folder, 'raw_roster')
 
-cur_sn = max(int(os.path.basename(fn).split('_')[1]) for fn in glob.glob(os.path.join(base, '*')) if os.path.basename(fn).startswith(semester)) + 1
+existing_sns = [int(os.path.basename(fn).split('_')[1]) for fn in glob.glob(os.path.join(base, '*')) if os.path.basename(fn).startswith(semester)]
+if len(existing_sns) == 0:
+	cur_sn = 1
+else:
+	cur_sn = max() + 1
+	
 print cur_sn
 
 base_dir = os.path.join(base, semester + '_' + str(cur_sn))

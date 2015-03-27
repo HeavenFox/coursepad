@@ -43,18 +43,23 @@ previous_maxid = int(open(course_id_path, 'r').read())
 open(course_id_path + '.bak', 'w').write(str(previous_maxid))
 
 # Read Previous DB
-previous_db = simplejson.load(open(os.path.join(base_dir, 'roster', term + '_' + str(current_sn - 1), 'term_db_' + term + '.json')))
+isbrandnew = False
+if current_sn > 1:
+    previous_db = simplejson.load(open(os.path.join(base_dir, 'roster', term + '_' + str(current_sn - 1), 'term_db_' + term + '.json')))
+
+    print 'Previous Database Loaded. There are %d courses in total' % len(previous_db['roster'])
+    print 'Building Index on Previous DB'
 
 
-print 'Previous Database Loaded. There are %d courses in total' % len(previous_db['roster'])
-print 'Building Index on Previous DB'
+    previous_course_by_number = defaultdict(list)
+    for course in previous_db['roster']:
+        previous_course_by_number[course['sub']+str(course['nbr'])].append(course)
 
+    previous_subjects = previous_db['subjects']
 
-previous_course_by_number = defaultdict(list)
-for course in previous_db['roster']:
-    previous_course_by_number[course['sub']+str(course['nbr'])].append(course)
+else:
+    isbrandnew = True
 
-previous_subjects = previous_db['subjects']
 
 
 # -------------------------------------
@@ -85,33 +90,41 @@ for course in courses:
 # -------------------------------------
 # Match Courses
 # -------------------------------------
-course_matcher = CourseMatcher()
+if isbrandnew:
+    for course in courses:
+        previous_maxid += 1
+        course['id'] = previous_maxid
 
-course_matcher.previous_maxid = previous_maxid
+else:
+    course_matcher = CourseMatcher()
 
-course_matcher.match(previous_course_by_number, course_by_number)
+    course_matcher.previous_maxid = previous_maxid
 
-print 'Done.'
-print 'Added these courses'
-for course in course_matcher.added:
-    print "%s %d: %s" % (course['sub'], course['nbr'], course['title'])
+    course_matcher.match(previous_course_by_number, course_by_number)
 
-print 'Deleted these courses'
-print course_matcher.deleted
+    print 'Done.'
+    print 'Added these courses'
+    for course in course_matcher.added:
+        print "%s %d: %s" % (course['sub'], course['nbr'], course['title'])
 
-print 'Modified %d courses' % len(course_matcher.modified)
+    print 'Deleted these courses'
+    print course_matcher.deleted
+
+    print 'Modified %d courses' % len(course_matcher.modified)
+
+    previous_maxid = course_matcher.previous_maxid
+
+    courses.sort(key=lambda x: x['id'])
 
 with open(course_id_path, 'w') as f:
-    f.write(str(course_matcher.previous_maxid))
-
-
-courses.sort(key=lambda x: x['id'])
+    f.write(str(previous_maxid))
 
 # -------------------------------------
 # Match Subjects
 # -------------------------------------
-subject_matcher = SubjectMatcher()
-subject_matcher.match(previous_subjects, subjects)
+if not isbrandnew:
+    subject_matcher = SubjectMatcher()
+    subject_matcher.match(previous_subjects, subjects)
 
 
 def persist_file(fn):
@@ -129,7 +142,7 @@ with open(persist_file('version_history.json'), 'r') as f:
     version_history = simplejson.load(f)
 
 if term not in version_history['term_db']:
-    version_history['term_db'][term] = [previous_db['time']]
+    version_history['term_db'][term] = []
 
 version_history['term_db'][term].append(roster_unixtime)
 
@@ -140,20 +153,21 @@ term_db = {
     'time' : roster_unixtime
 }
 
-diff_db = {
-    'roster' : {
-        'modified' : course_matcher.modified,
-        'added' : course_matcher.added,
-        'deleted' : course_matcher.deleted
-    },
-    'subjects' : {
-        'added' : subject_matcher.added,
-        'modified' : subject_matcher.modified,
-        'deleted' : subject_matcher.deleted
-    },
-    'time' : roster_unixtime,
-    'prev_time' : previous_db['time']
-}
+if not isbrandnew:
+    diff_db = {
+        'roster' : {
+            'modified' : course_matcher.modified,
+            'added' : course_matcher.added,
+            'deleted' : course_matcher.deleted
+        },
+        'subjects' : {
+            'added' : subject_matcher.added,
+            'modified' : subject_matcher.modified,
+            'deleted' : subject_matcher.deleted
+        },
+        'time' : roster_unixtime,
+        'prev_time' : previous_db['time']
+    }
 
 def wr(var, n, root_dir=None, sub_dir=None):
     if root_dir is None:
@@ -175,4 +189,5 @@ def wr(var, n, root_dir=None, sub_dir=None):
 wr(term_db, 'term_db_' + term)
 wr(meta, 'meta', persist_dir)
 wr(version_history, 'version_history', root_dir=persist_dir)
-wr(diff_db, 'diff_termdb_' + term + '_' + str(previous_db['time']) + '_' + str(roster_unixtime), sub_dir='diffs')
+if not isbrandnew:
+    wr(diff_db, 'diff_termdb_' + term + '_' + str(previous_db['time']) + '_' + str(roster_unixtime), sub_dir='diffs')
