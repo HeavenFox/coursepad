@@ -87,6 +87,22 @@ type fqlUserResult struct {
 	Error *fqlError
 }
 
+type googTokenInfoResult struct {
+	UserId *string `json:"user_id"`
+}
+
+type googPeopleResult struct {
+	DisplayName string
+	Image       struct {
+		Url       string
+		IsDefault bool
+	}
+	Emails []struct {
+		Value string
+		Type  string
+	}
+}
+
 type SessionId string
 
 type Session interface {
@@ -105,6 +121,17 @@ func (s redisSession) Id() SessionId {
 
 func (s redisSession) Expires() time.Time {
 	return s.expires
+}
+
+type emptySession struct {
+}
+
+func (s emptySession) Id() SessionId {
+	return SessionId("")
+}
+
+func (s emptySession) Expires() time.Time {
+	return time.Now()
 }
 
 func makeSessionId() SessionId {
@@ -193,7 +220,94 @@ func handleEmailLogin(w http.ResponseWriter, r *http.Request) (Session, *UserBun
 		return session, userBundle, nil
 	}
 
-	return redisSession{}, nil, errors.New("Wrong Email / Password Combination")
+	return emptySession{}, nil, errors.New("Wrong Email / Password Combination")
+}
+
+func callApi(address string, query url.Values) ([]byte, error) {
+	return httpGet(address + "?" + query.Encode())
+}
+
+func httpGet(address string) ([]byte, error) {
+	resp, err := http.Get(address)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	respData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return respData, nil
+}
+
+func handleGoogleLogin(w http.ResponseWriter, r *http.Request) (Session, *UserBundle, error) {
+	conn := db.GetPostgresConn()
+
+	r.ParseForm()
+	accessToken := r.Form.Get("access_token")
+
+	query := url.Values{}
+	query.Set("access_token", accessToken)
+
+	respData, err := callApi("https://www.googleapis.com/oauth2/v1/tokeninfo", query)
+	if err != nil {
+		return emptySession{}, nil, errors.New("Unable to communicate with Google")
+	}
+	tokenInfo := googTokenInfoResult{}
+	err = json.Unmarshal(respData, &tokenInfo)
+
+	if err != nil {
+		panic("Error parsing Google API")
+	}
+
+	if tokenInfo.UserId == nil {
+		return emptySession{}, nil, errors.New("Unable to authenticate with Google")
+	}
+
+	userBundle := &UserBundle{}
+
+	err = conn.QueryRow("SELECT id, slug, name, profile_picture FROM users WHERE goog_uid = $1", tokenInfo.UserId).Scan(&userBundle.Id, &userBundle.Slug, &userBundle.Name, &userBundle.ProfilePicture)
+	switch {
+	case err == sql.ErrNoRows:
+		var id int32
+
+		googProfileData, err := callApi("https://www.googleapis.com/plus/v1/people/me", query)
+		if err != nil {
+			return emptySession{}, nil, errors.New("Unable to communicate with Google")
+		}
+
+		googProfile := googPeopleResult{}
+		err = json.Unmarshal(googProfileData, &googProfile)
+
+		if !googProfile.Image.IsDefault {
+			userBundle.ProfilePicture = googProfile.Image.Url
+		}
+
+		userBundle.Name = googProfile.DisplayName
+
+		email := ""
+		for _, emailEntry := range googProfile.Emails {
+			if emailEntry.Type == "account" {
+				email = emailEntry.Value
+			}
+		}
+
+		err = conn.QueryRow("INSERT INTO users (name, email, profile_picture, goog_uid) VALUES ($1, $2, $3, $4) RETURNING id",
+			userBundle.Name, email, userBundle.ProfilePicture, tokenInfo.UserId).Scan(&id)
+
+		if err != nil {
+			panic(err)
+		}
+		userBundle.Id = id
+
+	case err != nil:
+		panic(err)
+	}
+
+	session := MakeSession(userBundle, SESSION_TIMEOUT_EPHEMERAL)
+
+	return session, userBundle, nil
 }
 
 func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (Session, *UserBundle, error) {
@@ -204,13 +318,11 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (Session, *User
 	query := url.Values{}
 	query.Set("access_token", accessToken)
 
-	resp, err := http.Get("https://graph.facebook.com/v2.2/me?" + query.Encode())
+	respData, err := callApi("https://graph.facebook.com/v2.2/me", query)
 	if err != nil {
 		return redisSession{}, nil, errors.New("Unable to communicate with Facebook")
 	}
 
-	defer resp.Body.Close()
-	respData, err := ioutil.ReadAll(resp.Body)
 	fqlResult := fqlUserResult{}
 	err = json.Unmarshal(respData, &fqlResult)
 
@@ -252,14 +364,8 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (Session, *User
 		for {
 			fqlResponse := fqlFriendResponse{}
 
-			resp, err := http.Get(url)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			defer resp.Body.Close()
+			data, err := httpGet(url)
 
-			data, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
 				log.Println(err)
 				return

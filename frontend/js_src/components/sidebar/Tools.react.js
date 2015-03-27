@@ -1,6 +1,3 @@
-/**
- * @jsx React.DOM
- */
 var ClassNumbers = require('../pagelets/ClassNumbers.react.js');
 var ImportExport = require('../pagelets/ImportExport.react.js');
 var modal = require('../../utils/modal.js');
@@ -15,7 +12,7 @@ var Tools = React.createClass({
     },
 
     render: function() {
-        return <div className="tools utilities-item">
+        return <div className="rightbar-simple-ul utilities-item">
         <h2>Tools</h2>
             <ul>
                 <li><a href="javascript:;" onClick={this._showClassNumbers}>Show Class Numbers</a></li>

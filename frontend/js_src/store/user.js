@@ -5,6 +5,7 @@ var endpoints = require('../consts/endpoints.js');
 var cookies = require('cookies-js');
 
 var fb = require('../thirdparty/fb.js');
+var google = require('../thirdparty/google.js');
 
 var ana = require('../analytics/analytics.js');
 
@@ -169,11 +170,24 @@ var store = EventEmitter({
         return header;
     },
 
-    triggerLogin: function(method) {
+    triggerLogin: async function(method) {
         if (method === 'fb') {
             FB.login(function(response) {
                 fbStatusChange(response);
             }, {'scope': SCOPE});
+        }
+        if (method === 'goog') {
+            console.log('Google API init');
+
+            gapi.auth.signIn({
+                'clientid': google.CLIENT_ID,
+                'cookiepolicy': 'single_host_origin',
+                'scope': 'profile',
+                'callback': function(data) {
+                    console.log(data);
+                }
+            });
+
         }
     },
 
@@ -196,3 +210,5 @@ var store = EventEmitter({
 module.exports = store;
 
 initLogin();
+
+google.init();

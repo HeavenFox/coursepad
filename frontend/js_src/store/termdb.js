@@ -87,18 +87,19 @@ RemoteTermDatabase.prototype.getCoursesBySubjectAndNumber = function(subject, nu
     });
 };
 
-RemoteTermDatabase.prototype.getBasket = function(basket) {
-    var classes = basket.join('|');
+RemoteTermDatabase.prototype.getBasket = async function(classNumbers) {
+    var classes = classNumbers.join('|');
 
-    return ajax.getJson(endpoints.termdbBasket(this.term, classes)).then(function(basket) {
-        basket.forEach(function(cluster) {
-            cluster.forEach(function(c, i) {
-                cluster[i] = new Course(c);
-            });
+    let basket = await ajax.getJson(endpoints.termdbBasket(this.term, classes));
+
+    basket.forEach(cluster => {
+        cluster.forEach((c, i) => {
+            cluster[i] = new Course(c, this.term);
         });
-
-        return basket;
     });
+
+    return basket;
+
 };
 
 RemoteTermDatabase.prototype.searchByKeyword = function(keywords) {
@@ -111,28 +112,13 @@ RemoteTermDatabase.prototype.searchByKeyword = function(keywords) {
     });
 };
 
-/**
- * @return {Promise}
- */
-LocalTermDatabase.prototype.getCoursesBySubjectAndNumber = function(subject, number) {
-    var resolvedCourses;
-    return indexeddb.queryAllByIndex('roster', 'course', IDBKeyRange.only([this.term, subject, number])).then(function(courses) {
-        return courses.map(function(c) {
-            return new Course(c);
-        });
-    }).then(function(courses) {
-        resolvedCourses = courses;
+LocalTermDatabase.prototype.getCoursesBySubjectAndNumber = async function(subject, number) {
+    let courses = await indexeddb.queryAllByIndex('roster', 'course', IDBKeyRange.only([this.term, subject, number]))
+    courses = courses.map(c => new Course(c, this.term));
 
-        return [];
-    }).then(function(professors) {
-
-        return resolvedCourses;
-    });
+    return courses;
 };
 
-/**
- * @return {Promise}
- */
 LocalTermDatabase.prototype.getBasket = function(basket) {
     var self = this;
     return Promise.all(basket.map(function(c) {

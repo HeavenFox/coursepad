@@ -273,46 +273,62 @@ var buildingNamesLong = {
     'WSH': 'Willard Straight Hall',
 };
 
-module.exports = {
-    sectionTypePriorities : ['LEC', 'SEM', 'IND', 'DIS', 'LAB', 'RSC', 'CLN'],
-    getSectionType: function() {
+export const sectionTypePriorities = ['LEC', 'SEM', 'IND', 'DIS', 'LAB', 'RSC', 'CLN'];
 
-    },
+export function getSectionType() {
 
-    sortTerms: function(terms, desc) {
-        var termOrder = {
-            'wi': 1,
-            'sp': 2,
-            'su': 3,
-            'fa': 4
-        };
-        return terms.sort(function(a, b) {
-            return (desc ? -1 : 1) * ((+a.slice(2) - b.slice(2)) || (termOrder[a.slice(0, 2)] - termOrder[b.slice(0, 2)]));
-        });
-    },
+};
 
-    getTermName: function(term) {
-        var termName = {
-            fa: 'Fall',
-            sp: 'Spring'
-        };
+export function sortTerms(terms, desc) {
+    var termOrder = {
+        'wi': 1,
+        'sp': 2,
+        'su': 3,
+        'fa': 4
+    };
+    return terms.sort(function(a, b) {
+        return (desc ? -1 : 1) * ((+a.slice(2) - b.slice(2)) || (termOrder[a.slice(0, 2)] - termOrder[b.slice(0, 2)]));
+    });
+};
 
-        function year(digit) {
-            if (digit < 50) {
-                return 2000 + digit;
-            } else {
-                return 1900 + digit;
-            }
+export function getTermName(term) {
+    var termName = {
+        fa: 'Fall',
+        sp: 'Spring'
+    };
+
+    function year(digit) {
+        if (digit < 50) {
+            return 2000 + digit;
+        } else {
+            return 1900 + digit;
         }
+    }
 
-        return termName[term.slice(0, 2)] + ' ' + year(+term.slice(2));
-    },
+    return termName[term.slice(0, 2)] + ' ' + year(+term.slice(2));
+};
 
-    getLongBuildingName: function(code) {
-        return buildingNamesLong[code];
-    },
+export function getLongBuildingName(code) {
+    return buildingNamesLong[code];
+};
 
-    getShortBuildingName: function(code) {
-        return buildingNamesShort[code];
-    },
+export function getShortBuildingName(code) {
+    return buildingNamesShort[code];
+};
+
+export function getShortLocation(building, number) {
+    if (!building || !number || building === 'TBA' || number === 'TBA') {
+        return 'TBA';
+    }
+    let location;
+    let shortBuilding = getShortBuildingName(building);
+    if (shortBuilding) {
+        location = shortBuilding;
+    } else {
+        location = building;
+    }
+    if (number) {
+        location += (' ' + number);
+    }
+    return location;
 };

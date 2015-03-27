@@ -39,6 +39,10 @@ var UserMenu = React.createClass({
         user.triggerLogin('fb');
     },
 
+    _googLogin: function() {
+        user.triggerLogin('goog');
+    },
+
     getInitialState: function() {
         return {user: user.getCurrentUser()};
     },
@@ -99,6 +103,7 @@ var UserMenu = React.createClass({
                     <hr />
 
                     <p className="linkish" onClick={this._fbLogin}>Login with Facebook</p>
+                    <p className="linkish" onClick={this._googLogin}>Login with Google</p>
                     {/*<p className="linkish" onClick={this._toggleEmail}>Login with Email</p>
                     <hr />
                     <p className="linkish">Register with Email</p>*/}

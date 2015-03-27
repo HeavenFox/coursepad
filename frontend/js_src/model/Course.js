@@ -47,74 +47,77 @@ function CourseComponent(parent, type, obj) {
 
 var SECTION_PRIORITY = ['LEC', 'SEM', 'IND', 'DIS', 'LAB'];
 
-function Course(obj) {
-    this.id = obj['id'];
-    this.number = obj['nbr'];
-    this.subject = obj['sub'];
-    this.title = obj['title'];
-    this.units = obj['unit'] || [0];
+class Course {
+    constructor(obj, term) {
+        this.term = term;
+        this.id = obj['id'];
+        this.number = obj['nbr'];
+        this.subject = obj['sub'];
+        this.title = obj['title'];
+        this.units = obj['unit'] || [0];
 
-    this.sections = {};
-    for (var type in obj['secs']) {
-        if (obj['secs'].hasOwnProperty(type)) {
-            this.sections[type] = obj['secs'][type].map(function(obj) {
-                return new CourseComponent(this, type, obj);
-            }, this);
-        }
-    }
-}
-
-Course.prototype.getNumber = function() {
-    return this.subject + ' ' + this.number;
-};
-
-Course.prototype.getPrimarySectionType = function() {
-    for (var i=0; i < SECTION_PRIORITY.length; i++) {
-        if (this.sections.hasOwnProperty(SECTION_PRIORITY[i])) {
-            return SECTION_PRIORITY[i];
-        }
-    }
-    for (var type in this.sections) {
-        if (this.sections.hasOwnProperty(type)) {
-            return type;
-        }
-    }
-};
-
-Course.prototype.getNumberOfTypes = function() {
-    var number = 0;
-    for (var type in this.sections) {
-        if (this.sections.hasOwnProperty(type)) {
-            number++;
-        }
-    }
-    return number;
-};
-
-Course.prototype.getAllSections = function() {
-    var all = [];
-
-    for (var type in this.sections) {
-        if (this.sections.hasOwnProperty(type)) {
-            all.push.apply(all, this.sections[type]);
-        }
-    }
-
-    return all;
-};
-
-Course.prototype.findSectionByNumber = function(number) {
-    for (var type in this.sections) {
-        if (this.sections.hasOwnProperty(type)) {
-            var list = this.sections[type];
-            for (var i=0; i < list.length; i++) {
-                if (list[i].number == number) {
-                    return list[i];
-                }
+        this.sections = {};
+        for (var type in obj['secs']) {
+            if (obj['secs'].hasOwnProperty(type)) {
+                this.sections[type] = obj['secs'][type].map(function(obj) {
+                    return new CourseComponent(this, type, obj);
+                }, this);
             }
         }
     }
-    return null;
-};
+
+    getNumber() {
+        return this.subject + ' ' + this.number;
+    }
+
+    getPrimarySectionType() {
+        for (var i=0; i < SECTION_PRIORITY.length; i++) {
+            if (this.sections.hasOwnProperty(SECTION_PRIORITY[i])) {
+                return SECTION_PRIORITY[i];
+            }
+        }
+        for (var type in this.sections) {
+            if (this.sections.hasOwnProperty(type)) {
+                return type;
+            }
+        }
+    }
+
+    getNumberOfTypes() {
+        var number = 0;
+        for (var type in this.sections) {
+            if (this.sections.hasOwnProperty(type)) {
+                number++;
+            }
+        }
+        return number;
+    }
+
+    getAllSections() {
+        var all = [];
+
+        for (var type in this.sections) {
+            if (this.sections.hasOwnProperty(type)) {
+                all.push.apply(all, this.sections[type]);
+            }
+        }
+
+        return all;
+    }
+
+    findSectionByNumber(number) {
+        for (var type in this.sections) {
+            if (this.sections.hasOwnProperty(type)) {
+                var list = this.sections[type];
+                for (var i=0; i < list.length; i++) {
+                    if (list[i].number == number) {
+                        return list[i];
+                    }
+                }
+            }
+        }
+        return null;
+    }
+}
 
 module.exports = Course;
