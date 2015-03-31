@@ -6,6 +6,8 @@ var cookies = require('cookies-js');
 
 var fb = require('../thirdparty/fb.js');
 
+var ana = require('../analytics/analytics.js');
+
 const LOGIN_EMAIL = 1, LOGIN_FB = 2;
 
 // Facebook Integration
@@ -22,8 +24,10 @@ async function facebookLogin(accessToken) {
         loginMethod = LOGIN_FB;
         storeSession(result['session_id']);
         userLoggedIn(result['session_id'], new User().fromBundle(result['user']));
-    } catch (e) {
 
+        ana.sdim('login_method', 'fb');
+    } catch (e) {
+        console.warn(e);
     }
 }
 
@@ -76,6 +80,8 @@ function userLoggedIn(session, user) {
         oldUser: previousUser,
         newUser: currentUser
     });
+
+    ana.suserid(user.id);
 }
 
 
