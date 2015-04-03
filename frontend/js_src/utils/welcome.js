@@ -16,7 +16,7 @@ module.exports = function() {
 
 	if (localStore.get('redirect') || localStore.get('meta_version') === undefined) {
         modal.show(<Redirecting />);
-		window.location = 'https://coursepad.me/';
+		window.location = 'https://coursepad.me/#didimport';
 	} else {
         modal.show(<MigrationNotice />);
 	}
