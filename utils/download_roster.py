@@ -14,7 +14,7 @@ existing_sns = [int(os.path.basename(fn).split('_')[1]) for fn in glob.glob(os.p
 if len(existing_sns) == 0:
 	cur_sn = 1
 else:
-	cur_sn = max() + 1
+	cur_sn = max(existing_sns) + 1
 	
 print cur_sn
 

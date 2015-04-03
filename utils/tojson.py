@@ -186,7 +186,7 @@ def wr(var, n, root_dir=None, sub_dir=None):
     output.close()
 
 
-wr(term_db, 'term_db_' + term)
+wr(term_db, 'termdb_' + term + '_' + str(roster_unixtime))
 wr(meta, 'meta', persist_dir)
 wr(version_history, 'version_history', root_dir=persist_dir)
 if not isbrandnew:
