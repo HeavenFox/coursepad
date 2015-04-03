@@ -2,7 +2,6 @@
  * @jsx React.DOM
  */
 var modal = require('../../utils/modal.js');
-var localStore = require('../../persist/localStorage.js');
 
 var user = require('../../store/user.js');
 var campaign = require('../../store/campaign.js');
@@ -46,8 +45,7 @@ var LoginWindow = React.createClass({
 
 var SplashScreen = React.createClass({
     componentWillMount: function() {
-        if (localStore.get('didImport', false)) {
-            localStore.del('didImport');
+        if (window.location.hash == '#didimport') {
             this.setState({didImport: true});
         } else {
             this.setState({didImport: false});
