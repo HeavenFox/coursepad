@@ -6,6 +6,8 @@ var modal = require('../../utils/modal.js');
 var user = require('../../store/user.js');
 var campaign = require('../../store/campaign.js');
 
+var ana = require('../../analytics/analytics.js');
+
 var LoginWindow = React.createClass({
     getInitialState: function() {
         return {confirming: false};
@@ -13,15 +15,22 @@ var LoginWindow = React.createClass({
 
     _donotsignin: function() {
         this.setState({confirming: true});
+        ana.sevent('splash', 'donotsignin');
+    },
 
+    _useGuest: function() {
+        this.props.onDone();
+        ana.sevent('splash', 'guest');
     },
 
     _changeplan: function() {
         this.setState({confirming: false});
+        ana.sevent('splash', 'change_mind');
     },
 
     _loginwithfb: function() {
         user.triggerLogin('fb');
+        ana.sevent('splash', 'login', 'fb');
     },
 
     render: function() {
@@ -30,7 +39,7 @@ var LoginWindow = React.createClass({
                     <h3>Are you sure?</h3>
                     <p>Without signing in, you cannot share your schedule or save your schedules to your account.</p>
                     <p className="linkish" onClick={this._changeplan}>Go Back</p>
-                    <p className="linkish" onClick={this.props.onDone}>Use Without Signing In</p>
+                    <p className="linkish" onClick={this._useGuest}>Use Without Signing In</p>
                 </div>
         } else {
             return <div className="start-using-btn-container">
@@ -55,6 +64,7 @@ var SplashScreen = React.createClass({
 
     componentDidMount: function() {
         user.on('loginstatuschange', this._onUserChange);
+        ana.sevent('splash', 'show');
     },
 
     componentWillUnmount: function() {
@@ -73,8 +83,12 @@ var SplashScreen = React.createClass({
         campaign.markRun('welcome_v2');
     },
 
+    _migrate: function() {
+        ana.sevent('splash', 'migrate');
+    },
+
     render: function() {
-        var old = this.state.didImport ? null : <p className="olduser">Old User from Spring 2015? <a href="http://beta.coursepad.me">Click here to import your schedules from old Beta.CoursePad.me.</a></p>;
+        var old = this.state.didImport ? null : <p className="olduser">Old User from Spring 2015? <a href="http://beta.coursepad.me" onClick={this._migrate}>Click here to import your schedules from old Beta.CoursePad.me.</a></p>;
         return <div className="splash-screen">
             <div className="splash-screen-header"></div>
             <div className="splash-screen-inner">
