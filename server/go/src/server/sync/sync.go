@@ -25,6 +25,10 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
 		origin := r.Header.Get("Origin")
+		index := strings.LastIndex(origin, "//")
+		if index != -1 {
+			origin = origin[index+2:]
+		}
 		return origin == *common.ORIGIN || strings.HasSuffix(origin, "."+*common.ORIGIN)
 	},
 }

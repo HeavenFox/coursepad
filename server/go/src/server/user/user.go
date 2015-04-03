@@ -244,7 +244,7 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 				userIds = append(userIds, friend.Id)
 			}
 
-			if fqlResponse.Paging.Next == nil {
+			if fqlResponse.Paging == nil || fqlResponse.Paging.Next == nil {
 				break
 			} else {
 				url = *fqlResponse.Paging.Next
