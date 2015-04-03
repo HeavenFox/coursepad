@@ -2,11 +2,11 @@
  * @jsx React.DOM
  */
 var SplashScreen = require('../components/pagelets/SplashScreen.react.js');
-var localStore = require('../persist/localStorage.js');
+var campaign = require('../store/campaign.js');
 var modal = require('./modal.js');
 
 module.exports = function() {
-    if (localStore.get('meta_version') === undefined) {
+    if (!campaign.hasRun('welcome_v2')) {
         modal.show(<SplashScreen />);
     }
 }

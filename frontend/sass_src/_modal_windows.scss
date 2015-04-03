@@ -38,6 +38,7 @@ span.class-number {
     margin-top: 12px;
 }
 
+/*
 .modal-window .btn {
     display: inline-block;
     cursor: pointer;
@@ -45,6 +46,7 @@ span.class-number {
     border-radius: 4px;
     font-size: 14px;
 }
+*/
 
 .modal-window .btn-blue {
     border: 1px solid #357ebd;
@@ -97,26 +99,26 @@ span.class-number {
 }
 
 .splash-screen-inner h3 {
-    text-align: center;
     font-weight: normal;
     margin: 3px 0;
 }
 
+.splash-screen-container {
+    margin-top: 15px;
+}
+
 .splash-screen-item-container {
-    clear: both;
+    float: left;
+    width: 70%;
 }
 
 .splash-screen-item {
-    float: left;
-    width: 210px;
-    margin: 0 6px;
     font-size: 14px;
 }
 
-.splash-screen .start-using-container {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    text-align: center;
+.splash-screen-item em {
+    font-style: normal;
+    font-weight: 500;
 }
 
 .splash-screen .splash-screen-item p {
@@ -124,26 +126,38 @@ span.class-number {
 }
 
 .start-using-btn-container {
-    text-align: center;
-    margin-top: 5px;
+    font-size: 14px;
+
+    float: right;
+    width: calc(30% - 10px);
 }
 
-.splash-screen-fast-img {
-    width: 100%;
-    height: 70px;
-    @include centered-img-with-size('splash-fast', 64px, 64px);
+.start-using-btn-container p.linkish {
+    margin: 2px 0;
 }
 
-.splash-screen-247-img {
-    width: 100%;
-    height: 70px;
-    @include centered-img-with-size('splash-247', 64px, 64px);
+.splash-screen-img {
+    float: left;
 }
 
-.splash-screen-support-img {
-    width: 100%;
-    height: 70px;
-    @include centered-img-with-size('splash-support', 64px, 64px);
+$splash-screen-img-size : 30px;
+
+.splash-screen-cloud-img {
+    width: $splash-screen-img-size + 10;
+    height: $splash-screen-img-size;
+    @include centered-img-with-size('splash-cloud', $splash-screen-img-size, $splash-screen-img-size);
+}
+
+.splash-screen-sharing-img {
+    width: $splash-screen-img-size + 10;
+    height: $splash-screen-img-size;
+    @include centered-img-with-size('splash-sharing', $splash-screen-img-size, $splash-screen-img-size);
+}
+
+.splash-screen-magic-img {
+    width: $splash-screen-img-size + 10;
+    height: $splash-screen-img-size;
+    @include centered-img-with-size('splash-magic', $splash-screen-img-size, $splash-screen-img-size);
 }
 
 .splash-screen .start-using-btn {
@@ -155,6 +169,43 @@ span.class-number {
     background-color: #428bca;
     color: #fff;
     font-size: 14px;
+}
+
+.loginwithfb {
+    font-family: 'Lucida Grande', Tahoma, Geneva, Verdana, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    padding: 10px;
+    padding-left: 34px;
+    color: white;
+    background-color: #183B95;
+
+    border-radius: 2px;
+    display: inline-block;
+
+    background-repeat: no-repeat;
+    background-position: 8px center;
+    background-size: 20px 20px;
+    background-image: url('../img/loginwithfb@2x.png');
+}
+p.headline {
+    margin-bottom: 3px;
+}
+p.olduser {
+    margin: 0;
+    font-size: 14px;
+}
+
+p.olduser a {
+    text-decoration: none;
+}
+
+p.olduser a:hover {
+    text-decoration: underline;
+}
+
+.splash-screen .promise {
+    font-size: 10px;
+    margin: 1px 0;
 }
 
 .classnumber-course-list {
