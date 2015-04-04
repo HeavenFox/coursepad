@@ -131,10 +131,10 @@ var Magic = React.createClass({
         switch (this.state.state) {
         case STATE_READY:
             content = <div className="utilities-content">
-            <p className="linkish" onClick={this._makeSchedule}>Conjure a Schedule</p>
-            <p className="linkish side" onClick={this._toggleCollapse}>{(this.state.collapsed ? '' : '- ') + 'Fine tune magical level'}</p>
+            <p className="linkish" onClick={this._makeSchedule}>Generate a Schedule</p>
+            <p className="linkish side" onClick={this._toggleCollapse}>{(this.state.collapsed ? '' : '- ') + 'Adjust Preferences'}</p>
             <div className={this.state.collapsed ? 'hidden' : ''}>
-            <p className="description">Rate the Importance of... (1-5)</p>
+            <p className="description">Rate the following:<br /><small>5: Very Important<br />1: Not Important</small></p>
             <ul>
                 <Priority label="Get up late" bind={bindings} to="lateStart" />
                 <Priority label="Go home early" bind={bindings} to="earlyEnd" />
@@ -181,7 +181,7 @@ var Magic = React.createClass({
         }
 
         return <div className="magic utilities-item">
-            <h2>Magic</h2>
+            <h2>Auto-Schedule</h2>
             {content}
         </div>;
     }
