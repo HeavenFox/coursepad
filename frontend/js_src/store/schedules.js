@@ -453,7 +453,7 @@ Schedule.prototype.deserialize = async function(serialized) {
                 }
             }
         }
-    });
+    }, this);
 
 
     return perfectDeserialization;
