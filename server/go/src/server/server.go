@@ -14,7 +14,7 @@ import (
 
 func main() {
 	iniflags.Parse()
-	err := termdb.LoadDatabase()
+	err := termdb.InitTermDatabase()
 	if err != nil {
 		panic(err)
 	}

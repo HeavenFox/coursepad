@@ -5,13 +5,17 @@ import (
 	"flag"
 	"github.com/zenazn/goji/web"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"path"
 	"regexp"
 	"server/common/httpcache"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 )
 
 type ClassMeetingJson struct {
@@ -179,7 +183,7 @@ func init() {
 	termdbLocation = flag.String("termdbpath", "", "TermDB Data Dir Location")
 }
 
-func LoadDatabase() error {
+func loadDatabase() error {
 	metaJson, err := ioutil.ReadFile(path.Join(*termdbLocation, "data_index", "meta.json"))
 	if err != nil {
 		return err
@@ -203,6 +207,29 @@ func LoadDatabase() error {
 		}
 		repo.DB[term] = db
 	}
+	return nil
+}
+
+func InitTermDatabase() error {
+	err := loadDatabase()
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGHUP)
+		for {
+			<-c
+			err := loadDatabase()
+			if err != nil {
+				log.Println("ERROR: Error reloading termdb. " + err.Error())
+			} else {
+				log.Println("Term Database Reloaded")
+			}
+		}
+	}()
+
 	return nil
 }
 
