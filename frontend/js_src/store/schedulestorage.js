@@ -97,11 +97,16 @@ var store = EventEmitter({
 });
 
 
-user.on('loginstatuschange', function(e) {
+user.on('loginstatuschange', async function(e) {
     closeSocket();
     var newUser = e.newUser;
     if (newUser) {
-        initSocket();
+        try {
+            await initSocket();
+        } catch(e) {
+            console.error('Cannot initialize WebSocket upon log in: ' + e);
+        }
+
         store.firstSync();
     }
 });
@@ -117,6 +122,8 @@ localStore.on('change', function(e) {
 });
 
 const WEBSOCKET_OPEN_TIMEOUT = 10*1000, WEBSOCKET_HEARTBEAT_INTERVAL = 60*1000;
+
+const WEBSOCKET_RETRY_LIMIT = 5, WEBSOCKET_RETRY_TIMEOUT = 10 * 60 * 1000;
 
 var webSocketPromise, socketSession, webSocket;
 var heartbeatTimeout;
@@ -160,6 +167,10 @@ function makeSocket(sessionId, clientId) {
                 }
             }
         };
+
+        ws.onerror = function() {
+            reject(new Error('WebSocket OnError'));
+        }
     });
 }
 
@@ -200,7 +211,19 @@ function isSocketHealthy() {
     return webSocket && webSocket.readyState === WebSocket.OPEN && user.getSession() === socketSession;
 }
 
+var websocketRetryRemaining = WEBSOCKET_RETRY_LIMIT, websocketLastTryTime = 0;
+
+var ERR_BLACKOUT_PERIOD = new Error('Blackout');
+
 async function getWebSocket() {
+    if (websocketRetryRemaining <= 0) {
+        if (Date.now() > websocketLastTryTime + WEBSOCKET_RETRY_TIMEOUT) {
+            websocketRetryRemaining = WEBSOCKET_RETRY_LIMIT;
+        } else {
+            throw ERR_BLACKOUT_PERIOD;
+        }
+    }
+
     var timeoutCounter = 3;
     while (!isSocketHealthy()) {
         try {
@@ -209,6 +232,8 @@ async function getWebSocket() {
             if (e === CONN_TIME_OUT_ERR && timeoutCounter > 0) {
                 timeoutCounter--;
             } else {
+                websocketRetryRemaining--;
+                websocketLastTryTime = Date.now()
                 throw e;
             }
         }
@@ -354,7 +379,12 @@ ScheduleStorage.prototype.publish = async function() {
         'schedule' : serialized
     };
 
-    var socket = await getWebSocket();
+    try {
+        var socket = await getWebSocket();
+    } catch(e) {
+        console.log('Cancel Publication: WebSocket Error: ' + e);
+        return;
+    }
     socket.send(JSON.stringify(message));
 
     this.inflight = true;
