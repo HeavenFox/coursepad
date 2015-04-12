@@ -47,6 +47,10 @@ module.exports = {
         return '/endpoints/user/session?sid=' + encodeURIComponent(session);
     },
 
+    refreshSession: function() {
+        return '/endpoints/user/refreshsession';
+    },
+
     share: function() {
         return '/endpoints/sharing/share';
     },

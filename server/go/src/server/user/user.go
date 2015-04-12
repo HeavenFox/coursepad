@@ -89,6 +89,24 @@ type fqlUserResult struct {
 
 type SessionId string
 
+type Session interface {
+	Id() SessionId
+	Expires() time.Time
+}
+
+type redisSession struct {
+	id      SessionId
+	expires time.Time
+}
+
+func (s redisSession) Id() SessionId {
+	return s.id
+}
+
+func (s redisSession) Expires() time.Time {
+	return s.expires
+}
+
 func makeSessionId() SessionId {
 	bits := make([]byte, 16)
 	_, err := rand.Read(bits)
@@ -122,8 +140,7 @@ type fqlFriendResponse struct {
 	Paging *fqlPaging
 }
 
-func MakeSession(bundle *UserBundle, expire int) SessionId {
-
+func MakeSession(bundle *UserBundle, expire int) Session {
 	redisConn := redisPool.Get()
 	defer redisConn.Close()
 	sessionId := makeSessionId()
@@ -135,10 +152,25 @@ func MakeSession(bundle *UserBundle, expire int) SessionId {
 		panic(err)
 	}
 
-	return sessionId
+	session := redisSession{
+		id:      sessionId,
+		expires: time.Now().Add(SESSION_TIMEOUT_EPHEMERAL),
+	}
+
+	return session
 }
 
-func handleEmailLogin(w http.ResponseWriter, r *http.Request) (SessionId, *UserBundle, error) {
+func RefreshSession(session SessionId) {
+	redisConn := redisPool.Get()
+	defer redisConn.Close()
+	result, err := redis.Bool(redisConn.Do("EXPIRE", rediskeyForUserId(session), SESSION_TIMEOUT_EPHEMERAL))
+	log.Println(result)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func handleEmailLogin(w http.ResponseWriter, r *http.Request) (Session, *UserBundle, error) {
 	email := r.PostForm.Get("email")
 	password := r.PostForm.Get("password")
 	userBundle := &UserBundle{}
@@ -161,10 +193,10 @@ func handleEmailLogin(w http.ResponseWriter, r *http.Request) (SessionId, *UserB
 		return session, userBundle, nil
 	}
 
-	return SessionId(""), nil, errors.New("Wrong Email / Password Combination")
+	return redisSession{}, nil, errors.New("Wrong Email / Password Combination")
 }
 
-func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *UserBundle, error) {
+func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (Session, *UserBundle, error) {
 	conn := db.GetPostgresConn()
 
 	r.ParseForm()
@@ -174,7 +206,7 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 
 	resp, err := http.Get("https://graph.facebook.com/v2.2/me?" + query.Encode())
 	if err != nil {
-		return SessionId(""), nil, errors.New("Unable to communicate with Facebook")
+		return redisSession{}, nil, errors.New("Unable to communicate with Facebook")
 	}
 
 	defer resp.Body.Close()
@@ -187,7 +219,7 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 	}
 
 	if fqlResult.Error != nil {
-		return SessionId(""), nil, errors.New("Unable to authenticate with Facebook")
+		return redisSession{}, nil, errors.New("Unable to authenticate with Facebook")
 	}
 
 	userBundle := &UserBundle{}
@@ -209,7 +241,7 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 		panic(err)
 	}
 
-	sessionId := MakeSession(userBundle, SESSION_TIMEOUT_EPHEMERAL)
+	session := MakeSession(userBundle, SESSION_TIMEOUT_EPHEMERAL)
 
 	// Fetch friend list
 	go func() {
@@ -267,7 +299,7 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (SessionId, *Us
 		tx.Commit()
 	}()
 
-	return sessionId, userBundle, nil
+	return session, userBundle, nil
 }
 
 func UserRegistrationHandler(c web.C, w http.ResponseWriter, r *http.Request) {
@@ -301,9 +333,11 @@ func UserRegistrationHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	session := MakeSession(&bundle, SESSION_TIMEOUT_EPHEMERAL)
 	result := SigninResult{
-		SessionId: MakeSession(&bundle, SESSION_TIMEOUT_EPHEMERAL),
-		User:      &bundle,
+		SessionId:      session.Id(),
+		SessionExpires: session.Expires().Unix(),
+		User:           &bundle,
 	}
 
 	data, err := json.Marshal(result)
@@ -315,23 +349,29 @@ func UserRegistrationHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 }
 
 type SigninResult struct {
-	SessionId SessionId   `json:"session_id"`
-	User      *UserBundle `json:"user"`
+	SessionId      SessionId   `json:"session_id"`
+	SessionExpires int64       `json:"session_expires"`
+	User           *UserBundle `json:"user"`
 }
 
 func UserSigninHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 	var err error
 	reply := SigninResult{}
 	r.ParseForm()
+	var session Session
 	switch c.URLParams["method"] {
 	case "fb":
-		reply.SessionId, reply.User, err = handleFacebookLogin(w, r)
+		session, reply.User, err = handleFacebookLogin(w, r)
 	case "email":
-		reply.SessionId, reply.User, err = handleEmailLogin(w, r)
+		session, reply.User, err = handleEmailLogin(w, r)
 	}
 	if err != nil {
 		httperror.Unauthenticated(w, httperror.ErrorMsgToJson(err.Error()))
 	}
+
+	reply.SessionId = session.Id()
+	reply.SessionExpires = session.Expires().Unix()
+
 	data, err := json.Marshal(reply)
 	if err != nil {
 		panic(err)
@@ -361,4 +401,23 @@ func BundleFromSessionHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	w.Write(mustMarshal(userBundle))
 
+}
+
+func RefreshSessionHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	session := r.Form.Get("sid")
+	_, err := GetUserIdForSession(session)
+	if err != nil {
+		httperror.Unauthenticated(w, "")
+		return
+	}
+	RefreshSession(SessionId(session))
+
+	var result struct {
+		Expires int64 `json:"expires"`
+	}
+
+	result.Expires = time.Now().Unix() + SESSION_TIMEOUT_EPHEMERAL
+
+	w.Write(mustMarshal(result))
 }

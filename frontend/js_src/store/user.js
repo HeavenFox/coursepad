@@ -14,15 +14,36 @@ const LOGIN_EMAIL = 1, LOGIN_FB = 2;
 const FB_APP_ID = '399310430207216';
 const SCOPE = 'public_profile,email,user_friends';
 
-function storeSession(sessionId, isPersistent) {
+
+const REFRESH_SESSION_GRACE_PERIOD = 5 * 60 * 1000;
+
+function storeSession(sessionId, expires, isPersistent) {
+    function scheduleRefreshSession(expirationTime) {
+        window.setTimeout(async function() {
+            console.log('refreshing session');
+            try {
+                var result = await ajax.post(endpoints.refreshSession(), {'sid': sessionId});
+                if (result['expires']) {
+                    scheduleRefreshSession(result['expires']);
+                }
+            } catch(e) {
+                if (e && e.status == 401) {
+                    clearSession();
+                } else {
+                    throw e;
+                }
+            }
+        }, expirationTime*1000-Date.now()-REFRESH_SESSION_GRACE_PERIOD);
+    }
     cookies.set('sessionId', sessionId, isPersistent ? {expires: 30 * 24 * 60 * 60} : {});
+    scheduleRefreshSession(expires);
 }
 
 async function facebookLogin(accessToken) {
     try {
         var result = await ajax.post(endpoints.userLogin('fb'), {'access_token' : accessToken});
         loginMethod = LOGIN_FB;
-        storeSession(result['session_id']);
+        storeSession(result['session_id'], result['session_expires']);
         userLoggedIn(result['session_id'], new User().fromBundle(result['user']));
 
         ana.sdim('login_method', 'fb');
@@ -101,6 +122,29 @@ var currentUser = null;
 var sessionId = null;
 var loginMethod = null;
 
+function clearSession() {
+    var prev = currentUser;
+    currentUser = null;
+
+    sessionId = null;
+    cookies.expire('sessionId');
+
+    store.emit('loginstatuschange', {
+        oldUser: prev,
+        newUser: currentUser
+    });
+
+}
+
+function logout() {
+    if (loginMethod === LOGIN_FB) {
+        FB.logout();
+    }
+    loginMethod = null;
+
+    clearSession();
+}
+
 var store = EventEmitter({
     loggedIn: function() {
         return currentUser !== null;
@@ -138,7 +182,7 @@ var store = EventEmitter({
 
 
         loginMethod = LOGIN_EMAIL;
-        storeSession(result['session_id'], rememberMe);
+        storeSession(result['session_id'], result['session_expires'], rememberMe);
         userLoggedIn(result['session_id'], new User().fromBundle(result['user']));
     },
 
@@ -146,22 +190,7 @@ var store = EventEmitter({
 
     },
 
-    logout: function() {
-        var prev = currentUser;
-        currentUser = null;
-
-        sessionId = null;
-        cookies.expire('sessionId');
-
-        if (loginMethod === LOGIN_FB) {
-            FB.logout();
-        }
-
-        this.emit('loginstatuschange', {
-            oldUser: prev,
-            newUser: currentUser
-        });
-    },
+    logout: logout,
 });
 
 module.exports = store;

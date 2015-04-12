@@ -2,12 +2,13 @@ function ajax(settings) {
     return new Promise(function(resolve, reject) {
         $.ajax($.extend({
             success: function(data) {
-                console.log('ajax success', data)
                 resolve(data);
             },
             error: function(xhr, status, error) {
-                console.log(error);
-                reject(error);
+                reject({
+                    status: xhr.status,
+                    body: xhr.responseText
+                });
             }
         }, settings));
     });
