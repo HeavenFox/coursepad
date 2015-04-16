@@ -45,7 +45,12 @@ open(course_id_path + '.bak', 'w').write(str(previous_maxid))
 # Read Previous DB
 isbrandnew = False
 if current_sn > 1:
-    previous_db = simplejson.load(open(os.path.join(base_dir, 'roster', term + '_' + str(current_sn - 1), 'term_db_' + term + '.json')))
+    jsons = [s for s in os.listdir(os.path.join(base_dir, 'roster', term + '_' + str(current_sn - 1))) if re.match('^termdb_(.+)_(\d+)\.json$', s) is not None]
+    if len(jsons) != 1:
+        print 'Error reading previous directory: no unique term db found'
+        sys.exit(1)
+
+    previous_db = simplejson.load(open(os.path.join(base_dir, 'roster', term + '_' + str(current_sn - 1), jsons[0])))
 
     print 'Previous Database Loaded. There are %d courses in total' % len(previous_db['roster'])
     print 'Building Index on Previous DB'
