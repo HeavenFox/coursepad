@@ -87,9 +87,9 @@ var BasicInfo = React.createClass({
         var creditIsRange = this.state['units'][0] != this.state['units'][1];
         return <div className={"utilities-item basic-info-container" + (this.state.conflicts ? ' conflicts' : '') + (this.state.isMutable ? ' mutable' : '')}>
             {isSharing}
-            <div className="basic-info-stats">
+            <div className={"basic-info-stats" + (creditIsRange ? ' total-credit-range' : '')}>
             <div className="basic-info">
-                <p className={'basic-info-value total-credit' + (creditIsRange ? ' total-credit-range' : '')}>
+                <p className={'basic-info-value total-credit'}>
                     {creditIsRange ? this.state['units'][0] + '-' + this.state['units'][1] : this.state['units'][0]}
                 </p>
                 <p className="basic-info-title">UNITS</p>

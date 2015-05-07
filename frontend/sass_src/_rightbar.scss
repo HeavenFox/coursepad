@@ -30,11 +30,21 @@
     margin: 0;
 }
 
+.basic-info-stats {
+    font-size: 36px;
+    font-weight: 400;
+
+    @media (max-width: #{$small-screen-cutoff}) {
+        font-size: 24px;
+    }
+}
+
 .basic-info {
     display: inline-block;
     width: 80px;
     margin: 5px;
     text-align: center;
+
     @media (max-width: #{$small-screen-cutoff}) {
         width: 60px;
         margin: 2px;
@@ -48,24 +58,21 @@
     }
 }
 
-.basic-info-value {
-    font-size: 36px;
-    font-weight: 400;
-    margin: 3px;
-
-    @media (max-width: #{$small-screen-cutoff}) {
-        font-size: 24px;
-    }
-}
-
-.basic-info-container.conflicts .basic-info-value {
+.basic-info-container.conflicts .basic-info {
     font-size: 24px;
-
 }
 
 .basic-info-title {
     font-size: 12px;
     margin: 3px;
+}
+
+.basic-info-value {
+    margin: 3px;
+}
+
+.total-credit-range .basic-info-value {
+    font-size: 0.7em;
 }
 
 
