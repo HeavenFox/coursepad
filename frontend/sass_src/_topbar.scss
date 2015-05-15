@@ -1,3 +1,5 @@
+$small-header-cutoff: 1000px;
+$compact-header-cutoff: 650px;
 
 header {
     margin: 0 0 0 $leftbar-width-collapsed;
@@ -16,7 +18,7 @@ header {
     background-image: url('../img/logo.png');
 
     background-repeat: no-repeat;
-    background-position: center;
+    background-position: center left;
     background-size: 170px 24px;
     @media print,
        (-o-min-device-pixel-ratio: 5/4),
@@ -27,6 +29,11 @@ header {
 
     float: left;
     order: 1;
+
+
+    @media (max-width: #{$compact-header-cutoff}) {
+        width: 30px;
+    }
 }
 
 #topnav {
@@ -46,10 +53,17 @@ header {
     order: 2;
     flex-grow: 1;
     margin-left: 50px;
+
+    @media (max-width: #{$small-header-cutoff}) {
+        margin-left: 15px;
+    }
 }
 
 #topsearch input {
     width: calc(100% - 50px);
+    @media (max-width: #{$small-header-cutoff}) {
+        width: calc(100% - 30px);
+    }
     max-width: 450px;
 
     border: 1px solid black;
@@ -103,6 +117,9 @@ header {
 .current-user-inner > span {
     display: flex;
     align-items: center;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .topbar-user-icon {
@@ -180,4 +197,16 @@ header {
 
 .user-menu.two > div:first-child {
     margin-left: -100%;
+}
+
+@media (max-width: #{$compact-header-cutoff}) {
+    .current-user-name {
+        display: none;
+    }
+}
+
+/* Term Selector */
+#term-selector {
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
