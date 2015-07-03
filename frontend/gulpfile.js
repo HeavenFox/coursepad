@@ -1,9 +1,11 @@
 var gulp = require('gulp');
+var babel = require('gulp-babel');
 var webpack = require('webpack-stream');
 var uglify = require('gulp-uglify');
 var sass = require('gulp-ruby-sass');
 var del = require('del');
 var jshint = require('gulp-jshint');
+var eslint = require('gulp-eslint');
 var insert = require('gulp-insert');
 var react = require('gulp-react');
 var sourcemaps = require('gulp-sourcemaps');
@@ -64,11 +66,41 @@ function prod(t) {
 }
 
 gulp.task('lint', function() {
+    var eslint_setting = {
+        "ecmaFeatures": {
+            "blockBindings": true,
+            "generators": true,
+            "forOf": true,
+            "jsx": true
+        },
+        envs: [
+            'browser'
+        ],
+        "globals": {
+                "React": false,
+                'require': false,
+                'exports': false,
+                'module': false,
+                '$': false,
+                'LEVEL': false,
+            },
+        "rules": {
+            'quotes': 0,
+            'global-strict': 0,
+            'dot-notation': 0,
+            'no-underscore-dangle': 0,
+        },
+
+    };
+
     return gulp.src('./js_src/**/*.js')
-        .pipe(react())
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'))
-        .pipe(jshint.reporter('fail'));
+        .pipe(babel({
+        optional: ['runtime'],
+        stage: 1
+        }))
+        .pipe(eslint(eslint_setting))
+        .pipe(eslint.format())
+        .pipe(eslint.failOnError());
 })
 
 gulp.task('js', function() {
