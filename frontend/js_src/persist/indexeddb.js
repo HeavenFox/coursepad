@@ -165,7 +165,7 @@ function getByKey(objectStore, key) {
 function getByKeys(objectStore, keys) {
     return open().then(function(db) {
         return new Promise(function(resolve, reject) {
-            result = new Array(keys.length);
+            let result = new Array(keys.length);
             var tr = db.transaction([objectStore]);
             var os = tr.objectStore(objectStore);
             for (var i=0; i < keys.length; i++) {

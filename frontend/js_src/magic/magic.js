@@ -25,7 +25,7 @@ function makeSchedule(clusters, selected, priorities) {
     priorityEarlyEnd = priorities['earlyEnd'];
     priorityNoFriday = priorities['noFriday'];
     priorityLunchBreak = priorities['lunchBreak'];
-    var n = performance.now();
+    // var n = performance.now();
     var fixed = [];
 
     removeTBASections(clusters, selected);
@@ -43,7 +43,7 @@ function makeSchedule(clusters, selected, priorities) {
 
     var result = searchForSolution(clusters, fixed);
 
-    console.log('Time elapsed:', performance.now() - n);
+    // console.log('Time elapsed:', performance.now() - n);
 
     return result;
 }

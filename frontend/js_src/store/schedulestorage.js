@@ -318,7 +318,7 @@ ScheduleStorage.prototype.persistAndDirtySchedule = function(schedule) {
 ScheduleStorage.prototype.persistAndDirtyStorage = function() {
     localStore.fsync(this.getStoreKey());
 
-    if (self.inflight) {
+    if (this.inflight) {
         this.dirtySinceSync = true;
     } else {
         this.getSyncStatus()['dirty'] = true;

@@ -1,5 +1,6 @@
 var EventEmitter = require('event-emitter');
 var schedules = require('../store/schedules.js');
+var datetime = require('../utils/datetime.js');
 
 function printSchedule(clusters) {
     function time2str(time) {

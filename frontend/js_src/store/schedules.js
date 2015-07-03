@@ -729,8 +729,8 @@ MutableSchedule.prototype.addCluster = function(cluster) {
 
     this.colorMapping[cluster[0].getNumber()] = (function(){
         for (var i=0; i < palette.length; i++) {
-            color = palette[i];
-            found = false;
+            let color = palette[i];
+            let found = false;
             for (var course in this.colorMapping) {
                 if (this.colorMapping[course] == color) {
                     found = true;
