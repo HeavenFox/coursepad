@@ -3,12 +3,10 @@ var meta = require('./store/meta.js');
 var Calendar = require('./components/Calendar.react.js');
 var SearchBar = require('./components/SearchBar.react.js');
 var Sidebar = require('./components/Sidebar.react.js');
-var termdb = require('./store/termdb.js');
 
 var schedules = require('./store/schedules.js');
 var termdb = require('./store/termdb.js');
 
-var magic = require('./magic/magic.js');
 var TermSelector = require('./components/TermSelector.react.js');
 var User = require('./components/User.react.js');
 var LeftBar = require('./components/LeftBar.react.js');

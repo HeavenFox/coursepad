@@ -41,7 +41,7 @@ exports.changePath = function(newPath) {
     }
 }
 
-window.onpopstate = function(event) {
+window.onpopstate = function() {
     var path = window.location.pathname;
     for (var i=0; i < registry.length; i++) {
         var matches = registry[i].pattern.exec(path);

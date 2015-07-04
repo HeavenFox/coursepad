@@ -26,26 +26,6 @@ function serror(e) {
     errorga(e.toString());
 }
 
-function queued(f) {
-    var queue = null;
-    return function() {
-        if (!window.ga) {
-            if (!queue) {
-                queue = [];
-            } else {
-                queue.push(arguments);
-            }
-            return;
-        }
-        if (queue) {
-            for (var i=0; i < queue.length; i++) {
-                f.apply(null, queue[i]);
-            }
-        }
-        f.apply(null, arguments);
-    }
-}
-
 function sdim(d, val) {
     if (!DIMS[d]) {
         throw new Error('Invalid dimension ' + d);
@@ -63,7 +43,7 @@ function suserid(uid) {
         return;
     }
     window.ga('set', '&uid', uid.toString());
-};
+}
 
 exports.sevent = sevent;
 exports.serror = serror;

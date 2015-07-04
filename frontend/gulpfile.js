@@ -74,7 +74,8 @@ gulp.task('lint', function() {
             "jsx": true
         },
         envs: [
-            'browser'
+            'browser',
+            'es6'
         ],
         "globals": {
                 "React": false,
@@ -95,8 +96,7 @@ gulp.task('lint', function() {
 
     return gulp.src('./js_src/**/*.js')
         .pipe(babel({
-        optional: ['runtime'],
-        stage: 1
+        optional: ['runtime', 'asyncToGenerator']
         }))
         .pipe(eslint(eslint_setting))
         .pipe(eslint.format())
