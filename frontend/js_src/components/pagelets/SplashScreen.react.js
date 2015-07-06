@@ -38,15 +38,15 @@ var LoginWindow = React.createClass({
             return <div className="start-using-btn-container">
                     <h3>Are you sure?</h3>
                     <p>Without signing in, you cannot share your schedule or save your schedules to your account.</p>
-                    <p className="linkish" onClick={this._changeplan}>Go Back</p>
-                    <p className="linkish" onClick={this._useGuest}>Use Without Signing In</p>
+                    <p className="linkish" onClick={this._changeplan} key="goback">Go Back</p>
+                    <p className="linkish" onClick={this._useGuest} key="continue">Use Without Signing In</p>
                 </div>
         } else {
             return <div className="start-using-btn-container">
                     <h3>Sign in</h3>
                     <div className="btn loginwithfb" onClick={this._loginwithfb}>Login with Facebook</div>
                     <p className="promise">We never sneak posts on your timeline or spam your friends</p>
-                    <p className="linkish" onClick={this._donotsignin}>Do not want to sign in?</p>
+                    <p className="linkish" onClick={this._donotsignin} key="nosignin">Do not want to sign in?</p>
             </div>
         }
     }
