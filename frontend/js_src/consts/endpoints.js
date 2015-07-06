@@ -1,13 +1,13 @@
 var WS_SERVER;
-if (LEVEL == 1) {
+if (LEVEL >= 9) {
+    WS_SERVER = 'wss://ws.coursepad.me/';
+} else if (LEVEL >= 5) {
+    WS_SERVER = 'wss://staging-ws.coursepad.me/';
+} else {
     WS_SERVER = 'ws://ws-test.coursepad.me/';
 }
-if (LEVEL == 5) {
-    WS_SERVER = 'wss://staging-ws.coursepad.me/';
-}
-if (LEVEL == 9) {
-    WS_SERVER = 'wss://ws.coursepad.me/';
-}
+
+
 
 function queryString(p) {
     var result = '';

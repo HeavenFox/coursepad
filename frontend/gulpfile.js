@@ -107,8 +107,8 @@ gulp.task('js', function() {
     var filter = gulpFilter(['main.js']);
     return gulp.src('js_src/app.js')
         .pipe(webpack(webpack_conf()))
-        .pipe(DEV ? insert.prepend('const LEVEL=' + LEVEL + ';\n') : gutil.noop())
-        .pipe(DEV ? gutil.noop() : uglify({
+        .pipe((LEVEL <= 7) ? insert.prepend('const LEVEL=' + LEVEL + ';\n') : gutil.noop())
+        .pipe((LEVEL <= 7) ? gutil.noop() : uglify({
                 mangle: {
                     except: ['GeneratorFunction']
                 },
