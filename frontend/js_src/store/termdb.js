@@ -191,7 +191,7 @@ LocalTermDatabase.prototype.applyUpdates = function(updates) {
                             for (i=0; i < rosterDiff['added'].length; i++) {
                                 rosterDiff['added'][i].term = termId;
 
-                                rosterStore.add(rosterDiff['added'][i]);
+                                rosterStore[LEVEL == 1 ? 'add' : 'put'](rosterDiff['added'][i]);
                             }
                         }
 
@@ -254,7 +254,7 @@ LocalTermDatabase.prototype.applyUpdates = function(updates) {
                         if (subjectsDiff['added']) {
                             for (var i=0; i < subjectsDiff['added'].length; i++) {
                                 subjectsDiff['added'][i].term = termId;
-                                subjectsStore.add(subjectsDiff['added'][i]);
+                                subjectsStore[LEVEL == 1 ? 'add' : 'put'](subjectsDiff['added'][i]);
                             }
                         }
                     }, 'readwrite');
