@@ -1,39 +1,5 @@
 var EventEmitter = require('event-emitter');
 var schedules = require('../store/schedules.js');
-var datetime = require('../utils/datetime.js');
-
-function printSchedule(clusters) {
-    function time2str(time) {
-        return '' + Math.floor(time) + ':' + (60*(time-Math.floor(time))).toFixed(0);
-    }
-
-    function meetings2str(section) {
-        if (section.meetings.length == 0) {
-            return 'no meetings';
-        }
-        return section.number + ' ' + section.meetings.map(function(meeting) {
-            return datetime.bitmaskToDay(meeting.pattern) + ' ' + time2str(meeting.startTimeHrs) + '-' + time2str(meeting.endTimeHrs);
-        }).join(', ') + (section.fixed ? ' (fixed)' : '');
-    }
-
-
-    clusters.forEach(function(cluster) {
-        console.group(cluster.name);
-        cluster.forEach(function(course) {
-            console.group('Components');
-            course.forEach(function(sections) {
-                console.group('Classes');
-                sections.forEach(function(section) {
-                    console.log(meetings2str(section));
-                });
-                console.groupEnd();
-            });
-            console.groupEnd();
-        });
-        console.groupEnd();
-    })
-}
-
 
 function arrayForSection(section) {
     return {
@@ -53,7 +19,7 @@ function arrayForSchedule(schedule) {
     return schedule.basket.filter(function(course) {
         return schedule.getVisibility(course[0].getNumber());
     }).map(function(cluster) {
-        var result = cluster.map(function(course) {
+        var result = cluster.map(course => {
             var result = [];
             for (var type in course.sections) {
                 if (course.sections.hasOwnProperty(type)) {
