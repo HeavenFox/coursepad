@@ -5,6 +5,8 @@ var Magic = require('./sidebar/Magic.react.js');
 var Sharing = require('./sidebar/Sharing.react.js');
 var IfLoginStatus = require('./meta/IfLoginStatus.react.js');
 
+import Sync from './sidebar/Sync.react.js';
+
 var Sidebar = React.createClass({
     render: function() {
         return <div>
@@ -14,6 +16,7 @@ var Sidebar = React.createClass({
                 <Sharing />
             </IfLoginStatus>
             <Magic />
+            <Sync />
             <Tools />
         </div>
     }

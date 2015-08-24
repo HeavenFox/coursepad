@@ -1,4 +1,4 @@
-exports.timeStringToHour = function(s) {
+export function timeStringToHour(s) {
     var result = s.match(/(\d+):(\d+) ?(.+)/);
     if (result) {
         var hr = parseInt(result[1], 10);
@@ -24,7 +24,7 @@ var bitmaskToDay = {
     "64": "U"
 };
 
-exports.bitmaskToDay = function(bitmask) {
+export function bitmaskToDay(bitmask) {
     var result = "";
     var days = "MTWRFSU";
     for (var i=0;i < 7;i++) {
@@ -34,3 +34,42 @@ exports.bitmaskToDay = function(bitmask) {
     }
     return result;
 };
+
+
+const timeRegex = /(\d+):(\d+)(A|P)M/;
+const dateRegex = /(\d+)\/(\d+)\/(\d+)/;
+
+function addLeadingZero(num) {
+    return num < 10 ? '0' + num : '' + num;
+}
+
+export function toRFC(date, time) {
+    let year, month, dom;
+    if (date instanceof Date) {
+        year = date.getFullYear();
+        month = addLeadingZero(date.getMonth() + 1);
+        dom = addLeadingZero(date.getDate());
+    } else {
+        const dm = dateRegex.exec(date);
+        if (!dm) return null;
+
+        year = dm[3];
+        month = dm[1];
+        dom = dm[2];
+    }
+
+    const tm = timeRegex.exec(time);
+    if (!tm) {
+        return null;
+    }
+
+    let hr = parseInt(tm[1], 10);
+    let offset = tm[3] === 'P' ? 12 : 0;
+    if (hr === 12) {
+        offset -= 12;
+    }
+    hr += offset;
+    let hrString = addLeadingZero(hr);
+
+    return `${year}-${month}-${dom}T${hrString}:${tm[2]}:00`;
+}

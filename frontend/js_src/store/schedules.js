@@ -37,7 +37,7 @@ var store = EventEmitter({
                 return false;
             }
             self.ready = false;
-            self.emit('readystatechange');
+            self.emit('readystatechange', false);
         }
 
         schedulestorage.setStorage(term);
@@ -59,7 +59,7 @@ var store = EventEmitter({
         self._setCurrentSchedule(schedule);
 
         self.ready = true;
-        self.emit('readystatechange');
+        self.emit('readystatechange', true);
 
         return true;
     },
@@ -67,7 +67,7 @@ var store = EventEmitter({
     setSharedSchedule: async function(term, serialized) {
         if (this.ready) {
             this.ready = false;
-            this.emit('readystatechange');
+            this.emit('readystatechange', false);
         }
 
         var db = termdb.getRemoteTerm(term);
@@ -84,7 +84,7 @@ var store = EventEmitter({
         this._setCurrentSchedule(schedule);
 
         this.ready = true;
-        this.emit('readystatechange');
+        this.emit('readystatechange', true);
     },
 
 

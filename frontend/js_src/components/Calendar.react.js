@@ -85,16 +85,7 @@ var Calendar = React.createClass({
             var startHour = datetime.timeStringToHour(meeting.startTime);
             var length = datetime.timeStringToHour(meeting.endTime) - startHour;
             var time = meeting.startTime + ' \u2013 ' + meeting.endTime;
-            var location;
-            var shortBuilding = humanize.getShortBuildingName(meeting.building);
-            if (shortBuilding) {
-                location = shortBuilding;
-            } else {
-                location = meeting.building;
-            }
-            if (meeting.room) {
-                location += (' ' + meeting.room);
-            }
+            var location = humanize.getShortLocation(meeting.building, meeting.room)
 
             var longBuilding = humanize.getLongBuildingName(meeting.building);
             if (longBuilding) {
