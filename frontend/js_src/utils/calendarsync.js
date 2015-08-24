@@ -3,6 +3,7 @@ import {getShortLocation} from '../consts/humanize.js';
 import {authorize} from '../thirdparty/google.js';
 import {promisify} from '../utils/promise.js'
 import {toRFC} from '../utils/datetime.js'
+import {serror} from '../analytics/analytics.js'
 import _ from 'lodash'
 
 export function toiCal(components) {
@@ -64,9 +65,18 @@ export function toGoogleCalendar(components) {
 
 			// Start date is the first day when the class meets
 			let startDate = new Date(parseInt(startDateMatch[3], 10), parseInt(startDateMatch[1], 10) - 1, parseInt(startDateMatch[2], 10));
-			if (meeting.pattern <= 0 || meeting.pattern >= (1<<7)) return;
+			if (!meeting.pattern || meeting.pattern < 0 || meeting.pattern >= (1<<7)) return;
+			let maxTries = 7;
 			while (!((1 << ((startDate.getDay() + 6) % 7)) & meeting.pattern)) {
 				startDate.setDate(startDate.getDate() + 1);
+				maxTries--;
+				if (maxTries < 0) {
+					// Fail-safe. Should never ever reach here.
+					serror('Calendar Sync: First Date: Max tries exceeded', false);
+					console.error('Max tries exceeded');
+					startDate = meeting.startDate;
+					break;
+				}
 			}
 
 			let startTime = toRFC(startDate, meeting.startTime);

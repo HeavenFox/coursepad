@@ -14,16 +14,15 @@ function sevent() {
     eventga.apply(null, arguments);
 }
 
-var errorga = null;
-
-function serror(e) {
-    if (!errorga) {
-        if (!window.ga) {
-            return;
-        }
-        errorga = window.ga.bind(window, 'send', 'exception');
+function serror(e, fatal) {
+    if (!window.ga) {
+        return;
     }
-    errorga(e.toString());
+
+    window.ga('send', 'exception', {
+        'exDescription': e.toString(),
+        'exFatal': !!fatal,
+    });
 }
 
 function sdim(d, val) {
