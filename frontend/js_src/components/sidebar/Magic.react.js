@@ -1,5 +1,6 @@
 var magic = require('../../store/magic.js');
 var schedules = require('../../store/schedules.js');
+import {sevent} from '../../analytics/analytics.js';
 
 var Priority = React.createClass({
     getInitialState: function() {
@@ -87,6 +88,7 @@ var Magic = React.createClass({
     _save: function() {
         magic.save();
         this.setState({state: STATE_SAVED});
+        sevent('magic', 'save');
     },
 
     _cancel: function() {
@@ -97,11 +99,13 @@ var Magic = React.createClass({
     _next: function() {
         this.setState({state: STATE_THINKING});
         magic.next();
+        sevent('magic', 'another');
     },
 
     _revert: function() {
         magic.revert();
         this.setState({state: STATE_REVERTED});
+        sevent('magic', 'revert');
     },
 
     _goBack: function() {
@@ -120,6 +124,7 @@ var Magic = React.createClass({
         this.setState({state: STATE_THINKING});
         var curSchedule = schedules.getCurrentSchedule();
         magic.makeSchedule(curSchedule, bindings);
+        sevent('magic', 'makeschedule');
     },
 
     render: function() {
