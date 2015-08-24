@@ -2,7 +2,6 @@ from __future__ import division
 
 import itertools
 import pprint
-import ipdb
 
 def dict_similarity(dict_a, dict_b):
     if isinstance(dict_a, dict) and isinstance(dict_b, dict):
