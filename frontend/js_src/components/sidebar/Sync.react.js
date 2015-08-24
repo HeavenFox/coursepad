@@ -1,5 +1,6 @@
 import schedules from '../../store/schedules.js';
 import {saveiCal, syncToGoogle} from '../../utils/calendarsync.js';
+import {sevent} from '../../analytics/analytics.js';
 
 let GoogleSync = React.createClass({
     getInitialState() {
@@ -46,6 +47,7 @@ let GoogleSync = React.createClass({
             this.setState({status: 'error'});
         }
 
+        sevent('calendarsync', 'google');
     },
 
     componentDidMount() {
@@ -82,6 +84,7 @@ export default React.createClass({
     _downloadICal() {
         let curSchedule = schedules.getCurrentSchedule().getVisibleSections();
         saveiCal(curSchedule, 'schedule.ics');
+        sevent('calendarsync', 'ical');
     },
 
     render() {
