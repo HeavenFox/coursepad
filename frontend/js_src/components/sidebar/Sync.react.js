@@ -34,10 +34,11 @@ let GoogleSync = React.createClass({
 
     async _syncToGoogleCalendar() {
         this._stopReadyTimer();
-        let curSchedule = schedules.getCurrentSchedule().getVisibleSections();
+        let curSchedule = schedules.getCurrentSchedule();
+        let sections = curSchedule.getVisibleSections();
         this.setState({status: 'pending'});
         try {
-            await syncToGoogle(curSchedule);
+            await syncToGoogle(sections, [curSchedule.term]);
             this.setState({status: 'done'});
             this._startReadyTimer();
         } catch (e) {

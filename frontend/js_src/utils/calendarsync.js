@@ -123,13 +123,18 @@ export function toGoogleCalendar(components) {
 	return events;
 }
 
-async function syncEvents(components) {
+async function syncEvents(components, terms) {
 	await gapi.client.load('calendar', 'v3');
 	var request = gapi.client.calendar.events.list({
 		'calendarId': 'primary',
 	});
+	if (!terms) {
+		terms = components.map(comp => comp.parent.term);
+	}
 	let compsByTerm = _.groupBy(components, comp => comp.parent.term);
-	_.forEach(compsByTerm, async function(comps, term) {
+	let requestPromises = terms.map(async function(term) {
+		let comps = compsByTerm[term] || [];
+
 		let canonicalEvents = toGoogleCalendar(comps);
 		let request = gapi.client.calendar.events.list({
 			'calendarId': 'primary',
@@ -203,11 +208,12 @@ async function syncEvents(components) {
 		})
 		let result = await batch;
 		console.log(result);
-		
-	})
+	});
+	
+	await Promise.all(requestPromises);
 }
 
-export async function syncToGoogle(components) {
+export async function syncToGoogle(components, terms) {
 	await new Promise((resolve, reject) => {
 		authorize({
 			'scope': ['https://www.googleapis.com/auth/calendar'],
@@ -221,5 +227,5 @@ export async function syncToGoogle(components) {
 		});
 	});
 
-	await syncEvents(components);
+	await syncEvents(components, terms);
 }
