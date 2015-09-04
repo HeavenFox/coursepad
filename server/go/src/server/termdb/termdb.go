@@ -20,6 +20,7 @@ import (
 
 type ClassMeetingJson struct {
 	Building   string   `json:"bldg"`
+	Room       string   `json:"rm"`
 	StartDate  string   `json:"sd"`
 	EndDate    string   `json:"ed"`
 	StartTime  string   `json:"st"`
