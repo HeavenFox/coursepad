@@ -53,15 +53,6 @@ var LoginWindow = React.createClass({
 });
 
 var SplashScreen = React.createClass({
-    componentWillMount: function() {
-        if (window.location.hash == '#didimport') {
-            this.setState({didImport: true});
-        } else {
-            this.setState({didImport: false});
-        }
-    },
-
-
     componentDidMount: function() {
         user.on('loginstatuschange', this._onUserChange);
         ana.sevent('splash', 'show');
@@ -88,13 +79,11 @@ var SplashScreen = React.createClass({
     },
 
     render: function() {
-        var old = this.state.didImport ? null : <p className="olduser">Old User from Spring 2015? <a href="http://beta.coursepad.me" onClick={this._migrate}>Click here to import your schedules from old Beta.CoursePad.me.</a></p>;
         return <div className="splash-screen">
             <div className="splash-screen-header"></div>
             <div className="splash-screen-inner">
-            <h2>Welcome to a Better CoursePad.me</h2>
-            <p className="headline">CoursePad.me is the new way to schedule your courses at Cornell, and it just got even better.</p>
-            {old}
+            <h2>Welcome to CoursePad.me</h2>
+            <p className="headline">CoursePad.me is the best way to choose your classes and create your schedule at Cornell.</p>
             <div className="splash-screen-container">
             <div className="splash-screen-item-container">
                 <div className="splash-screen-item">
@@ -107,7 +96,7 @@ var SplashScreen = React.createClass({
                 </div>
                 <div className="splash-screen-item">
                     <div className="splash-screen-img splash-screen-magic-img" />
-                    <p><em>Auto-Schedule</em> Miss Schedulizer? Add the courses in your mind, and let CoursePad.me make a schedule, tailored for your taste.</p>
+                    <p><em>Auto-Schedule</em> Miss Schedulizer? Add the courses in your mind, and let CoursePad.me arrange the time slots, tailored for your taste.</p>
                 </div>
                 <div className="clearboth" />
             </div>
