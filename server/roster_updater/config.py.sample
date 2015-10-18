@@ -1,0 +1,4 @@
+ROSTER_DATA_DIR = ''
+
+OMIT_TERM = {'fa14', 'sp15', 'fa15'}
+FORCE_TERM = {'wi15'}
