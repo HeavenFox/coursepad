@@ -284,7 +284,7 @@ export function sortTerms(terms, desc) {
         'wi': 1,
         'sp': 2,
         'su': 3,
-        'fa': 4
+        'fa': 4,
     };
     return terms.sort(function(a, b) {
         return (desc ? -1 : 1) * ((+a.slice(2) - b.slice(2)) || (termOrder[a.slice(0, 2)] - termOrder[b.slice(0, 2)]));
@@ -292,9 +292,11 @@ export function sortTerms(terms, desc) {
 };
 
 export function getTermName(term) {
-    var termName = {
-        fa: 'Fall',
-        sp: 'Spring'
+    let termName = {
+        'fa': 'Fall',
+        'sp': 'Spring',
+        'wi': 'Winter',
+        'su': 'Summer',
     };
 
     function year(digit) {
