@@ -1,6 +1,7 @@
 from __future__ import division
 
 import simplejson
+import subprocess
 import argparse
 import sys
 import glob
@@ -36,7 +37,7 @@ class APIError(UpdateError):
 
 
 def isotime_to_unix(s):
-    return time.mktime(dateutil.parser.parse(s).utctimetuple())
+    return int(time.mktime(dateutil.parser.parse(s).utctimetuple()))
 
 
 api_call_time = 0
@@ -62,8 +63,8 @@ def make_api_call(endpoint, args=None):
         try:
             result = simplejson.load(urllib2.urlopen(url))
             break
-        except urllib2.URLError as e:
-            print 'URLError: %s, retrying...' % e
+        except Exception as e:
+            print 'Error: %s, retrying...' % e
 
     if result is None:
         raise APIError('Cannot call API after retrying')
@@ -95,6 +96,9 @@ def persist_index():
 def backup_data_index():
     for fn in [data_index_file('meta.json'), data_index_file('version_history.json')]:
         shutil.copyfile(fn, fn + '.bak')
+
+def backup():
+    subprocess.call(['tar', '-czf', os.path.join(config.BACKUP_DIR, 'data_' + time.strftime('%Y%m%d%H%M%S') + '.tar.gz'), config.ROSTER_DATA_DIR])
 
 
 
@@ -168,14 +172,26 @@ def update_term(term, roster_time):
         course_matcher.match(previous_course_by_number, course_by_number)
 
         print 'Done.'
-        print 'Added these courses'
-        for course in course_matcher.added:
-            print "%s %d: %s" % (course['sub'], course['nbr'], course['title'])
+        modified = False
+        if course_matcher.added:
+            modified = True
+            print 'Added these courses'
+            for course in course_matcher.added:
+                print "%s %d: %s" % (course['sub'], course['nbr'], course['title'])
 
-        print 'Deleted these courses'
-        print course_matcher.deleted
+        if course_matcher.deleted:
+            modified = True
+            print 'Deleted these courses'
+            print course_matcher.deleted
 
-        print 'Modified %d courses' % len(course_matcher.modified)
+        if course_matcher.modified:
+            modified = True
+            print 'Modified %d courses' % len(course_matcher.modified)
+
+        if not modified:
+            print 'Nothing modified. Bailing out.'
+            return
+
 
         previous_maxid = course_matcher.previous_maxid
 
@@ -240,40 +256,10 @@ def update_term(term, roster_time):
         f.write(str(course_id_max))
 
 
-"""
-
-persist_dir = os.path.join(base_dir, 'persist')
-
-
-
-
-
-def wr(var, n, root_dir=None, sub_dir=None):
-    if root_dir is None:
-        root_dir = os.path.join(base_dir, 'roster', term + '_' + str(current_sn))
-        if sub_dir is not None:
-            root_dir = os.path.join(root_dir, sub_dir)
-
-    if not os.path.exists(root_dir):
-        os.makedirs(root_dir)
-    output = open(os.path.join(root_dir, n + '.json'), 'wb')
-    simplejson.dump(var, output)
-    output.close()
-
-    output = open(os.path.join(root_dir, n + '_readable.json'), 'wb')
-    simplejson.dump(var, output, indent='  ', sort_keys=True)
-    output.close()
-
-
-wr(term_db, 'termdb_' + term + '_' + str(roster_unixtime))
-if not isbrandnew:
-    wr(diff_db, 'diff_termdb_' + term + '_' + str(previous_db['time']) + '_' + str(roster_unixtime), sub_dir='diffs')
-
-"""
-
 # Backup first
 
 backup_data_index()
+backup()
 
 err_occurred = False
 

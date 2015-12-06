@@ -12,16 +12,39 @@ def dict_similarity(dict_a, dict_b):
     elif isinstance(dict_a, list) and isinstance(dict_b, list):
         return 1/max(len(dict_a), len(dict_b)) * sum(dict_similarity(dict_a[i], dict_b[i]) for i in xrange(min(len(dict_a), len(dict_b))))
     else:
-        return 1 if dict_a == dict_b else 0
+        return 1.0 if dict_a == dict_b else 0
 
+
+def course_sim(a, b):
+    section_measure = 0.95 if all_section_numbers_set(a) == all_section_numbers_set(b) else 0
+    return max(dict_similarity(a, b), section_measure)
 
 def all_section_numbers_set(course):
     return reduce(lambda acc, sec: acc | set(a['nbr'] for a in sec), course['secs'].values(), set())
 
 
-
 def genmatching(shortlist, longlist):
-    return [max(xrange(len(longlist)), key=lambda i: dict_similarity(d, longlist[i])) for d in shortlist]
+    short_matched = set()
+    long_matched = set()
+    score = {}
+    match = [-1] * len(shortlist)
+    for i in xrange(len(shortlist)):
+        for j in xrange(len(longlist)):
+            score[i, j] = course_sim(shortlist[i], longlist[j])
+
+    score_items = score.items()
+    score_items.sort(key=lambda x: -x[1])
+    for pair, score in score_items:
+        if score < 0.5:
+            break
+
+        i, j = pair
+        if i not in short_matched and j not in long_matched:
+            match[i] = j
+            short_matched.add(i)
+            long_matched.add(j)
+
+    return match
 
 def pprintcslist(ls):
     result = [a.copy() for a in ls]
@@ -44,10 +67,12 @@ class CourseMatcher(object):
     def match(self, previous_course_by_number, course_by_number):
 
         for key, courseswithno in course_by_number.iteritems():
-            prevwithno = previous_course_by_number[key]
             if key not in previous_course_by_number:
                 self.added.extend(courseswithno)
-            elif len(courseswithno) == len(previous_course_by_number[key]) == 1:
+                continue
+
+            prevwithno = previous_course_by_number[key]
+            if len(courseswithno) == len(previous_course_by_number[key]) == 1:
                 courseswithno[0]['id'] = previous_course_by_number[key][0]['id']
                 self.matched_courses.add(previous_course_by_number[key][0]['id'])
             else:
@@ -67,25 +92,36 @@ class CourseMatcher(object):
                 else:
                     shortlist, longlist = (courseswithno, prevwithno) if len(courseswithno) <= len(prevwithno) else (prevwithno, courseswithno)
                     matching = genmatching(shortlist, longlist)
-                    if len(matching) != len(set(matching)):
-                        print matching
+                    # sanity check
+                    for i in xrange(len(matching)):
+                        if matching[i] >= 0:
+                            for j in xrange(i+1, len(matching)):
+                                if matching[i] == matching[j]:
+                                    raise Exception('Wrong matching')
+                    # if len(matching) != len(set(matching)):
+                    # if True:
+                    #     print matching
 
-                        pprintcslist(shortlist)
-                        print '=========================================='
-                        pprintcslist(longlist)
+                    #     print '=========================================='
+                    #     pprintcslist(shortlist)
+                    #     print '=========================================='
+                    #     pprintcslist(longlist)
                         
 
-                        while True:
-                            matching = input('Please manually resolve matching: ')
-                            if len(matching) != len(shortlist):
-                                print 'Length not right'
-                                continue
+                    #     while True:
+                    #         t = input('Please manually resolve matching: ')
+                    #         if t == 0:
+                    #             break
+                    #         matching = t
+                    #         if len(matching) != len(shortlist):
+                    #             print 'Length not right'
+                    #             continue
 
-                            for i in matching:
-                                if i >= len(longlist):
-                                    print '%d is out of range' % i
-                                    continue
-                            break
+                    #         for i in matching:
+                    #             if i >= len(longlist):
+                    #                 print '%d is out of range' % i
+                    #                 continue
+                    #         break
 
                     for i in xrange(len(matching)):
                         if matching[i] >= 0:
