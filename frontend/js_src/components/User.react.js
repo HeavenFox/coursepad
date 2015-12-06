@@ -147,7 +147,7 @@ var User = React.createClass({
         user.on('loginstatuschange', this._onUserChange);
         var contentDescriptor = <div><UserMenu clickHandler={this._click} /></div>;
         this.menu = new Drop({
-            target: this.refs['trigger'].getDOMNode(),
+            target: this.refs['trigger'],
             content: contentDescriptor,
             position: 'bottom center',
             openOn: 'click',

@@ -37,9 +37,9 @@ var SingleMeeting = React.createClass({
         if (this._mutable) {
             var self = this;
 
-            $(this.refs['meeting'].getDOMNode()).draggable({
+            $(this.refs['meeting']).draggable({
                 revert: "invalid",
-                containment: this._owner.getMeetingContainer(),
+                containment: this.props.owner.getMeetingContainer(),
                 stop: function(event, ui) {
                     ui.helper.css('left', '');
                 }

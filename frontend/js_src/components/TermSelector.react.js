@@ -54,7 +54,7 @@ var TermSelector = React.createClass({
         termdb.on('readystatechange', this.termDBReadyStateChange);
     },
 
-    componentDidUnmount: function() {
+    componentWillUnmount: function() {
         termdb.off('readystatechange', this.termDBReadyStateChange);
     },
 
@@ -68,7 +68,7 @@ var TermSelector = React.createClass({
     componentDidMount: function() {
         var contentDescriptor = <TermList clickHandler={this._click} />;
         this.menu = new Drop({
-            target: this.refs['selector'].getDOMNode(),
+            target: this.refs['selector'],
             content: contentDescriptor,
             position: 'bottom center',
             openOn: 'click',

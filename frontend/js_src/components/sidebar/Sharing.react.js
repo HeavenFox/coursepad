@@ -4,7 +4,7 @@ var twitter = require('../../thirdparty/twitter.js');
 
 var SocialNetworks = React.createClass({
     componentDidMount: function() {
-        var root = this.getDOMNode();
+        var root = ReactDOM.findDOMNode(this);
         (async function() {
             await twitter.init();
 

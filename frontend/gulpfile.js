@@ -50,8 +50,8 @@ function webpack_conf() {
         },
         module: {
             loaders: [
-                { test: /\.js$/, exclude: /node_modules/, loader: "babel", query: babel_query},
-                { test: /\.json/, loader: "json-loader"}
+                {test: /\.tsx?$/, loader: 'ts-loader'},
+                {test: /\.js$/, exclude: /node_modules/, loader: "babel", query: babel_query},
             ]
         }
     };
@@ -105,7 +105,7 @@ gulp.task('lint', function() {
 
 gulp.task('js', function() {
     var filter = gulpFilter(['main.js']);
-    return gulp.src('js_src/app.js')
+    return gulp.src('js_src/app.tsx')
         .pipe(webpack(webpack_conf()))
         .pipe((LEVEL <= 7) ? insert.prepend('const LEVEL=' + LEVEL + ';\n') : gutil.noop())
         .pipe((LEVEL <= 7) ? gutil.noop() : uglify({
@@ -149,7 +149,7 @@ gulp.task('default', function() {
     DEV = true;
     gulp.run('js', 'css', 'static');
 
-    gulp.watch('js_src/**/*.js', ['js']);
+    gulp.watch('js_src/**/*', ['js']);
     gulp.watch('sass_src/**/*.scss', ['css']);
     gulp.watch('static/**', ['static']);
 });

@@ -14,7 +14,7 @@ var ImportExport = React.createClass({
     },
 
     _load: function() {
-        var files = this.refs['load'].getDOMNode().files;
+        var files = this.refs['load'].files;
         if (files.length === 0) {
             alert("You need to choose a file");
         } else {

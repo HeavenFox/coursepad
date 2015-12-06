@@ -18,7 +18,7 @@ var DropoffSet = React.createClass({
     render: function() {
         var dropoffs = [];
         this.state.dropoffs.forEach(function(dropoff) {
-            dropoffs.push(MeetingDropoff(dropoff));
+            dropoffs.push(<MeetingDropoff {...dropoff} />);
         });
         return <div>{dropoffs}</div>;
     }
@@ -30,7 +30,7 @@ var Calendar = React.createClass({
     maxTime: 22,
 
     getMeetingContainer: function() {
-        return this.refs['container'].getDOMNode();
+        return this.refs['container'];
     },
 
     getInitialState: function() {
@@ -163,7 +163,7 @@ var Calendar = React.createClass({
         var meetings = [];
         this.state.meetings.forEach(function(meeting) {
             meeting.readOnly = this.state.readOnly;
-            meetings.push(React.createElement(SingleMeeting, meeting));
+            meetings.push(<SingleMeeting {...meeting} owner={this} />);
         }, this);
 
         var fullWeek = this.state.needWeekend;

@@ -9,7 +9,7 @@ var SearchBar = React.createClass({
         schedules.on('readystatechange', this._readyStateChanged);
     },
 
-    componentDidUnmount: function() {
+    componentWillUnmount: function() {
         schedules.off('readystatechange', this._readyStateChanged);
     },
 
@@ -57,7 +57,7 @@ var SearchBar = React.createClass({
     },
     componentDidMount: function() {
         var that = this;
-        $(this.getDOMNode()).autocomplete({
+        $(ReactDOM.findDOMNode(this)).autocomplete({
             minLength: 2,
             source: this.dataSource,
             select: function(event, ui) {

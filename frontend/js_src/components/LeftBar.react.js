@@ -64,7 +64,7 @@ var ScheduleLine = React.createClass({
 
     _focusIfNeeded: function() {
         if (this.state.editing) {
-            var node = this.refs['input'].getDOMNode();
+            var node = this.refs['input'];
             node.focus();
             node.select();
         }

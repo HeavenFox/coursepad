@@ -1,32 +1,32 @@
-var meta = require('./store/meta.js');
+var meta : any = require('./store/meta.js');
 
-var Calendar = require('./components/Calendar.react.js');
-var SearchBar = require('./components/SearchBar.react.js');
-var Sidebar = require('./components/Sidebar.react.js');
+var Calendar : any = require('./components/Calendar.react.js');
+var SearchBar : any = require('./components/SearchBar.react.js');
+var Sidebar : any = require('./components/Sidebar.react.js');
 
-var schedules = require('./store/schedules.js');
-var termdb = require('./store/termdb.js');
+var schedules : any = require('./store/schedules.js');
+var termdb : any = require('./store/termdb.js');
 
-var TermSelector = require('./components/TermSelector.react.js');
-var User = require('./components/User.react.js');
-var LeftBar = require('./components/LeftBar.react.js');
-var humanize = require('./consts/humanize.js');
+var TermSelector : any = require('./components/TermSelector.react.js');
+var User : any = require('./components/User.react.js');
+var LeftBar : any = require('./components/LeftBar.react.js');
+var humanize : any = require('./consts/humanize.js');
 
-var welcome = require('./utils/welcome.js');
+var welcome : any = require('./utils/welcome.js');
 require('./controllers/update.js');
 
-var router = require('./router.js');
+import * as router from './router.ts';
 
-var ajax = require('./utils/ajax.js');
-var endpoints = require('./consts/endpoints.js');
+var ajax : any = require('./utils/ajax.js');
+var endpoints : any = require('./consts/endpoints.js');
 
 
-React.render(<Calendar />, document.getElementById('calendar'));
-React.render(<SearchBar />, document.getElementById('topsearch'));
-React.render(<Sidebar />, document.getElementById('utilities'));
-React.render(<TermSelector />, document.getElementById('term-selector'));
-React.render(<User />, document.getElementById('current-user'));
-React.render(<LeftBar />, document.getElementById('sidebar'));
+ReactDOM.render(<Calendar />, document.getElementById('calendar'));
+ReactDOM.render(<SearchBar />, document.getElementById('topsearch'));
+ReactDOM.render(<Sidebar />, document.getElementById('utilities'));
+ReactDOM.render(<TermSelector />, document.getElementById('term-selector'));
+ReactDOM.render(<User />, document.getElementById('current-user'));
+ReactDOM.render(<LeftBar />, document.getElementById('sidebar'));
 
 welcome();
 meta.upgradeSchema();

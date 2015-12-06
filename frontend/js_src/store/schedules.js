@@ -1,5 +1,5 @@
 var EventEmitter = require('event-emitter');
-var router = require('../router.js');
+var router = require('../router.ts');
 var datetime = require('../utils/datetime.js');
 var conflicts = require('../model/course/conflicts.js');
 

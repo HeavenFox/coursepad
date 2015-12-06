@@ -19,7 +19,7 @@ var Basket = React.createClass({
         schedules.on('change', this._update);
 
     },
-    componentDidUnmount: function() {
+    componentWillUnmount: function() {
         schedules.off('readystatechange', this._onReadyStateChange);
         schedules.off('change', this._update);
 

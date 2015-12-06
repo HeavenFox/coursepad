@@ -1,6 +1,6 @@
 var registry = [];
 
-exports.reg = function(pattern, action, init) {
+export function reg(pattern, action, init) {
     registry.push({
         pattern: pattern,
         action: action,
@@ -8,7 +8,7 @@ exports.reg = function(pattern, action, init) {
     });
 };
 
-exports.init = function() {
+export function init() {
     var path = window.location.pathname;
     for (var i=0; i < registry.length; i++) {
         var matches = registry[i].pattern.exec(path);
@@ -35,7 +35,7 @@ exports.init = function() {
     }
 }
 
-exports.changePath = function(newPath) {
+export function changePath(newPath) {
     if (window.location.pathname !== newPath) {
         window.history.pushState(null, "", newPath);
     }

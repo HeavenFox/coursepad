@@ -53,6 +53,8 @@
     "jsx-loader": "^0.12.0",
     "regenerator": "HeavenFox/regenerator#no_funexpr",
     "regenerator-loader": "git://github.com/CoursePad/regenerator-loader#cp",
+    "ts-loader": "^0.7.2",
+    "typescript": "^1.7.3",
     "uglify-js": "^2.4.15",
     "webpack": "^1.4.3",
     "webpack-stream": "^2.0.0",
