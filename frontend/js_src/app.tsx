@@ -1,4 +1,4 @@
-var meta : any = require('./store/meta.js');
+import * as meta from './store/meta.ts';
 
 var Calendar : any = require('./components/Calendar.react.js');
 var SearchBar : any = require('./components/SearchBar.react.js');

@@ -1,7 +1,7 @@
 var EventEmitter = require('event-emitter');
 var endpoints = require('../consts/endpoints.js');
 var indexeddb = require('../persist/indexeddb.js');
-var meta = require('./meta.js');
+var meta = require('./meta.ts');
 
 var ajax = require('../utils/ajax.js');
 

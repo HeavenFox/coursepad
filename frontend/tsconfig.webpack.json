@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "sourceMap": true,
+    "jsx": "react",
+    "moduleResolution": "node"
+  },
+  "files": [
+  	"./typings/coursepad.d.ts",
+  	"./typings/tsd.d.ts"
+  ]
+}

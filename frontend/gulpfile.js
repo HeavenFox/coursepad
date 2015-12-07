@@ -53,6 +53,9 @@ function webpack_conf() {
                 {test: /\.tsx?$/, loader: 'ts-loader'},
                 {test: /\.js$/, exclude: /node_modules/, loader: "babel", query: babel_query},
             ]
+        },
+        ts: {
+            configFileName: 'tsconfig.webpack.json'
         }
     };
     return conf;
