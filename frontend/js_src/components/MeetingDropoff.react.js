@@ -4,7 +4,7 @@
 var schedules = require('../store/schedules.js');
 var CalendarElementMixin = require('./CalendarElementMixin.react.js');
 
-var ana = require('../analytics/analytics.js');
+var ana = require('../analytics/analytics.ts');
 
 var MeetingDropoff = React.createClass({
     mixins : [CalendarElementMixin],

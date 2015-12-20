@@ -4,7 +4,7 @@
 var Drop = require('drop');
 
 var meta = require('../store/meta.ts');
-var termdb = require('../store/termdb.js');
+var termdb = require('../store/termdb.ts');
 var schedules = require('../store/schedules.js');
 var humanize = require('../consts/humanize.js');
 

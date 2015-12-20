@@ -3,7 +3,7 @@
  */
 var schedules = require('../../store/schedules.js');
 
-var ana = require('../../analytics/analytics.js');
+var ana = require('../../analytics/analytics.ts');
 
 var Drop = require('drop');
 

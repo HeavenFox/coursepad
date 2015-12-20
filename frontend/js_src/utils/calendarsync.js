@@ -2,8 +2,8 @@ import saveAs from 'FileSaver.js';
 import {getShortLocation} from '../consts/humanize.js';
 import {authorize} from '../thirdparty/google.js';
 import {promisify} from '../utils/promise.js'
-import {toRFC} from '../utils/datetime.js'
-import {serror} from '../analytics/analytics.js'
+import {toRFC} from '../utils/datetime.ts'
+import {serror} from '../analytics/analytics.ts'
 import _ from 'lodash'
 
 export function toiCal(components) {

@@ -1,6 +1,6 @@
 var schedules = require('../store/schedules.js');
 var schedulestorage = require('../store/schedulestorage.js');
-var ana = require('../analytics/analytics.js');
+var ana = require('../analytics/analytics.ts');
 
 var ScheduleIcon = React.createClass({
     render: function() {

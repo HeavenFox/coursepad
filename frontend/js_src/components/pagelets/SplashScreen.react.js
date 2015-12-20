@@ -6,7 +6,7 @@ var modal = require('../../utils/modal.js');
 var user = require('../../store/user.js');
 var campaign = require('../../store/campaign.js');
 
-var ana = require('../../analytics/analytics.js');
+var ana = require('../../analytics/analytics.ts');
 
 var LoginWindow = React.createClass({
     getInitialState: function() {

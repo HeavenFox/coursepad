@@ -1,16 +1,16 @@
 var EventEmitter = require('event-emitter');
 var router = require('../router.ts');
-var datetime = require('../utils/datetime.js');
+var datetime = require('../utils/datetime.ts');
 var conflicts = require('../model/course/conflicts.js');
 
-var termdb = require('./termdb.js');
+var termdb = require('./termdb.ts');
 var user = require('./user.js');
 
 var localStore = require('../persist/localStorage.js');
 
 var randomInt31 = require('../utils/rand.js').int31;
 
-var ana = require('../analytics/analytics.js');
+var ana = require('../analytics/analytics.ts');
 var schedulestorage = require('./schedulestorage.js');
 
 const PREFER_LOCAL = 1;

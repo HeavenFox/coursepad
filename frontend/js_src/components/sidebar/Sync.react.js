@@ -1,6 +1,6 @@
 import schedules from '../../store/schedules.js';
 import {saveiCal, syncToGoogle} from '../../utils/calendarsync.js';
-import {sevent} from '../../analytics/analytics.js';
+import {sevent} from '../../analytics/analytics.ts';
 
 let GoogleSync = React.createClass({
     getInitialState() {

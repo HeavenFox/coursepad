@@ -7,7 +7,7 @@ var cookies = require('cookies-js');
 var fb = require('../thirdparty/fb.js');
 var google = require('../thirdparty/google.js');
 
-var ana = require('../analytics/analytics.js');
+var ana = require('../analytics/analytics.ts');
 
 const LOGIN_EMAIL = 1, LOGIN_FB = 2;
 

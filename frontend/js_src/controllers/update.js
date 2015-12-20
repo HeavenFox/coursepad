@@ -1,7 +1,7 @@
 var banner = require('./banner.js');
 var UpdateAvailable = require('../components/banners/UpdateAvailable.react.js');
 
-var termdb = require('../store/termdb.js');
+var termdb = require('../store/termdb.ts');
 
 function finish() {
     banner.stop('updateAvailable');

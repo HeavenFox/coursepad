@@ -1,7 +1,7 @@
 /**
  * @jsx React.DOM
  */
-var termdb = require('../store/termdb.js');
+var termdb = require('../store/termdb.ts');
 var schedules = require('../store/schedules.js');
 
 var SearchBar = React.createClass({

@@ -4,7 +4,7 @@ var DIMS = {
     'login_method' : '1'
 };
 
-function sevent() {
+export function sevent() {
     if (!eventga) {
         if (!window.ga) {
             return;
@@ -14,7 +14,7 @@ function sevent() {
     eventga.apply(null, arguments);
 }
 
-function serror(e, fatal) {
+export function serror(e, fatal) {
     if (!window.ga) {
         return;
     }
@@ -25,7 +25,7 @@ function serror(e, fatal) {
     });
 }
 
-function sdim(d, val) {
+export function sdim(d, val) {
     if (!DIMS[d]) {
         throw new Error('Invalid dimension ' + d);
     }
@@ -37,14 +37,9 @@ function sdim(d, val) {
     window.ga('set', 'dimension' + DIMS[d], val.toString());
 }
 
-function suserid(uid) {
+export function suserid(uid) {
     if (!window.ga) {
         return;
     }
     window.ga('set', '&uid', uid.toString());
 }
-
-exports.sevent = sevent;
-exports.serror = serror;
-exports.sdim = sdim;
-exports.suserid = suserid;

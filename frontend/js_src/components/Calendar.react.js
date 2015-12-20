@@ -7,7 +7,7 @@ var ConflictIndicator = require('./ConflictIndicator.react.js');
 
 var schedules = require('../store/schedules.js');
 
-var datetime = require('../utils/datetime.js');
+var datetime = require('../utils/datetime.ts');
 var humanize = require('../consts/humanize.js');
 
 var DropoffSet = React.createClass({

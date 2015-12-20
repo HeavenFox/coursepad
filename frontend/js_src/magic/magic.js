@@ -18,7 +18,7 @@ function hasNextSchedule() {
 
 // Uncomment the following for debug
 /*
-var datetime = require('../utils/datetime.js');
+var datetime = require('../utils/datetime.ts');
 
 function printSchedule(clusters) {
     function time2str(time) {

@@ -5,7 +5,7 @@ var SearchBar : any = require('./components/SearchBar.react.js');
 var Sidebar : any = require('./components/Sidebar.react.js');
 
 var schedules : any = require('./store/schedules.js');
-var termdb : any = require('./store/termdb.js');
+import termdb from './store/termdb.ts';
 
 var TermSelector : any = require('./components/TermSelector.react.js');
 var User : any = require('./components/User.react.js');

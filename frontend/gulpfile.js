@@ -50,7 +50,7 @@ function webpack_conf() {
         },
         module: {
             loaders: [
-                {test: /\.tsx?$/, loader: 'ts-loader'},
+                {test: /\.tsx?$/, loaders: ['babel?' + JSON.stringify(babel_query), 'ts-loader']},
                 {test: /\.js$/, exclude: /node_modules/, loader: "babel", query: babel_query},
             ]
         },

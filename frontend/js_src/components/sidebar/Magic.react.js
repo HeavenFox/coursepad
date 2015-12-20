@@ -1,6 +1,6 @@
 var magic = require('../../store/magic.js');
 var schedules = require('../../store/schedules.js');
-import {sevent} from '../../analytics/analytics.js';
+import {sevent} from '../../analytics/analytics.ts';
 
 var Priority = React.createClass({
     getInitialState: function() {

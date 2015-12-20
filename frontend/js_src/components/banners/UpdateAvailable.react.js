@@ -1,5 +1,5 @@
 var schedules = require('../../store/schedules.js');
-var termdb = require('../../store/termdb.js');
+var termdb = require('../../store/termdb.ts');
 
 var UpdateAvailable = React.createClass({
     getInitialState: function() {
