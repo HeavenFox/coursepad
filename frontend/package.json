@@ -43,6 +43,7 @@
     "gulp-minify-html": "^0.1.8",
     "gulp-postcss": "^3.0.0",
     "gulp-react": "^2.0.0",
+    "gulp-replace": "^0.5.4",
     "gulp-rev": "^2.0.1",
     "gulp-rev-collector": "^0.1.2",
     "gulp-ruby-sass": "sindresorhus/gulp-ruby-sass#master",

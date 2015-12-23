@@ -10,6 +10,7 @@ var insert = require('gulp-insert');
 var react = require('gulp-react');
 var sourcemaps = require('gulp-sourcemaps');
 var gutil = require('gulp-util');
+var replace = require('gulp-replace');
 var postcss = require('gulp-postcss');
 var autoprefixer = require('autoprefixer-core');
 var rev = require('gulp-rev');
@@ -66,6 +67,13 @@ function prod(t) {
         return gutil.noop();
     }
     return t;
+}
+
+function dev(t) {
+    if (DEV) {
+        return t;
+    }
+    return gutil.noop();
 }
 
 gulp.task('lint', function() {
@@ -145,7 +153,13 @@ gulp.task('css', function() {
 });
 
 gulp.task('static', function() {
-    return gulp.src('static/**').pipe(gulp.dest(target()));
+    var filter = gulpFilter(['index.html'], {restore: true});
+    return gulp.src('static/**')
+               .pipe(dev(filter))
+               .pipe(dev(replace('react.min.js', 'react.js')))
+               .pipe(dev(replace('react-dom.min.js', 'react-dom.js')))
+               .pipe(dev(filter.restore()))
+               .pipe(gulp.dest(target()));
 });
 
 gulp.task('default', function() {
