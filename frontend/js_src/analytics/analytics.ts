@@ -4,7 +4,7 @@ var DIMS = {
     'login_method' : '1'
 };
 
-export function sevent() {
+export function sevent(...args) {
     if (!eventga) {
         if (!window.ga) {
             return;

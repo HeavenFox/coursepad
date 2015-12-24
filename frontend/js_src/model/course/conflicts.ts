@@ -17,7 +17,7 @@ function conflicts(meetings1, meetings2) {
     return false;
 }
 
-function conflictIntervals(meetings1, meetings2) {
+export function conflictIntervals(meetings1, meetings2) {
     var intervals = [];
     for (var i=0; i < meetings1.length; i++) {
         var m1 = meetings1[i];
@@ -41,7 +41,7 @@ function conflictIntervals(meetings1, meetings2) {
     return intervals;
 }
 
-function normalizeIntervals(intervals) {
+export function normalizeIntervals(intervals) {
     var intervalsByDay = Object.create(null);
     intervals.forEach(function(interval) {
         for (var d = 1; d < (1 << 7); d <<= 1) {
@@ -80,6 +80,3 @@ function normalizeIntervals(intervals) {
     }
     return result;
 }
-
-exports.conflictIntervals = conflictIntervals;
-exports.normalizeIntervals = normalizeIntervals;

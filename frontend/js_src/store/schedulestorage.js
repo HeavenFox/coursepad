@@ -1,5 +1,5 @@
 var EventEmitter = require('event-emitter');
-var randomInt31 = require('../utils/rand.js').int31;
+var randomInt31 = require('../utils/rand.ts').int31;
 var endpoints = require('../consts/endpoints.js');
 var user = require('./user.js');
 var ajax = require('../utils/ajax.js');

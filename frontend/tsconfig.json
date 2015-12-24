@@ -1,14 +1,8 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "es6",
     "sourceMap": true,
     "jsx": "react",
     "moduleResolution": "node"
-  },
-  "files": [
-  	"./typings/coursepad.d.ts",
-  	"./typings/tsd.d.ts",
-	"./js_src"
-  ]
+  }
 }

@@ -1,6 +1,6 @@
 import {timeStringToHour} from '../utils/datetime.ts';
 
-class Meeting {
+export class Meeting {
     parent: CourseComponent;
     
     startTime: string;
@@ -47,7 +47,7 @@ class Meeting {
 }
 
 
-class CourseComponent {
+export class CourseComponent {
     parent: Course;
     
     number: number;
@@ -74,7 +74,7 @@ class CourseComponent {
 
 const SECTION_PRIORITY = ['LEC', 'SEM', 'IND', 'DIS', 'LAB'];
 
-export default class Course {
+export class Course {
     term : string;
     id: number;
     number: number;
@@ -101,11 +101,11 @@ export default class Course {
         }
     }
 
-    getNumber() {
+    getNumber(): string {
         return this.subject + ' ' + this.number;
     }
 
-    getPrimarySectionType() {
+    getPrimarySectionType(): string {
         for (var i=0; i < SECTION_PRIORITY.length; i++) {
             if (this.sections.hasOwnProperty(SECTION_PRIORITY[i])) {
                 return SECTION_PRIORITY[i];
@@ -118,7 +118,7 @@ export default class Course {
         }
     }
 
-    getNumberOfTypes() {
+    getNumberOfTypes(): number {
         var number = 0;
         for (var type in this.sections) {
             if (this.sections.hasOwnProperty(type)) {
@@ -128,8 +128,8 @@ export default class Course {
         return number;
     }
 
-    getAllSections() {
-        var all = [];
+    getAllSections(): CourseComponent[] {
+        let all: CourseComponent[] = [];
 
         for (var type in this.sections) {
             if (this.sections.hasOwnProperty(type)) {
@@ -140,7 +140,7 @@ export default class Course {
         return all;
     }
 
-    findSectionByNumber(number) {
+    findSectionByNumber(number: number): CourseComponent {
         for (var type in this.sections) {
             if (this.sections.hasOwnProperty(type)) {
                 var list = this.sections[type];

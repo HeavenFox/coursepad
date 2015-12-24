@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
 import * as meta from './meta.ts';
-import Course from '../model/Course.ts';
+import {Course} from '../model/course.ts';
 
 var endpoints: any = require('../consts/endpoints.js');
 var indexeddb: any = require('../persist/indexeddb.js');
@@ -307,7 +307,7 @@ function localTermDownloaded(term) {
 }
 
 function downloadLocalTerm(term) {
-    var db;
+    var db: LocalTermDatabase;
     console.log('Using indexedDB');
     var dbLoadedPromise;
     if (localTermDownloaded(term)) {

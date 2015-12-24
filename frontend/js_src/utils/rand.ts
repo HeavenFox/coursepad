@@ -1,5 +1,3 @@
-function int31() {
+export function int31() {
     return Math.floor(Math.random() * 0x7FFFFFFF);
 }
-
-exports.int31 = int31;
