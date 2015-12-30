@@ -4,7 +4,7 @@ var endpoints = require('../consts/endpoints.js');
 var user = require('./user.js');
 var ajax = require('../utils/ajax.js');
 
-var schedules = require('./schedules.js');
+import schedules from './schedules.ts';
 var localStore = require('../persist/localStorage.js');
 var color = require('../utils/color.js');
 

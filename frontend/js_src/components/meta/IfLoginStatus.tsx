@@ -1,4 +1,4 @@
-var user = require('../../store/user.js');
+var user : any = require('../../store/user.js');
 
 var IfLoginStatus = React.createClass({
     getInitialState: function() {
@@ -27,4 +27,4 @@ var IfLoginStatus = React.createClass({
     },
 });
 
-module.exports = IfLoginStatus;
+export default IfLoginStatus;

@@ -1,8 +1,12 @@
-var sharing = require('../../controllers/sharing.js');
-var fb = require('../../thirdparty/fb.js');
-var twitter = require('../../thirdparty/twitter.js');
+var sharing : any = require('../../controllers/sharing.js');
+var fb : any = require('../../thirdparty/fb.js');
+var twitter : any = require('../../thirdparty/twitter.js');
 
-var SocialNetworks = React.createClass({
+interface SocialNetworksProps {
+    url: string;
+}
+
+var SocialNetworks = React.createClass<SocialNetworksProps, any>({
     componentDidMount: function() {
         var root = ReactDOM.findDOMNode(this);
         (async function() {
@@ -91,4 +95,4 @@ var Sharing = React.createClass({
     }
 });
 
-module.exports = Sharing;
+export default Sharing;

@@ -1,8 +1,6 @@
-/**
- * @jsx React.DOM
- */
-var termdb = require('../store/termdb.ts');
-var schedules = require('../store/schedules.js');
+import {MutableSchedule} from '../model/schedules.ts';
+import termdb from '../store/termdb.ts';
+import schedules from '../store/schedules.ts';
 
 var SearchBar = React.createClass({
     componentWillMount: function() {
@@ -15,7 +13,7 @@ var SearchBar = React.createClass({
 
     _readyStateChanged: function() {
         var curSchedule = schedules.getCurrentSchedule();
-        this.setState({available: schedules.ready, disabled: curSchedule && !curSchedule.isMutable});
+        this.setState({ available: schedules.ready, disabled: curSchedule && !(curSchedule instanceof MutableSchedule)});
     },
 
     getInitialState: function() {
@@ -57,12 +55,13 @@ var SearchBar = React.createClass({
     },
     componentDidMount: function() {
         var that = this;
-        $(ReactDOM.findDOMNode(this)).autocomplete({
+        ($(ReactDOM.findDOMNode(this)) as any).autocomplete({
             minLength: 2,
             source: this.dataSource,
             select: function(event, ui) {
-                schedules.getCurrentSchedule()
-                         .addCourse(ui.item.course[0], ui.item.course[1]);
+                let schedule = schedules.getCurrentSchedule() as MutableSchedule;
+                
+                schedule.addCourse(ui.item.course[0], ui.item.course[1]);
             }
         }).autocomplete("instance")._renderItem = this.renderItem;
     },
@@ -71,4 +70,4 @@ var SearchBar = React.createClass({
     }
 });
 
-module.exports = SearchBar;
+export default SearchBar;

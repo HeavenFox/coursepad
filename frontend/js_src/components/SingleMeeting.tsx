@@ -1,8 +1,6 @@
-/**
- * @jsx React.DOM
- */
-var CalendarElementMixin = require('./CalendarElementMixin.react.js');
-var schedules = require('../store/schedules.js');
+import CalendarElementMixin from './CalendarElementMixin.tsx';
+import {CalendarElementMixinProps} from './CalendarElementMixin.tsx';
+import schedules from '../store/schedules.ts';
 
 // Make a function that can only be run once
 function makeRunOnce(f) {
@@ -20,8 +18,7 @@ function makeRunOnce(f) {
     };
 }
 
-var SingleMeeting = React.createClass({
-    longMeetingThreshold: 1.2,
+interface SingleMeetingProps extends CalendarElementMixinProps {
     /**
      * title: title of the course
      * location: location
@@ -30,6 +27,17 @@ var SingleMeeting = React.createClass({
      * st_offset: start time (in offset)
      * length: length
      */
+    owner: any;
+    readOnly: boolean;
+    meetings: any[];
+    title: string;
+    time: string;
+    location: string;
+    longLocation: string;
+}
+
+var SingleMeeting = React.createClass<SingleMeetingProps, {}>({
+    longMeetingThreshold: 1.2,
 
     mixins: [CalendarElementMixin],
 
@@ -57,29 +65,29 @@ var SingleMeeting = React.createClass({
     },
 
     render: function() {
-        this._mutable = !this.props.readOnly && !!schedules.getCurrentSchedule().getAlternateMeetings(this.props['meeting']).length;
+        this._mutable = !this.props.readOnly && !!schedules.getCurrentSchedule().getAlternateMeetings(this.props.meeting).length;
 
         var classNames = 'meeting ' + this.getClassName();
         if (this._mutable) {
             classNames += ' mutable';   
         }
-        if (this.props['length'] > this.longMeetingThreshold) {
+        if (this.props.length > this.longMeetingThreshold) {
             classNames += ' meeting-long';
         }
-        classNames += ' ' + this.props['color'];
+        classNames += ' ' + this.props.color;
 
         var style = this.getLayoutStyle();
         var extra = {};
-        if (this.props['longLocation']) {
-            extra['title'] = this.props['longLocation'];
+        if (this.props.longLocation) {
+            extra['title'] = this.props.longLocation;
         }
 
-        return <div style={style} className={classNames} ref="meeting" data-nbr={this.props['nbr']}>
-            <p className='meeting-title'>{this.props['title']}</p>
-            <p className='meeting-time'>{this.props['time']}</p>
-            <p className='meeting-loc' {...extra}>{this.props['location']}</p>
+        return <div style={style} className={classNames} ref="meeting" data-nbr={this.props.nbr}>
+            <p className='meeting-title'>{this.props.title}</p>
+            <p className='meeting-time'>{this.props.time}</p>
+            <p className='meeting-loc' {...extra}>{this.props.location}</p>
         </div>;
     }
 });
 
-module.exports = SingleMeeting;
+export default SingleMeeting;

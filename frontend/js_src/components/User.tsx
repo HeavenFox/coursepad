@@ -1,10 +1,15 @@
-var Drop = require('drop');
+var Drop : any = require('drop');
 
-var user = require('../store/user.js');
-var schedulestorage = require('../store/schedulestorage.js');
-var modal = require('../utils/modal.js');
+var user : any = require('../store/user.js');
+var schedulestorage : any = require('../store/schedulestorage.js');
+var modal : any = require('../utils/modal.js');
 
-var UserAvatar = React.createClass({
+interface UserAvatarProps {
+    className?: string;
+    pic?: string;
+}
+
+var UserAvatar = React.createClass<UserAvatarProps, any>({
     render: function() {
         var cls = this.props.className || '';
         if (this.props.pic) {
@@ -24,7 +29,12 @@ var UserAvatar = React.createClass({
     }
 });
 
-var UserInfoBox = React.createClass({
+interface UserInfoBoxProps {
+    name?: string;
+    profilePicture?: string;
+};
+
+var UserInfoBox = React.createClass<UserInfoBoxProps, any>({
     render: function() {
         var style = this.props.profilePicture ? {'backgroundImage' : 'url("' + this.props.profilePicture.replace('"', '\\"') + '")'} : {};
         return <div className="user-info">
@@ -34,7 +44,11 @@ var UserInfoBox = React.createClass({
     }
 })
 
-var UserMenu = React.createClass({
+interface UserMenuProps {
+    clickHandler: Function;
+}
+
+var UserMenu = React.createClass<UserMenuProps, any>({
     _fbLogin: function() {
         user.triggerLogin('fb');
     },
@@ -181,4 +195,4 @@ var User = React.createClass({
     }
 });
 
-module.exports = User;
+export default User;

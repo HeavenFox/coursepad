@@ -1,8 +1,15 @@
-var magic = require('../../store/magic.js');
-var schedules = require('../../store/schedules.js');
+var magic : any = require('../../store/magic.js');
+import schedules from '../../store/schedules.ts';
+import {MutableSchedule} from '../../model/schedules.ts';
 import {sevent} from '../../analytics/analytics.ts';
 
-var Priority = React.createClass({
+interface PriorityProps {
+    label: string;
+    bind: any;
+    to: string;
+}
+
+var Priority = React.createClass<PriorityProps, any>({
     getInitialState: function() {
         return {val: this.props.bind[this.props.to]};
     },
@@ -73,7 +80,7 @@ var Magic = React.createClass({
     },
 
     _extScheduleChange: function() {
-        if (schedules.ready && schedules.getCurrentSchedule().isMutable) {
+        if (schedules.ready && schedules.getCurrentSchedule() instanceof MutableSchedule) {
             this.setState({
                 show: true,
                 state: STATE_READY
@@ -192,4 +199,4 @@ var Magic = React.createClass({
     }
 });
 
-module.exports = Magic;
+export default Magic;

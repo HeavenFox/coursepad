@@ -1,5 +1,6 @@
-var schedules = require('../../store/schedules.js');
-var termdb = require('../../store/termdb.ts');
+import schedules from '../../store/schedules.ts';
+import termdb from '../../store/termdb.ts';
+import {LocalTermDatabase} from '../../model/termdb.ts'
 
 var UpdateAvailable = React.createClass({
     getInitialState: function() {
@@ -9,7 +10,10 @@ var UpdateAvailable = React.createClass({
     _update: async function() {
         var self = this;
         this.setState({updating: true});
-        await termdb.getCurrentTerm().applyUpdates(this.props.updates);
+        let db = termdb.getCurrentTerm();
+        if (db instanceof LocalTermDatabase) {
+            await db.applyUpdates(this.props.updates);
+        }
         self.props.onFinish();
     },
 
@@ -25,4 +29,4 @@ var UpdateAvailable = React.createClass({
     }
 });
 
-module.exports = UpdateAvailable;
+export default UpdateAvailable;

@@ -1,9 +1,7 @@
-/**
- * @jsx React.DOM
- */
-var schedules = require('../../store/schedules.js');
+import schedules from '../../store/schedules.ts';
+import {SharedSchedule, MutableSchedule} from '../../model/schedules.ts';
 
-var ana = require('../../analytics/analytics.ts');
+import * as ana from '../../analytics/analytics.ts';
 
 var BasicInfo = React.createClass({
     componentWillMount: function() {
@@ -27,10 +25,10 @@ var BasicInfo = React.createClass({
 
     _update: function() {
         var curSchedule = schedules.getCurrentSchedule();
-        var newState = curSchedule.getBasicInfo();
+        var newState : any = curSchedule.getBasicInfo();
         newState.conflicts = curSchedule.getConflictIntervals().length > 0;
-        newState.isSharing = curSchedule.isShared;
-        newState.isMutable = curSchedule.isMutable;
+        newState.isSharing = curSchedule instanceof SharedSchedule;
+        newState.isMutable = curSchedule instanceof MutableSchedule;
         this.setState(newState);
     },
 
@@ -113,4 +111,4 @@ var BasicInfo = React.createClass({
     }
 });
 
-module.exports = BasicInfo;
+export default BasicInfo;

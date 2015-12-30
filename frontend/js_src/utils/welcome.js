@@ -1,7 +1,4 @@
-/**
- * @jsx React.DOM
- */
-var SplashScreen = require('../components/pagelets/SplashScreen.react.js');
+import SplashScreen from '../components/pagelets/SplashScreen.tsx';
 var campaign = require('../store/campaign.js');
 var modal = require('./modal.js');
 

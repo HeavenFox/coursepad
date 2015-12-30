@@ -1,5 +1,5 @@
 var EventEmitter = require('event-emitter');
-var schedules = require('../store/schedules.js');
+import schedules from '../store/schedules.ts';
 
 function arrayForSection(section) {
     return {

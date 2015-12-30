@@ -1,5 +1,8 @@
-import schedules from '../../store/schedules.js';
-import {saveiCal, syncToGoogle} from '../../utils/calendarsync.js';
+import schedules from '../../store/schedules.ts';
+let calendarSync: any = require('../../utils/calendarsync.js');
+let saveiCal = calendarSync.saveiCal;
+let syncToGoogle = calendarSync.syncToGoogle;
+//import {saveiCal, syncToGoogle} from '../../utils/calendarsync.js';
 import {sevent} from '../../analytics/analytics.ts';
 
 let GoogleSync = React.createClass({

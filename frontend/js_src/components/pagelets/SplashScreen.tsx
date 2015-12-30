@@ -1,14 +1,14 @@
 /**
  * @jsx React.DOM
  */
-var modal = require('../../utils/modal.js');
+var modal : any = require('../../utils/modal.js');
 
-var user = require('../../store/user.js');
-var campaign = require('../../store/campaign.js');
+var user : any = require('../../store/user.js');
+var campaign : any = require('../../store/campaign.js');
 
-var ana = require('../../analytics/analytics.ts');
+import * as ana from '../../analytics/analytics.ts';
 
-var LoginWindow = React.createClass({
+var LoginWindow = React.createClass<any, any>({
     getInitialState: function() {
         return {confirming: false};
     },
@@ -108,4 +108,4 @@ var SplashScreen = React.createClass({
     }
 });
 
-module.exports = SplashScreen;
+export default SplashScreen;

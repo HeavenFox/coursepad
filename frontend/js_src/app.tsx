@@ -1,15 +1,15 @@
 import * as meta from './store/meta.ts';
 
-var Calendar : any = require('./components/Calendar.react.js');
-var SearchBar : any = require('./components/SearchBar.react.js');
-var Sidebar : any = require('./components/Sidebar.react.js');
+import Calendar from './components/Calendar.tsx';
+import SearchBar from './components/SearchBar.tsx';
+import Sidebar from './components/Sidebar.tsx';
 
-var schedules : any = require('./store/schedules.js');
+import schedules from './store/schedules.ts';
 import termdb from './store/termdb.ts';
 
-var TermSelector : any = require('./components/TermSelector.react.js');
-var User : any = require('./components/User.react.js');
-var LeftBar : any = require('./components/LeftBar.react.js');
+import TermSelector from './components/TermSelector.tsx';
+import User from './components/User.tsx';
+import LeftBar from './components/LeftBar.tsx';
 var humanize : any = require('./consts/humanize.js');
 
 var welcome : any = require('./utils/welcome.js');

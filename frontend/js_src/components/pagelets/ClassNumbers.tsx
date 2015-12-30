@@ -1,10 +1,10 @@
 /**
  * @jsx React.DOM
  */
-var schedules = require('../../store/schedules.js');
-var humanize = require('../../consts/humanize.js');
+import schedules from '../../store/schedules.ts';
+var humanize : any = require('../../consts/humanize.js');
 
-var modal = require('../../utils/modal.js');
+var modal : any = require('../../utils/modal.js');
 
 var ClassNumbers = React.createClass({
     componentDidMount: function() {
@@ -88,4 +88,4 @@ var ClassNumbers = React.createClass({
     }
 });
 
-module.exports = ClassNumbers;
+export default ClassNumbers;

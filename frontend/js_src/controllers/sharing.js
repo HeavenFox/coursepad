@@ -1,7 +1,7 @@
 var ajax = require('../utils/ajax.js');
 var endpoints = require('../consts/endpoints.js');
 var user = require('../store/user.js');
-var schedule = require('../store/schedules.js');
+import schedules from '../store/schedules.ts';
 
 async function shareSchedule() {
     var curUser = user.getCurrentUser();

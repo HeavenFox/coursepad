@@ -6,6 +6,8 @@ declare var require: {
 
 interface Window {
     ga?: any;
+    twttr: any;
+    FB: any;
 }
 
 declare var LEVEL : number;

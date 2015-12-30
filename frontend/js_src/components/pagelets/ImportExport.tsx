@@ -1,7 +1,7 @@
 
-var modal = require('../../utils/modal.js');
+var modal : any = require('../../utils/modal.js');
 
-var importexport = require('../../utils/importexport.js');
+var importexport : any = require('../../utils/importexport.js');
 
 
 var ImportExport = React.createClass({
@@ -44,4 +44,4 @@ var ImportExport = React.createClass({
     }
 });
 
-module.exports = ImportExport;
+export default ImportExport;

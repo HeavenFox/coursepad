@@ -1,16 +1,13 @@
-/**
- * @jsx React.DOM
- */
-var SingleMeeting = require('./SingleMeeting.react.js');
-var MeetingDropoff = require('./MeetingDropoff.react.js');
-var ConflictIndicator = require('./ConflictIndicator.react.js');
+import SingleMeeting from './SingleMeeting.tsx';
+import MeetingDropoff from './MeetingDropoff.tsx';
+import ConflictIndicator from './ConflictIndicator.tsx';
 
-var schedules = require('../store/schedules.js');
+import schedules from '../store/schedules.ts';
 
-var datetime = require('../utils/datetime.ts');
-var humanize = require('../consts/humanize.js');
+import * as datetime from '../utils/datetime.ts';
+var humanize: any = require('../consts/humanize.js');
 
-var DropoffSet = React.createClass({
+var DropoffSet = React.createClass<React.Props<any>, any>({
     getInitialState: function() {
         return {dropoffs: []};
     },
@@ -188,4 +185,4 @@ var Calendar = React.createClass({
     }
 });
 
-module.exports = Calendar;
+export default Calendar;

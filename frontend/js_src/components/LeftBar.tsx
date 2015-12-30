@@ -1,12 +1,17 @@
-var schedules = require('../store/schedules.js');
-var schedulestorage = require('../store/schedulestorage.js');
-var ana = require('../analytics/analytics.ts');
+import schedules from '../store/schedules.ts';
+var schedulestorage : any = require('../store/schedulestorage.js');
+import * as ana from '../analytics/analytics.ts';
 
-var ScheduleIcon = React.createClass({
+interface ScheduleIconProps {
+    color: string;
+    fill: boolean;
+}
+
+var ScheduleIcon = React.createClass<ScheduleIconProps, any>({
     render: function() {
         var color = this.props.color;
         var fill = this.props.fill ? color : 'transparent';
-        return <svg className="schedule-logo" width="17" height="17" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        return <svg className="schedule-logo" width="17" height="17" version="1.1">
           <rect x="0.5" y="0.5" width="16" height="4" fill={fill} stroke={color} strokeWidth="1" />
           <rect x="0.5" y="6.5" width="7" height="4" fill={fill} stroke={color} strokeWidth="1" />
           <rect x="0.5" y="12.5" width="7" height="4" fill={fill} stroke={color} strokeWidth="1" />
@@ -16,7 +21,19 @@ var ScheduleIcon = React.createClass({
     }
 });
 
-var ScheduleLine = React.createClass({
+interface ScheduleLineProps {
+    key: string;
+    name: string;
+    color: string;
+    isCurrent: boolean;
+    editing: boolean;
+    onSave: Function;
+    onCancel?: Function;
+    onDelete?: Function;
+    onClick?: Function;
+}
+
+var ScheduleLine = React.createClass<ScheduleLineProps, any>({
     getInitialState: function() {
         return {
             name: this.props.name,
@@ -43,7 +60,9 @@ var ScheduleLine = React.createClass({
     },
 
     _onClick: function() {
-        this.props.onClick();
+        if (this.props.onClick) {
+            this.props.onClick();
+        }
     },
 
     _onCancel: function() {
@@ -196,4 +215,4 @@ var LeftBar = React.createClass({
     }
 });
 
-module.exports = LeftBar;
+export default LeftBar;

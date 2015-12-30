@@ -1,10 +1,8 @@
-/**
- * @jsx React.DOM
- */
-var schedules = require('../store/schedules.js');
-var CalendarElementMixin = require('./CalendarElementMixin.react.js');
+import {MutableSchedule} from '../model/schedules.ts';
+import schedules from '../store/schedules.ts';
+import CalendarElementMixin from './CalendarElementMixin.tsx';
 
-var ana = require('../analytics/analytics.ts');
+import * as ana from '../analytics/analytics.ts';
 
 var MeetingDropoff = React.createClass({
     mixins : [CalendarElementMixin],
@@ -26,7 +24,10 @@ var MeetingDropoff = React.createClass({
     },
 
     onDropped: function(fromClassNumber) {
-        schedules.getCurrentSchedule().changeSection(this.props['nbr'], fromClassNumber);
+        let schedule = schedules.getCurrentSchedule();
+        if (schedule instanceof MutableSchedule) {
+            schedule.changeSection(this.props['nbr'], fromClassNumber);
+        }
 
         ana.sevent('course', 'change_section_drop', fromClassNumber + '->' + this.props['nbr']);
     },
@@ -58,4 +59,4 @@ var MeetingDropoff = React.createClass({
     }
 });
 
-module.exports = MeetingDropoff;
+export default MeetingDropoff;

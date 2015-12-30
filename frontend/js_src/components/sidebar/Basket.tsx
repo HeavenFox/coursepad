@@ -1,17 +1,28 @@
-/**
- * @jsx React.DOM
- */
-var schedules = require('../../store/schedules.js');
+import schedules from '../../store/schedules.ts';
+import {Schedule, MutableSchedule} from '../../model/schedules.ts';
 
-var ana = require('../../analytics/analytics.ts');
+import * as ana from '../../analytics/analytics.ts';
 
-var Drop = require('drop');
+var Drop : any = require('drop');
 
-var SelectionIndicator = React.createClass({
+interface SelectionIndicatorProps {
+    selected: boolean;
+    action: Function;
+}
+
+var SelectionIndicator = React.createClass<SelectionIndicatorProps, any>({
     render: function() {
         return <div className={'selected-indicator' + (this.props['selected'] ? ' selected' : '') + (this.props.action && !this.props['selected'] ? ' selectable' : '')} onClick={this.props['selected'] ? null : this.props.action}> </div>
     }
 });
+
+function withMutableSchedule(schedule: Schedule, action: (s: MutableSchedule) => void) {
+    if (schedule instanceof MutableSchedule) {
+        action(schedule);
+    } else {
+        console.warn("Trying to mutate immutable schedule");
+    }
+}
 
 var Basket = React.createClass({
     componentWillMount: function() {
@@ -52,12 +63,15 @@ var Basket = React.createClass({
     },
 
     _toggleVisibility: function(courseNumber) {
-        schedules.getCurrentSchedule().toggleVisibility(courseNumber);
+        withMutableSchedule(schedules.getCurrentSchedule(), schedule => {
+            schedule.toggleVisibility(courseNumber);
+        });
     },
 
     _deleteCourse: function(courseNumber) {
-        schedules.getCurrentSchedule().removeCourseByNumber(courseNumber);
-        console.log(courseNumber);
+        withMutableSchedule(schedules.getCurrentSchedule(), schedule => {
+            schedule.removeCourseByNumber(courseNumber);
+        });
     },
 
     _toggleMenu: function(courseNumber, e) {
@@ -96,13 +110,17 @@ var Basket = React.createClass({
     },
 
     _changeSectionTo: function(sectionId) {
-        schedules.getCurrentSchedule().changeSection(sectionId);
+        withMutableSchedule(schedules.getCurrentSchedule(), schedule => {
+            schedule.changeSection(sectionId);
+        });
 
         ana.sevent('course', 'change_section_basket_dot', sectionId);
     },
 
     _changeCourseTo: function(course) {
-        schedules.getCurrentSchedule().changeCourse(course);
+        withMutableSchedule(schedules.getCurrentSchedule(), schedule => {
+            schedule.changeCourse(course);
+        });
 
         ana.sevent('course', 'change_course_basket_dot', course);
     },
@@ -177,4 +195,4 @@ var Basket = React.createClass({
     }
 });
 
-module.exports = Basket;
+export default Basket;

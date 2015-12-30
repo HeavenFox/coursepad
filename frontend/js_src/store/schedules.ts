@@ -1,38 +1,45 @@
-var EventEmitter = require('event-emitter');
-var router = require('../router.ts');
-var termdb = require('./termdb.ts');
+import EventEmitter from 'eventemitter3';
+import * as router from '../router.ts';
+import termdb from './termdb.ts';
+import {Schedule, MutableSchedule, SharedSchedule} from '../model/schedules.ts';
 var user = require('./user.js');
-
 var localStore = require('../persist/localStorage.js');
+var schedulestorage : any = require('./schedulestorage.js');
 
-
-var schedulestorage = require('./schedulestorage.js');
-
-import {MutableSchedule, SharedSchedule} from '../model/schedules.ts';
 
 const PREFER_LOCAL = 1;
 const PREFER_REMOTE = 2;
 const NO_PREFERENCE = 3;
 
-var store = EventEmitter({
-    ready: false,
-    setCurrentSchedule: async function(term, index) {
+class ScheduleStore extends EventEmitter {
+    ready: boolean;
+    currentSchedule: Schedule;
+
+    __onScheduleChange: Function;
+
+    constructor() {
+        super();
+        this.ready = false;
+    }
+
+    async setCurrentSchedule(term = null, index = 0) {
         router.changePath('/');
 
         var currentTermDB = termdb.getCurrentTerm();
         var self = this;
 
-        if (term === undefined) {
+        if (term === null) {
             term = currentTermDB.term;
-        }
-        if (index === undefined) {
-            index = 0;
         }
 
         if (this.currentSchedule) {
-            if ((this.currentSchedule.term === term) && (this.currentSchedule.index === index)) {
-                return false;
+            let curSchedule = this.currentSchedule;
+            if (curSchedule instanceof MutableSchedule) {
+                if ((curSchedule.term === term) && (curSchedule.index === index)) {
+                    return false;
+                }
             }
+            
             self.ready = false;
             self.emit('readystatechange', false);
         }
@@ -46,10 +53,7 @@ var store = EventEmitter({
             await termdb.setCurrentTerm(term);
         }
 
-        var schedule = new MutableSchedule();
-        schedule.term = term;
-        schedule.index = index;
-        schedule.storage = schedulestorage.getStorage();
+        var schedule = new MutableSchedule(term, index, schedulestorage.getStorage());
 
         await schedulestorage.getStorage().loadSchedule(schedule);
 
@@ -59,9 +63,9 @@ var store = EventEmitter({
         self.emit('readystatechange', true);
 
         return true;
-    },
+    }
 
-    setSharedSchedule: async function(term, serialized) {
+    async setSharedSchedule(term, serialized) {
         if (this.ready) {
             this.ready = false;
             this.emit('readystatechange', false);
@@ -70,8 +74,7 @@ var store = EventEmitter({
         var db = termdb.getRemoteTerm(term);
         schedulestorage.setStorage(term);
 
-        var schedule = new SharedSchedule();
-        schedule.term = term;
+        var schedule = new SharedSchedule(term);
         schedule.getTermDB = function() {
             return db;
         }
@@ -82,37 +85,37 @@ var store = EventEmitter({
 
         this.ready = true;
         this.emit('readystatechange', true);
-    },
+    }
 
-
-    setSchedule: function(schedule, by) {
+    setSchedule(schedule, by) {
         this._setCurrentSchedule(schedule);
 
         this.emit('change', {by: by});
-    },
+    }
 
-    _setCurrentSchedule: function(schedule) {
+    _setCurrentSchedule(schedule) {
         this.currentSchedule = schedule;
         schedule.on('change', this._getOnScheduleChange());
-    },
+    }
 
-    _getOnScheduleChange: function() {
+    _getOnScheduleChange() {
         var self = this;
         return this.__onScheduleChange || (this.__onScheduleChange = function(v) {
             self.emit('change', v);
         });
-    },
+    }
 
-    getCurrentSchedule: function() {
+    getCurrentSchedule() {
         if (!this.ready) { return null; }
         return this.currentSchedule;
-    },
+    }
 
-    _onTermDBChange: function() {
+    _onTermDBChange() {
         this.currentSchedule.onTermDBChange();
-    },
+    }
+}
 
-});
+var store = new ScheduleStore();
 
 termdb.on('change', store._onTermDBChange.bind(store));
 
@@ -121,8 +124,8 @@ schedulestorage.on('change', function(e) {
         if (!store.ready) {
             store.once('readystatechange', handler);
         } else {
-            var schedule = store.getCurrentSchedule();
-            if (schedule.isMutable && schedule.term === e.term) {
+            let schedule = store.getCurrentSchedule();
+            if (schedule instanceof MutableSchedule && schedule.term === e.term) {
                 schedule.onLocalStorageChange();
             }
         }
@@ -134,10 +137,9 @@ schedulestorage.on('change', function(e) {
 schedulestorage.on('listchange', function() {
     // Update the current schedule's name
     var schedule = store.getCurrentSchedule();
-    if (schedule && schedule.isMutable) {
+    if (schedule && schedule instanceof MutableSchedule) {
         schedule.updateNameAndIndex();
     }
 });
 
-
-module.exports = store;
+export default store;

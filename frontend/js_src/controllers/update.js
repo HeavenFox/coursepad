@@ -1,5 +1,5 @@
 var banner = require('./banner.js');
-var UpdateAvailable = require('../components/banners/UpdateAvailable.react.js');
+var UpdateAvailable = require('../components/banners/UpdateAvailable.tsx');
 
 var termdb = require('../store/termdb.ts');
 

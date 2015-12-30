@@ -24,6 +24,8 @@ const palette = [
 ];
 
 export abstract class Schedule extends EventEmitter {
+    term: string;
+
     colorMapping: {[course: string] : string};
 
     basket: Course[][];
@@ -37,9 +39,10 @@ export abstract class Schedule extends EventEmitter {
 
     _conflictCache: any;
 
-    constructor() {
+    constructor(term: string) {
         super();
         this.clear();
+        this.term = term;
     }
     
     clear(): void {
@@ -60,6 +63,7 @@ export abstract class Schedule extends EventEmitter {
     clone(): this {
         let clone : this = new (<any>this.constructor());
 
+        clone.term = this.term;
         clone.colorMapping = $.extend({}, this.colorMapping);
         clone.basket = this.basket.slice(0);
         clone.sections = this.sections.slice(0);
@@ -378,8 +382,10 @@ export class MutableSchedule extends Schedule {
 
     storage: any; // TODO
 
-    constructor() {
-        super();
+    constructor(term: string, index: number, storage: any /* TODO */) {
+        super(term);
+        this.index = index;
+        this.storage = storage;
 
         this.isMutable = true;
     }
@@ -423,7 +429,7 @@ export class MutableSchedule extends Schedule {
         this._onChange();
     }
 
-    changeSection(toNumber, fromNumber) {
+    changeSection(toNumber, fromNumber = undefined) {
         var toSection;
         var fromIndex;
 
@@ -524,7 +530,7 @@ export class MutableSchedule extends Schedule {
         return true;
     };
 
-    changeCourse(to, from) {
+    changeCourse(to, from = undefined) {
         this._changeCourse(to, from);
         this.persistSections();
         this._onChange();
@@ -724,8 +730,8 @@ export class MutableSchedule extends Schedule {
 export class SharedSchedule extends Schedule {
     isShared: boolean;
 
-    constructor() {
-        super();
+    constructor(term: string) {
+        super(term);
         this.isShared = true;
     }
 }

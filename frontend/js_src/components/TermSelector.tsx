@@ -1,14 +1,18 @@
 /**
  * @jsx React.DOM
  */
-var Drop = require('drop');
+var Drop : any = require('drop');
 
-var meta = require('../store/meta.ts');
-var termdb = require('../store/termdb.ts');
-var schedules = require('../store/schedules.js');
-var humanize = require('../consts/humanize.js');
+import * as meta from '../store/meta.ts';
+import termdb from '../store/termdb.ts';
+import schedules from '../store/schedules.ts';
+var humanize : any = require('../consts/humanize.js');
 
-var TermList = React.createClass({
+interface TermListProps {
+    clickHandler: Function;
+}
+
+var TermList = React.createClass<TermListProps, any>({
     getInitialState: function() {
         return {
             remoteTerms: null,
@@ -33,7 +37,7 @@ var TermList = React.createClass({
         } else {
             lis = terms.map(function(term) {
                 var isLocal = local.indexOf(term) > -1;
-                return <li className="clickable menuitem" onClick={this.props['clickHandler'].bind(null, term)} key={term}>{humanize.getTermName(term)}</li>
+                return <li className="clickable menuitem" onClick={this.props.clickHandler.bind(null, term)} key={term}>{humanize.getTermName(term)}</li>
             }, this);
         }
         return <div className="menu" ref="menu"><ul>
@@ -104,4 +108,4 @@ var TermSelector = React.createClass({
     }
 });
 
-module.exports = TermSelector;
+export default TermSelector;

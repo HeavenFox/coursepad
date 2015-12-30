@@ -1,6 +1,6 @@
-var ClassNumbers = require('../pagelets/ClassNumbers.react.js');
-var ImportExport = require('../pagelets/ImportExport.react.js');
-var modal = require('../../utils/modal.js');
+import ClassNumbers from '../pagelets/ClassNumbers.tsx';
+import ImportExport from '../pagelets/ImportExport.tsx';
+var modal : any = require('../../utils/modal.js');
 
 var Tools = React.createClass({
     _showClassNumbers: function() {
@@ -22,4 +22,4 @@ var Tools = React.createClass({
     }
 });
 
-module.exports = Tools;
+export default Tools;
