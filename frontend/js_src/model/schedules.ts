@@ -61,7 +61,7 @@ export abstract class Schedule extends EventEmitter {
     }
 
     clone(): this {
-        let clone : this = new (<any>this.constructor());
+        let clone : this = new (<any>this.constructor);
 
         clone.term = this.term;
         clone.colorMapping = $.extend({}, this.colorMapping);

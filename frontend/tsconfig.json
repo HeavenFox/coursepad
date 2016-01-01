@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es6",
     "sourceMap": true,
-    "jsx": "react",
+    "jsx": "preserve",
     "moduleResolution": "node"
   }
 }
