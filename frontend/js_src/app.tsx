@@ -1,15 +1,11 @@
 import * as meta from './store/meta.ts';
 
-import Calendar from './components/Calendar.tsx';
-import SearchBar from './components/SearchBar.tsx';
-import Sidebar from './components/Sidebar.tsx';
-
 import schedules from './store/schedules.ts';
 import termdb from './store/termdb.ts';
 
-import TermSelector from './components/TermSelector.tsx';
-import User from './components/User.tsx';
-import LeftBar from './components/LeftBar.tsx';
+import App from './components/App.tsx';
+
+
 var humanize : any = require('./consts/humanize.js');
 
 var welcome : any = require('./utils/welcome.js');
@@ -21,12 +17,7 @@ var ajax : any = require('./utils/ajax.js');
 var endpoints : any = require('./consts/endpoints.js');
 
 
-ReactDOM.render(<Calendar />, document.getElementById('calendar'));
-ReactDOM.render(<SearchBar />, document.getElementById('topsearch'));
-ReactDOM.render(<Sidebar />, document.getElementById('utilities'));
-ReactDOM.render(<TermSelector />, document.getElementById('term-selector'));
-ReactDOM.render(<User />, document.getElementById('current-user'));
-ReactDOM.render(<LeftBar />, document.getElementById('sidebar'));
+ReactDOM.render(<App />, document.getElementById('app'));
 
 welcome();
 meta.upgradeSchema();
