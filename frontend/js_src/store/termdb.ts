@@ -4,8 +4,8 @@ import * as meta from './meta.ts';
 import {TermDatabase, LocalTermDatabase, RemoteTermDatabase} from '../model/termdb.ts';
 
 var endpoints: any = require('../consts/endpoints.js');
-var indexeddb: any = require('../persist/indexeddb.js');
-var ajax: any = require('../utils/ajax.js');
+import * as indexeddb from '../persist/indexeddb.ts';
+import * as ajax from '../utils/ajax.ts';
 
 
 enum DBPreference {

@@ -13,7 +13,7 @@ require('./controllers/update.js');
 
 import * as router from './router.ts';
 
-var ajax : any = require('./utils/ajax.js');
+import * as ajax from './utils/ajax.ts';
 var endpoints : any = require('./consts/endpoints.js');
 
 

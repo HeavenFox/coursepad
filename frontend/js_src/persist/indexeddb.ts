@@ -1,20 +1,20 @@
 var VERSION = 3;
 
-var dbPromise;
+var dbPromise: Promise<IDBDatabase>;
 
-function open() {
+export function open() {
     if (dbPromise === undefined) {
         dbPromise = new Promise(function(resolve, reject) {
-            var request = window.indexedDB.open('coursepad', VERSION);
+            let request = window.indexedDB.open('coursepad', VERSION);
             request.onsuccess = function(e) {
-                resolve(e.target.result);
+                resolve(request.result);
             };
 
             request.onupgradeneeded = function(e) {
                 if (e.oldVersion === 0) {
-                    initSchema(e.target.result);
+                    initSchema(request.result);
                 } else {
-                    upgradeSchema(e.target.transaction, e.oldVersion);
+                    upgradeSchema(request.transaction, e.oldVersion);
                 }
             }
         });
@@ -23,13 +23,13 @@ function open() {
     return dbPromise;
 }
 
-function close() {
+export function close() {
     return open().then(function(db) {
         db.close();
     });
 }
 
-function upgradeSchema(transaction, version) {
+function upgradeSchema(transaction: IDBTransaction, version: number) {
     switch (version) {
     case 1:
         transaction.objectStore('subjects').createIndex('term', 'term', {unique: false});
@@ -37,7 +37,7 @@ function upgradeSchema(transaction, version) {
     case 2:
         var newCacheStore = transaction.db.createObjectStore('title_typeahead_index', {keyPath: 'term'});
         var index = Object.create(null);
-        transaction.objectStore('title_index').openCursor().onsuccess = function(e) {
+        transaction.objectStore('title_index').openCursor().onsuccess = function(e: any) {
             var cursor = e.target.result;
             var term;
             if (cursor) {
@@ -59,25 +59,23 @@ function upgradeSchema(transaction, version) {
     }
 }
 
-function initSchema(db) {
+function initSchema(db: IDBDatabase) {
+    // FIXME: TS Bug: compound key not supported. Use <any> as workaround
     var rosterStore = db.createObjectStore('roster', {keyPath: 'id'});
     rosterStore.createIndex('term', 'term', {unique: false});
-    rosterStore.createIndex('course', ['term', 'sub', 'nbr'], {unique: false});
-    rosterStore.createIndex('subject', ['term', 'sub'], {unique: false});
+    rosterStore.createIndex('course', <any>['term', 'sub', 'nbr'], {unique: false});
+    rosterStore.createIndex('subject', <any>['term', 'sub'], {unique: false});
 
     var subjectsStore = db.createObjectStore('subjects', {autoIncrement: true});
-    subjectsStore.createIndex('subject', ['term', 'sub'], {unique: false});
+    subjectsStore.createIndex('subject', <any>['term', 'sub'], {unique: false});
     subjectsStore.createIndex('term', 'term', {unique: false});
 
     db.createObjectStore('title_typeahead_index', {keyPath: 'term'});
 }
 
-function queryObjectStore(store, query, mode) {
-    if (mode === undefined) {
-        mode = 'readonly';
-    }
+export function queryObjectStore(store: string, query: (store: IDBObjectStore) => void, mode = 'readonly') {
     return open().then(function(db) {
-        return new Promise(function(resolve, reject) {
+        return new Promise<boolean>(function(resolve, reject) {
             var transaction = db.transaction([store], mode);
             var objStore = transaction.objectStore(store);
 
@@ -88,7 +86,6 @@ function queryObjectStore(store, query, mode) {
             };
 
             transaction.onerror = function(e) {
-                console.warn(e);
                 reject(e);
             };
 
@@ -96,15 +93,15 @@ function queryObjectStore(store, query, mode) {
     });
 }
 
-function keyCursorByIndex(objectStore, index, keyRange, callback, mode) {
+export function keyCursorByIndex(objectStore: string, index: string, keyRange: IDBKeyRange, callback, mode) {
     return open().then(function(db) {
         return new Promise(function(resolve, reject) {
             var transaction = db.transaction([objectStore], mode);
-              transaction.objectStore(objectStore)
+            transaction.objectStore(objectStore)
               .index(index)
               .openKeyCursor(keyRange)
               .onsuccess = function(e) {
-                var cursor = e.target.result;
+                var cursor: IDBCursor = (<IDBRequest>e.target).result;
                 if (cursor) {
                     callback(cursor);
                     cursor.continue();
@@ -118,7 +115,7 @@ function keyCursorByIndex(objectStore, index, keyRange, callback, mode) {
     });
 }
 
-function queryByIndex(objectStore, index, keyRange, callback) {
+export function queryByIndex(objectStore, index, keyRange, callback) {
     return open().then(function(db) {
         return new Promise(function(resolve, reject) {
             var transaction = db.transaction([objectStore]);
@@ -126,7 +123,7 @@ function queryByIndex(objectStore, index, keyRange, callback) {
                 .index(index)
                 .openCursor(keyRange)
                 .onsuccess = function(e) {
-                    var cursor = e.target.result;
+                    let cursor: IDBCursorWithValue = (<IDBRequest>e.target).result;
                     if (cursor) {
                         var item = cursor.value;
                         callback(item);
@@ -140,7 +137,7 @@ function queryByIndex(objectStore, index, keyRange, callback) {
     });
 }
 
-function queryAllByIndex(objectStore, index, keyRange) {
+export function queryAllByIndex(objectStore, index, keyRange) {
     var results = [];
     return queryByIndex(objectStore, index, keyRange, function(item) {
         results.push(item);
@@ -149,29 +146,29 @@ function queryAllByIndex(objectStore, index, keyRange) {
     });
 }
 
-function getByKey(objectStore, key) {
+export function getByKey(objectStore, key) {
     return open().then(function(db) {
         return new Promise(function(resolve, reject) {
             db.transaction([objectStore])
               .objectStore(objectStore)
               .get(key)
               .onsuccess = function(e) {
-                resolve(e.target.result);
+                resolve((<IDBRequest>e.target).result);
               }
         });
     });
 }
 
-function getByKeys(objectStore, keys) {
+export function getByKeys(objectStore: string, keys: any[]) {
     return open().then(function(db) {
-        return new Promise(function(resolve, reject) {
+        return new Promise<any[]>(function(resolve, reject) {
             let result = new Array(keys.length);
             var tr = db.transaction([objectStore]);
             var os = tr.objectStore(objectStore);
             for (var i=0; i < keys.length; i++) {
                 (function(i) {
                     os.get(keys[i]).onsuccess = function(e) {
-                        result[i] = e.target.result;
+                        result[i] = (<IDBRequest>e.target).result;
                     }
                 })(i);
             }
@@ -183,9 +180,9 @@ function getByKeys(objectStore, keys) {
     });
 }
 
-function add(objectStore, obj, key) {
+export function add(objectStore: string, obj, key = undefined) {
     return open().then(function(db) {
-        return new Promise(function(resolve, reject) {
+        return new Promise<boolean>(function(resolve, reject) {
             var tr = db.transaction([objectStore], 'readwrite');
             var os = tr.objectStore(objectStore);
 
@@ -202,9 +199,9 @@ function add(objectStore, obj, key) {
     });
 }
 
-function deleteRecord(objectStore, key) {
+export function deleteRecord(objectStore: string, key: any) {
     return open().then(function(db) {
-        return new Promise(function(resolve, reject) {
+        return new Promise<boolean>(function(resolve, reject) {
             var tr = db.transaction([objectStore], 'readwrite');
             var os = tr.objectStore(objectStore);
 
@@ -215,19 +212,8 @@ function deleteRecord(objectStore, key) {
             }
 
             tr.onerror = function(e) {
-                reject(e.target.error);
+                reject(e.target);
             }
         });
     });
 }
-
-exports.open = open;
-exports.close = close;
-exports.keyCursorByIndex = keyCursorByIndex;
-exports.queryByIndex = queryByIndex;
-exports.queryAllByIndex = queryAllByIndex;
-exports.getByKey = getByKey;
-exports.getByKeys = getByKeys;
-exports.queryObjectStore = queryObjectStore;
-exports.add = add;
-exports.delete = deleteRecord;

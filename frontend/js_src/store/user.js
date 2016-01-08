@@ -1,6 +1,6 @@
 var EventEmitter = require('event-emitter');
 
-var ajax = require('../utils/ajax.js');
+import * as ajax from '../utils/ajax.ts';
 var endpoints = require('../consts/endpoints.js');
 var cookies = require('cookies-js');
 

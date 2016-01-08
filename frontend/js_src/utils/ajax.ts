@@ -1,4 +1,4 @@
-function ajax(settings) {
+export function ajax(settings): any {
     return new Promise(function(resolve, reject) {
         $.ajax($.extend({
             success: function(data) {
@@ -14,10 +14,7 @@ function ajax(settings) {
     });
 }
 
-function getJson(url, options) {
-    if (options === undefined) {
-        options = {};
-    }
+export function getJson(url, options = {}): any {
     var settings = $.extend({
         url: url,
         dataType: 'json'
@@ -25,10 +22,7 @@ function getJson(url, options) {
     return ajax(settings);
 }
 
-function post(url, data, options) {
-    if (options === undefined) {
-        options = {};
-    }
+export function post(url, data, options = {}): any {
     var settings = $.extend({
         method: 'POST',
         url: url,
@@ -36,10 +30,4 @@ function post(url, data, options) {
         dataType: 'json'
     }, options);
     return ajax(settings);
-}
-
-module.exports = {
-    ajax: ajax,
-    getJson: getJson,
-    post: post
 }

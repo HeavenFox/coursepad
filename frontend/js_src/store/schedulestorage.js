@@ -2,11 +2,11 @@ var EventEmitter = require('event-emitter');
 var randomInt31 = require('../utils/rand.ts').int31;
 var endpoints = require('../consts/endpoints.js');
 var user = require('./user.js');
-var ajax = require('../utils/ajax.js');
+import * as ajax from '../utils/ajax.ts';
 
 import schedules from './schedules.ts';
 var localStore = require('../persist/localStorage.js');
-var color = require('../utils/color.js');
+var color = require('../utils/color.ts');
 
 var currentStorage;
 

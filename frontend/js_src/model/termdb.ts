@@ -3,8 +3,8 @@ import {Course} from '../model/course.ts';
 import * as meta from '../store/meta.ts';
 
 var endpoints: any = require('../consts/endpoints.js');
-var ajax: any = require('../utils/ajax.js');
-var indexeddb: any = require('../persist/indexeddb.js');
+import * as ajax from '../utils/ajax.ts';
+import * as indexeddb from '../persist/indexeddb.ts';
 
 export abstract class TermDatabase extends EventEmitter {
     term: string;
@@ -114,7 +114,8 @@ export class LocalTermDatabase extends TermDatabase {
         this.titleIndex = [];
     
         var titleIndexKeysToDelete = [];
-        var chain = indexeddb.delete('title_typeahead_index', termId);
+        let chain: Promise<any>;
+        chain = indexeddb.deleteRecord('title_typeahead_index', termId);
     
         for (var i=0; i < updates.diffs.length; i++) {
             (function(diff) {
@@ -175,7 +176,7 @@ export class LocalTermDatabase extends TermDatabase {
                             var index = subjectsStore.index('term');
     
                             index.openCursor(IDBKeyRange.only(termId)).onsuccess = function(e) {
-                                var cursor = e.target.result;
+                                var cursor: IDBCursorWithValue = (<IDBRequest>e.target).result;
                                 if (cursor) {
                                     if (modifiedSubDiff[cursor.value['sub']]) {
                                         modifiedSubDiff[cursor.value['sub']]['term'] = termId;
@@ -211,7 +212,7 @@ export class LocalTermDatabase extends TermDatabase {
         chain = chain.then(function() {
             return indexeddb.queryObjectStore('roster', function(rosterStore) {
                 rosterStore.index('term').openCursor(IDBKeyRange.only(termId)).onsuccess = function(e) {
-                    var cursor = e.target.result;
+                    var cursor = (<IDBRequest>e.target).result;
                     if (cursor) {
                         var number = cursor.value['sub'] + cursor.value['nbr'];
                         if (!(indexHash[number])) {

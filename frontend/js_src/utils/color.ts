@@ -1,8 +1,6 @@
-exports.hsvToHex = function(h, s, v) {
-    var r, g, b, i, f, p, q, t;
-    if (h && s === undefined && v === undefined) {
-        s = h.s, v = h.v, h = h.h;
-    }
+export function hsvToHex(h: number, s: number, v: number): string {
+    let r, g, b, i, f, p, q, t;
+
     i = Math.floor(h * 6);
     f = h * 6 - i;
     p = v * (1 - s);
