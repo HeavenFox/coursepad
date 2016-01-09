@@ -2,10 +2,16 @@ var VERSION = 3;
 
 var dbPromise: Promise<IDBDatabase>;
 
+var DB_NAME = 'coursepad';
+
+export function setDatabase(name: string) {
+    DB_NAME = name;
+}
+
 export function open() {
     if (dbPromise === undefined) {
         dbPromise = new Promise(function(resolve, reject) {
-            let request = window.indexedDB.open('coursepad', VERSION);
+            let request = window.indexedDB.open(DB_NAME, VERSION);
             request.onsuccess = function(e) {
                 resolve(request.result);
             };
@@ -23,7 +29,7 @@ export function open() {
     return dbPromise;
 }
 
-export function close() {
+export function close(): Promise<void> {
     return open().then(function(db) {
         db.close();
     });
@@ -93,7 +99,7 @@ export function queryObjectStore(store: string, query: (store: IDBObjectStore) =
     });
 }
 
-export function keyCursorByIndex(objectStore: string, index: string, keyRange: IDBKeyRange, callback, mode) {
+export function keyCursorByIndex(objectStore: string, index: string, keyRange: IDBKeyRange, callback: (c: IDBCursor)=>void, mode: string) {
     return open().then(function(db) {
         return new Promise(function(resolve, reject) {
             var transaction = db.transaction([objectStore], mode);
@@ -115,18 +121,17 @@ export function keyCursorByIndex(objectStore: string, index: string, keyRange: I
     });
 }
 
-export function queryByIndex(objectStore, index, keyRange, callback) {
+export function cursorByIndex(objectStore, index, keyRange, callback: (c: IDBCursorWithValue)=>void, mode = 'readonly') {
     return open().then(function(db) {
         return new Promise(function(resolve, reject) {
-            var transaction = db.transaction([objectStore]);
+            var transaction = db.transaction([objectStore], mode);
             transaction.objectStore(objectStore)
                 .index(index)
                 .openCursor(keyRange)
                 .onsuccess = function(e) {
                     let cursor: IDBCursorWithValue = (<IDBRequest>e.target).result;
                     if (cursor) {
-                        var item = cursor.value;
-                        callback(item);
+                        callback(cursor);
                         cursor.continue();
                     }
                 }
@@ -139,8 +144,8 @@ export function queryByIndex(objectStore, index, keyRange, callback) {
 
 export function queryAllByIndex(objectStore, index, keyRange) {
     var results = [];
-    return queryByIndex(objectStore, index, keyRange, function(item) {
-        results.push(item);
+    return cursorByIndex(objectStore, index, keyRange, function(item) {
+        results.push(item.value);
     }).then(function() {
         return results;
     });

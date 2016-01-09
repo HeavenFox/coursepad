@@ -162,9 +162,9 @@ gulp.task('test', function(done) {
     delete webpackConfig['output'];
     
     new KarmaServer({
-        files: ['js_src/**/tests/*.js'],
+        files: ['js_src/**/tests/*.ts'],
         frameworks: ['mocha'],
-        preprocessors: {'js_src/**/tests/*.js': ['webpack']},
+        preprocessors: {'js_src/**/tests/*.ts': ['webpack']},
         reporters: ['progress'],
         // web server port
         port: 9876,

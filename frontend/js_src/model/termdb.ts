@@ -6,6 +6,8 @@ var endpoints: any = require('../consts/endpoints.js');
 import * as ajax from '../utils/ajax.ts';
 import * as indexeddb from '../persist/indexeddb.ts';
 
+const DEBUG = (LEVEL == 1);
+
 export abstract class TermDatabase extends EventEmitter {
     term: string;
     
@@ -62,6 +64,11 @@ export abstract class TermDatabase extends EventEmitter {
     }
 }
 
+interface ITermDBUpdates {
+    term: string;
+    diffs: any[];
+}
+
 export class LocalTermDatabase extends TermDatabase {
     titleIndex: any;
     
@@ -102,10 +109,64 @@ export class LocalTermDatabase extends TermDatabase {
         return courses;
     }
     
+    static async deleteTerm(term: string) {
+        await Promise.all([
+            indexeddb.cursorByIndex('roster', 'term', IDBKeyRange.only(term), (cursor) => {
+                cursor.delete();
+            }, 'readwrite'),
+            indexeddb.cursorByIndex('subjects', 'term', IDBKeyRange.only(term), (cursor) => {
+                cursor.delete();
+            }, 'readwrite'),
+            indexeddb.deleteRecord('title_typeahead_index', term)
+        ]);        
+    }
+    
+    static async loadTerm(term: string, data: any) {
+        await this.deleteTerm(term);
+        
+        let titleHash = Object.create(null);
+
+        await indexeddb.queryObjectStore('roster', function(rosterStore) {
+            if (data.roster) {
+                for (let i=0; i < data.roster.length; i++) {
+                    var course = data.roster[i];
+
+                    course.term = term;
+
+                    rosterStore.add(course);
+
+                    titleHash[course.sub + course.nbr + ': ' + course.title] = [course.sub, course.nbr]
+
+                }
+            }
+        }, 'readwrite');
+        
+        await indexeddb.queryObjectStore('subjects', function(subjectsStore) {
+            if (data.subjects) {
+                for (var i=0; i < data.subjects.length; i++) {
+                    var subject = data.subjects[i];
+
+                    subject.term = term;
+                    subjectsStore.add(subject);
+
+                }
+            }
+        }, 'readwrite');
+           
+        let obj = {term: term, index: []};
+        for (let title in titleHash) {
+            obj.index.push({
+                title: title,
+                course: titleHash[title]
+            });
+        }
+        await indexeddb.add('title_typeahead_index', obj);
+    }
+    
     /**
      * @return {Promise}
      */
-    applyUpdates(updates) {
+    applyUpdates(updates: ITermDBUpdates) {
         var self = this;
         if (updates.term != this.term) {
             return Promise.resolve(false);
@@ -127,8 +188,12 @@ export class LocalTermDatabase extends TermDatabase {
                             if (rosterDiff['added']) {
                                 for (i=0; i < rosterDiff['added'].length; i++) {
                                     rosterDiff['added'][i].term = termId;
-    
-                                    rosterStore[LEVEL == 1 ? 'add' : 'put'](rosterDiff['added'][i]);
+                                    let data = rosterDiff['added'][i];
+                                    if (DEBUG) {
+                                        rosterStore.add(data);
+                                    } else {
+                                        rosterStore.put(data);
+                                    }
                                 }
                             }
     
@@ -191,7 +256,12 @@ export class LocalTermDatabase extends TermDatabase {
                             if (subjectsDiff['added']) {
                                 for (var i=0; i < subjectsDiff['added'].length; i++) {
                                     subjectsDiff['added'][i].term = termId;
-                                    subjectsStore[LEVEL == 1 ? 'add' : 'put'](subjectsDiff['added'][i]);
+                                    let data = subjectsDiff['added'][i];
+                                    if (DEBUG) {
+                                        subjectsStore.add(data);
+                                    } else {
+                                        subjectsStore.put(data);
+                                    }
                                 }
                             }
                         }, 'readwrite');

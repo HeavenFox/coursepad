@@ -80,47 +80,11 @@ async function loadTerm(term, progress = null) {
                 reject(status);
             },
             success: function(data) {
-                var titleHash = Object.create(null);
-
-                indexeddb.queryObjectStore('roster', function(rosterStore) {
-                    if (data.roster) {
-                        for (var i=0; i < data.roster.length; i++) {
-                            var course = data.roster[i];
-
-                            course.term = term;
-
-                            rosterStore.add(course);
-
-                            titleHash[course.sub + course.nbr + ': ' + course.title] = [course.sub, course.nbr]
-
-                        }
-                    }
-                }, 'readwrite').then(function() {
-                    return indexeddb.queryObjectStore('subjects', function(subjectsStore) {
-                        if (data.subjects) {
-                            for (var i=0; i < data.subjects.length; i++) {
-                                var subject = data.subjects[i];
-
-                                subject.term = term;
-                                subjectsStore.add(subject);
-
-                            }
-                        }
-                    }, 'readwrite');
-                }).then(function() {
-                    var obj = {term: term, index: []};
-                    for (var title in titleHash) {
-                        obj.index.push({
-                            title: title,
-                            course: titleHash[title]
-                        });
-                    }
-                    return indexeddb.add('title_typeahead_index', obj);
-                }).then(function() {
+                LocalTermDatabase.loadTerm(term, data).then(() => {
                     meta.addLocalTerm(term, data.time);
                     progress(1);
                     resolve(true);
-                }).then(null, function(e) {
+                }).then(null, (e) => {
                     console.warn(e);
                     reject(e);
                 });
