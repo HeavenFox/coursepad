@@ -1,13 +1,10 @@
 var gulp = require('gulp');
 var babel = require('gulp-babel');
-var webpack = require('webpack-stream');
+var webpack = require('webpack');
+var webpackStream = require('webpack-stream');
 var uglify = require('gulp-uglify');
 var sass = require('gulp-ruby-sass');
 var del = require('del');
-var jshint = require('gulp-jshint');
-var eslint = require('gulp-eslint');
-var insert = require('gulp-insert');
-var react = require('gulp-react');
 var sourcemaps = require('gulp-sourcemaps');
 var gutil = require('gulp-util');
 var replace = require('gulp-replace');
@@ -17,6 +14,8 @@ var rev = require('gulp-rev');
 var revCollector = require('gulp-rev-collector');
 var minifyHTML   = require('gulp-minify-html');
 var gulpFilter = require('gulp-filter');
+
+var KarmaServer = require('karma').Server;
 
 var LEVEL = +process.env.LEVEL;
 if (!LEVEL) LEVEL = 1;
@@ -57,7 +56,12 @@ function webpack_conf() {
         },
         ts: {
             configFileName: 'tsconfig.webpack.json'
-        }
+        },
+        plugins: [
+            new webpack.DefinePlugin({
+                LEVEL: JSON.stringify(LEVEL)
+            })
+        ]
     };
     return conf;
 }
@@ -76,56 +80,16 @@ function dev(t) {
     return gutil.noop();
 }
 
-gulp.task('lint', function() {
-    var eslint_setting = {
-        "ecmaFeatures": {
-            "blockBindings": true,
-            "generators": true,
-            "forOf": true,
-            "jsx": true
-        },
-        envs: [
-            'browser',
-            'es6'
-        ],
-        "globals": {
-                "React": false,
-                'require': false,
-                'exports': false,
-                'module': false,
-                '$': false,
-                'LEVEL': false,
-            },
-        "rules": {
-            'quotes': 0,
-            'global-strict': 0,
-            'dot-notation': 0,
-            'no-underscore-dangle': 0,
-        },
-
-    };
-
-    return gulp.src('./js_src/**/*.js')
-        .pipe(babel({
-        optional: ['runtime', 'asyncToGenerator']
-        }))
-        .pipe(eslint(eslint_setting))
-        .pipe(eslint.format())
-        .pipe(eslint.failOnError());
-})
-
 gulp.task('js', function() {
     var filter = gulpFilter(['main.js']);
     return gulp.src('js_src/app.tsx')
-        .pipe(webpack(webpack_conf()))
-        .pipe((LEVEL <= 7) ? insert.prepend('const LEVEL=' + LEVEL + ';\n') : gutil.noop())
+        .pipe(webpackStream(webpack_conf()))
         .pipe((LEVEL <= 7) ? gutil.noop() : uglify({
                 mangle: {
                     except: ['GeneratorFunction']
                 },
                 compress: {
-                    drop_console: true,
-                    global_defs: {'LEVEL': LEVEL}
+                    drop_console: true
                 }
              }))
         .pipe(prod(filter))
@@ -192,3 +156,43 @@ gulp.task('rev-static', ['rev-index'], function() {
 });
 
 gulp.task('build', ['rev-static']);
+
+gulp.task('test', function(done) {
+    var webpackConfig = webpack_conf();
+    delete webpackConfig['output'];
+    
+    new KarmaServer({
+        files: ['js_src/**/tests/*.js'],
+        frameworks: ['mocha'],
+        preprocessors: {'js_src/**/tests/*.js': ['webpack']},
+        reporters: ['progress'],
+        // web server port
+        port: 9876,
+
+
+        // enable / disable colors in the output (reporters and logs)
+        colors: true,
+
+
+        // enable / disable watching file and executing tests whenever any file changes
+        autoWatch: false,
+
+
+        // start these browsers
+        // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
+        browsers: ['Chrome'],
+
+        webpack: webpackConfig,
+        webpackMiddleware: {
+            // webpack-dev-middleware configuration
+            // i. e.
+            noInfo: true
+        },
+        plugins: [
+            'karma-webpack',
+            'karma-mocha',
+            'karma-chrome-launcher'
+        ],
+        singleRun: true
+    }, done).start();
+});

@@ -11,10 +11,11 @@
     "url": "git@github.com:HeavenFox/coursepad.git"
   },
   "author": "Jingsi Zhu",
-  "license": "Proprietary",
+  "license": "UNLICENSED",
   "bugs": {
     "url": "https://github.com/HeavenFox/coursepad/issues"
   },
+  "private": true,
   "homepage": "https://github.com/HeavenFox/coursepad",
   "dependencies": {
     "cookies-js": "^1.1.0",
@@ -53,6 +54,11 @@
     "jshint": "^2.5.10",
     "json-loader": "^0.5.1",
     "jsx-loader": "^0.12.0",
+    "karma": "^0.13.19",
+    "karma-chrome-launcher": "^0.2.2",
+    "karma-mocha": "^0.2.1",
+    "karma-webpack": "^1.7.0",
+    "mocha": "^2.3.4",
     "regenerator": "HeavenFox/regenerator#no_funexpr",
     "regenerator-loader": "git://github.com/CoursePad/regenerator-loader#cp",
     "ts-loader": "^0.7.2",
