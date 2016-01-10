@@ -163,155 +163,137 @@ export class LocalTermDatabase extends TermDatabase {
         await indexeddb.add('title_typeahead_index', obj);
     }
     
-    /**
-     * @return {Promise}
-     */
-    applyUpdates(updates: ITermDBUpdates) {
-        var self = this;
-        if (updates.term != this.term) {
-            return Promise.resolve(false);
+    async _applyDiff(termId, diff) {
+        if (diff['roster']) {
+            let rosterDiff = diff['roster'];
+            await indexeddb.queryObjectStore('roster', function(rosterStore) {
+                var i;
+                if (rosterDiff['added']) {
+                    for (i=0; i < rosterDiff['added'].length; i++) {
+                        rosterDiff['added'][i].term = termId;
+                        let data = rosterDiff['added'][i];
+                        if (DEBUG) {
+                            rosterStore.add(data);
+                        } else {
+                            rosterStore.put(data);
+                        }
+                    }
+                }
+
+                if (rosterDiff['deleted']) {
+                    for (i=0; i < rosterDiff['deleted'].length; i++) {
+                        rosterStore.delete(rosterDiff['deleted'][i]);
+                    }
+                }
+
+                if (rosterDiff['modified']) {
+                    for (i=0; i < rosterDiff['modified'].length; i++) {
+                        rosterDiff['modified'][i].term = termId;
+
+                        rosterStore.put(rosterDiff['modified'][i]);
+
+                    }
+                }
+            }, 'readwrite');
         }
-        var termId = updates.term;
-        this.titleIndex = [];
-    
-        var titleIndexKeysToDelete = [];
-        let chain: Promise<any>;
-        chain = indexeddb.deleteRecord('title_typeahead_index', termId);
-    
-        for (var i=0; i < updates.diffs.length; i++) {
-            (function(diff) {
-                if (diff['roster']) {
-                    chain = chain.then(function() {
-                        var rosterDiff = diff['roster'];
-                        return indexeddb.queryObjectStore('roster', function(rosterStore) {
-                            var i;
-                            if (rosterDiff['added']) {
-                                for (i=0; i < rosterDiff['added'].length; i++) {
-                                    rosterDiff['added'][i].term = termId;
-                                    let data = rosterDiff['added'][i];
-                                    if (DEBUG) {
-                                        rosterStore.add(data);
-                                    } else {
-                                        rosterStore.put(data);
-                                    }
-                                }
-                            }
-    
-                            if (rosterDiff['deleted']) {
-                                for (i=0; i < rosterDiff['deleted'].length; i++) {
-                                    rosterStore.delete(rosterDiff['deleted'][i]);
-                                }
-                            }
-    
-                            if (rosterDiff['modified']) {
-                                for (i=0; i < rosterDiff['modified'].length; i++) {
-                                    rosterDiff['modified'][i].term = termId;
-    
-                                    rosterStore.put(rosterDiff['modified'][i]);
-    
-                                }
-                            }
-                        }, 'readwrite');
+
+        if (diff['subjects']) {
+            var subjectsDiff = diff['subjects'];
+
+            function hashify(diff) {
+                var result = Object.create(null);
+                if (diff) {
+                    diff.forEach(function(subject) {
+                        result[subject['sub']] = subject;
                     })
                 }
-    
-                if (diff['subjects']) {
-                    var subjectsDiff = diff['subjects'];
-    
-                    chain = chain.then(function() {
-                        function hashify(diff) {
-                            var result = Object.create(null);
-                            if (diff) {
-                                diff.forEach(function(subject) {
-                                    result[subject['sub']] = subject;
-                                })
-                            }
-                            return result;
-                        }
-    
-                        var modifiedSubDiff = hashify(subjectsDiff['modified']);
-                        var removedSubDiff = Object.create(null);
-                        if (subjectsDiff['deleted']) {
-                            subjectsDiff['deleted'].forEach(function(s) {
-                                removedSubDiff[s] = true;
-                            });
-                        }
-    
-                        return indexeddb.queryObjectStore('subjects', function(subjectsStore) {
-                            var index = subjectsStore.index('term');
-    
-                            index.openCursor(IDBKeyRange.only(termId)).onsuccess = function(e) {
-                                var cursor: IDBCursorWithValue = (<IDBRequest>e.target).result;
-                                if (cursor) {
-                                    if (modifiedSubDiff[cursor.value['sub']]) {
-                                        modifiedSubDiff[cursor.value['sub']]['term'] = termId;
-                                        cursor.update(modifiedSubDiff[cursor.value['sub']]);
-                                    } else if (removedSubDiff[cursor.value['sub']]) {
-                                        cursor.delete();
-                                    }
-                                    cursor.continue();
-                                }
-                            };
-    
-                            if (subjectsDiff['added']) {
-                                for (var i=0; i < subjectsDiff['added'].length; i++) {
-                                    subjectsDiff['added'][i].term = termId;
-                                    let data = subjectsDiff['added'][i];
-                                    if (DEBUG) {
-                                        subjectsStore.add(data);
-                                    } else {
-                                        subjectsStore.put(data);
-                                    }
-                                }
-                            }
-                        }, 'readwrite');
-                    });
-                }
-    
-                chain = chain.then(function() {
-                    // Set local storage
-                    meta.addLocalTerm(termId, diff.time);
+                return result;
+            }
+
+            var modifiedSubDiff = hashify(subjectsDiff['modified']);
+            var removedSubDiff = Object.create(null);
+            if (subjectsDiff['deleted']) {
+                subjectsDiff['deleted'].forEach(function(s) {
+                    removedSubDiff[s] = true;
                 });
-            })(updates.diffs[i]);
+            }
+
+            await indexeddb.queryObjectStore('subjects', function(subjectsStore) {
+                var index = subjectsStore.index('term');
+
+                index.openCursor(IDBKeyRange.only(termId)).onsuccess = function(e) {
+                    var cursor: IDBCursorWithValue = (<IDBRequest>e.target).result;
+                    if (cursor) {
+                        if (modifiedSubDiff[cursor.value['sub']]) {
+                            modifiedSubDiff[cursor.value['sub']]['term'] = termId;
+                            cursor.update(modifiedSubDiff[cursor.value['sub']]);
+                        } else if (removedSubDiff[cursor.value['sub']]) {
+                            cursor.delete();
+                        }
+                        cursor.continue();
+                    }
+                };
+
+                if (subjectsDiff['added']) {
+                    for (var i=0; i < subjectsDiff['added'].length; i++) {
+                        subjectsDiff['added'][i].term = termId;
+                        let data = subjectsDiff['added'][i];
+                        if (DEBUG) {
+                            subjectsStore.add(data);
+                        } else {
+                            subjectsStore.put(data);
+                        }
+                    }
+                }
+            }, 'readwrite');
+        }
+
+        // Set local storage
+        meta.addLocalTerm(termId, diff.time);
+    }
+    
+    async applyUpdates(updates: ITermDBUpdates) {
+        if (updates.term != this.term) {
+            return false;
+        }
+        let termId = updates.term;
+        this.titleIndex = [];
+    
+        let titleIndexKeysToDelete = [];
+        await indexeddb.deleteRecord('title_typeahead_index', termId);
+    
+        for (let i=0; i < updates.diffs.length; i++) {
+            await this._applyDiff(termId, updates.diffs[i]);
         }
     
         // Rebuild Index
         var indexHash = Object.create(null);
         var index = {term: termId, index: []};
     
-        chain = chain.then(function() {
-            return indexeddb.queryObjectStore('roster', function(rosterStore) {
-                rosterStore.index('term').openCursor(IDBKeyRange.only(termId)).onsuccess = function(e) {
-                    var cursor = (<IDBRequest>e.target).result;
-                    if (cursor) {
-                        var number = cursor.value['sub'] + cursor.value['nbr'];
-                        if (!(indexHash[number])) {
-                            indexHash[number] = {
-                                title: cursor.value['sub'] + cursor.value['nbr'] + ': ' + cursor.value['title'],
-                                course: [cursor.value['sub'], cursor.value['nbr']]
-                            }
+        await indexeddb.queryObjectStore('roster', function(rosterStore) {
+            rosterStore.index('term').openCursor(IDBKeyRange.only(termId)).onsuccess = function(e) {
+                var cursor = (<IDBRequest>e.target).result;
+                if (cursor) {
+                    var number = cursor.value['sub'] + cursor.value['nbr'];
+                    if (!(indexHash[number])) {
+                        indexHash[number] = {
+                            title: cursor.value['sub'] + cursor.value['nbr'] + ': ' + cursor.value['title'],
+                            course: [cursor.value['sub'], cursor.value['nbr']]
                         }
-                        cursor.continue();
                     }
+                    cursor.continue();
                 }
-            });
-        })
-        .then(function() {
-            for (var i in indexHash) {
-                index.index.push(indexHash[i]);
             }
-            // Insert index
-            return indexeddb.add('title_typeahead_index', index);
-        })
-        .then(function() {
-            self.setTitleIndex(index);
-            self.emit('update');
-        })
-        .then(null, function(e) {
-            console.error('Error when Applying Updates: ', e);
         });
-    
-        return chain;
+
+        for (let i in indexHash) {
+            index.index.push(indexHash[i]);
+        }
+        // Insert index
+        await indexeddb.add('title_typeahead_index', index);
+
+        this.setTitleIndex(index);
+        this.emit('update');
     }
 }
 
