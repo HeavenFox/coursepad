@@ -5,7 +5,7 @@ import ConflictIndicator from './ConflictIndicator.tsx';
 import schedules from '../store/schedules.ts';
 
 import * as datetime from '../utils/datetime.ts';
-var humanize: any = require('../consts/humanize.js');
+import * as humanize from '../consts/humanize.ts';
 
 var DropoffSet = React.createClass<React.Props<any>, any>({
     getInitialState: function() {

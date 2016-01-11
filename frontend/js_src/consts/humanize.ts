@@ -273,7 +273,7 @@ var buildingNamesLong = {
     'WSH': 'Willard Straight Hall',
 };
 
-export const sectionTypePriorities = ['LEC', 'SEM', 'IND', 'DIS', 'LAB', 'RSC', 'CLN'];
+export const SECTION_TYPE_PRIORITIES = ['LEC', 'SEM', 'IND', 'DIS', 'LAB', 'RSC', 'CLN'];
 
 export function getSectionType() {
 

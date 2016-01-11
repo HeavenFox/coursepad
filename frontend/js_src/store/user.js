@@ -1,7 +1,7 @@
 var EventEmitter = require('event-emitter');
 
 import * as ajax from '../utils/ajax.ts';
-var endpoints = require('../consts/endpoints.js');
+import * as endpoints from '../consts/endpoints.ts';
 var cookies = require('cookies-js');
 
 var fb = require('../thirdparty/fb.js');

@@ -1,12 +1,10 @@
-import * as meta from './store/meta.ts';
+import * as humanize from './consts/humanize.ts';
 
 import schedules from './store/schedules.ts';
 import termdb from './store/termdb.ts';
+import * as meta from './store/meta.ts';
 
 import App from './components/App.tsx';
-
-
-var humanize : any = require('./consts/humanize.js');
 
 var welcome : any = require('./utils/welcome.js');
 require('./controllers/update.js');
@@ -14,7 +12,7 @@ require('./controllers/update.js');
 import * as router from './router.ts';
 
 import * as ajax from './utils/ajax.ts';
-var endpoints : any = require('./consts/endpoints.js');
+import * as endpoints from './consts/endpoints.ts';
 
 
 ReactDOM.render(<App />, document.getElementById('app'));

@@ -1,8 +1,5 @@
-/**
- * @jsx React.DOM
- */
 import schedules from '../../store/schedules.ts';
-var humanize : any = require('../../consts/humanize.js');
+import {SECTION_TYPE_PRIORITIES} from '../../consts/humanize.ts';
 
 var modal : any = require('../../utils/modal.js');
 
@@ -55,7 +52,7 @@ var ClassNumbers = React.createClass({
 
             courseLis = courseIds.map(function(courseId) {
                 var course = courseIdToCourseHash[courseId];
-                var sectionsLis = humanize.sectionTypePriorities.filter(function(type) {
+                var sectionsLis = SECTION_TYPE_PRIORITIES.filter(function(type) {
                     return sectionsByCourseIdAndType[courseId][type];
                 }).map(function(type) {
                     var section = sectionsByCourseIdAndType[courseId][type];

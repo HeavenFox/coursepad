@@ -1,5 +1,5 @@
 import * as ajax from '../utils/ajax.ts';
-var endpoints = require('../consts/endpoints.js');
+import * as endpoints from '../consts/endpoints.ts';
 var user = require('../store/user.js');
 import schedules from '../store/schedules.ts';
 

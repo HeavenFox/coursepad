@@ -1,6 +1,6 @@
 var EventEmitter = require('event-emitter');
-var randomInt31 = require('../utils/rand.ts').int31;
-var endpoints = require('../consts/endpoints.js');
+import {int31 as randomInt31} from '../utils/rand.ts';
+import * as endpoints from '../consts/endpoints.ts';
 var user = require('./user.js');
 import * as ajax from '../utils/ajax.ts';
 

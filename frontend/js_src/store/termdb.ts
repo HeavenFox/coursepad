@@ -3,7 +3,7 @@ import EventEmitter from 'eventemitter3';
 import * as meta from './meta.ts';
 import {TermDatabase, LocalTermDatabase, RemoteTermDatabase} from '../model/termdb.ts';
 
-var endpoints: any = require('../consts/endpoints.js');
+import * as endpoints from '../consts/endpoints.ts';
 import * as indexeddb from '../persist/indexeddb.ts';
 import * as ajax from '../utils/ajax.ts';
 

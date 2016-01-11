@@ -1,5 +1,5 @@
 var localStore : any = require('../persist/localStorage.js');
-var endpoints : any = require('../consts/endpoints.js');
+import * as endpoints from '../consts/endpoints.ts';
 import * as ajax from '../utils/ajax.ts';
 
 const LATEST_VERSION = 1;

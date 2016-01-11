@@ -1,12 +1,9 @@
-/**
- * @jsx React.DOM
- */
 var Drop : any = require('drop');
 
 import * as meta from '../store/meta.ts';
 import termdb from '../store/termdb.ts';
 import schedules from '../store/schedules.ts';
-var humanize : any = require('../consts/humanize.js');
+import * as humanize from '../consts/humanize.ts';
 
 interface TermListProps {
     clickHandler: Function;

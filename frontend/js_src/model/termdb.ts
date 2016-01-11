@@ -2,7 +2,7 @@ import EventEmitter from 'eventemitter3';
 import {Course} from '../model/course.ts';
 import * as meta from '../store/meta.ts';
 
-var endpoints: any = require('../consts/endpoints.js');
+import * as endpoints from '../consts/endpoints.ts';
 import * as ajax from '../utils/ajax.ts';
 import * as indexeddb from '../persist/indexeddb.ts';
 
