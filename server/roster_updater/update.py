@@ -26,6 +26,7 @@ from lib.subject_match import SubjectMatcher
 import config
 
 print 'CoursePad.me Roster Database Generator'
+print 'Current time is: %d' % (int(time.time()), )
 
 ROOT = config.ROSTER_DATA_DIR
 
@@ -76,8 +77,8 @@ def make_api_call(endpoint, args=None):
 
 
 
-def data_index_file(fn):
-    return os.path.join(ROOT, 'data_index', fn)
+def data_index_file(fn, path=None):
+    return os.path.join(ROOT if path is None else path, 'data_index', fn)
 
 with open(data_index_file('meta.json'), 'r') as f:
     meta = simplejson.load(f)
@@ -93,19 +94,30 @@ def persist_index():
         simplejson.dump(version_history, f)
 
 
-def backup_data_index():
-    for fn in [data_index_file('meta.json'), data_index_file('version_history.json')]:
-        shutil.copyfile(fn, fn + '.bak')
-
-def backup():
-    subprocess.call(['tar', '-czf', os.path.join(config.BACKUP_DIR, 'data_' + time.strftime('%Y%m%d%H%M%S') + '.tar.gz'), config.ROSTER_DATA_DIR])
-
-
 
 # Read Previous Course ID
 course_id_path = os.path.join(ROOT, 'track', 'course_id')
 course_id_max = int(open(course_id_path, 'r').read())
-open(course_id_path + '.bak', 'w').write(str(course_id_max))
+
+def ensure_dir(path):
+    try:
+        os.makedirs(path)
+    except OSError:
+        pass
+
+def backup_data_index():
+    rollback_path = os.path.join(config.ROLLBACK_DIR, str(int(time.time())))
+    for d in ['data_index', 'track']:
+        ensure_dir(os.path.join(rollback_path, d))
+
+    for fn in ['meta.json', 'version_history.json']:
+        shutil.copyfile(data_index_file(fn), data_index_file(fn, rollback_path))
+
+    open(os.path.join(rollback_path, 'track', 'course_id'), 'w').write(str(course_id_max))
+
+# def backup():
+#     subprocess.call(['tar', '-czf', os.path.join(config.BACKUP_DIR, 'data_' + time.strftime('%Y%m%d%H%M%S') + '.tar.gz'), config.ROSTER_DATA_DIR])
+
 
 
 def update_term(term, roster_time):
@@ -218,7 +230,7 @@ def update_term(term, roster_time):
     }
 
 
-    simplejson.dump(raw_data, open(os.path.join(ROOT, 'raw_data', '%s_%d.json' % (term, roster_time)), 'wb'))
+    simplejson.dump(raw_data, open(os.path.join(config.AUDIT_DIR, 'raw_data', '%s_%d.json' % (term, roster_time)), 'wb'))
 
     simplejson.dump(term_db, open(os.path.join(ROOT, 'data', 'termdb_%s_%d.json' % (term, roster_time)), 'wb'))
 
@@ -259,7 +271,6 @@ def update_term(term, roster_time):
 # Backup first
 
 backup_data_index()
-backup()
 
 err_occurred = False
 
