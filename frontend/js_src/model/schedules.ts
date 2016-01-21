@@ -599,7 +599,7 @@ export class MutableSchedule extends Schedule {
         this.sections = newSections;
     };
 
-    addCluster(cluster: Course[]): void {
+    private _addCluster(cluster: Course[]): void {
         if (cluster.length === 0) {
             throw new Error('This class does not exist');
         }
@@ -629,7 +629,7 @@ export class MutableSchedule extends Schedule {
 
     };
 
-    addCourse(subject, number) {
+    async addCourse(subject, number): Promise<this> {
         var self = this;
         var course;
         for (var i=0; i < this.basket.length; i++) {
@@ -641,24 +641,19 @@ export class MutableSchedule extends Schedule {
 
         if (course) {
             // Mark this course as visible
-            return Promise.resolve(false);
+            this.setVisibility(subject + ' ' + number, true);
+            return this;
         } else {
-            return this.getTermDB()
-                  .getCoursesBySubjectAndNumber(subject, number)
-                  .then(function(courses) {
+            let courses = await this.getTermDB().getCoursesBySubjectAndNumber(subject, number);
+            
+            self._addCluster(courses);
 
+            self.persistSections();
+            self._onChange();
 
-                self.addCluster(courses);
+            ana.sevent('course', 'add', subject + ' ' + number);
 
-                self.persistSections();
-
-                self._onChange();
-
-
-                ana.sevent('course', 'add', subject + ' ' + number);
-
-                return true;
-            });
+            return this;
         }
     };
 
