@@ -1,6 +1,6 @@
 var sharing : any = require('../../controllers/sharing.js');
-var fb : any = require('../../thirdparty/fb.js');
-var twitter : any = require('../../thirdparty/twitter.js');
+import * as fb from '../../thirdparty/fb.ts';
+import * as twitter from '../../thirdparty/twitter.ts';
 
 interface SocialNetworksProps {
     url: string;

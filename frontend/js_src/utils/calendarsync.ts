@@ -1,9 +1,10 @@
 import saveAs from 'FileSaver.js';
 import {getShortLocation} from '../consts/humanize.ts';
-import {authorize} from '../thirdparty/google.js';
+import {authorize} from '../thirdparty/google.ts';
 import {promisify} from '../utils/promise.ts'
 import {toRFC} from '../utils/datetime.ts'
 import {serror} from '../analytics/analytics.ts'
+import {CourseComponent} from '../model/course.ts';
 import _ from 'lodash'
 
 export function toiCal(components) {
@@ -133,7 +134,7 @@ export function toGoogleCalendar(components) {
 	return events;
 }
 
-async function syncEvents(components, terms) {
+async function syncEvents(components: CourseComponent[], terms) {
 	await gapi.client.load('calendar', 'v3');
 	var request = gapi.client.calendar.events.list({
 		'calendarId': 'primary',

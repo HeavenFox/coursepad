@@ -11,7 +11,7 @@ var loadAwaitable, initialized;
 /**
  * idempotent
  */
-async function init() {
+export async function init() {
 	if (initialized) {
 		return true;
 	}
@@ -42,5 +42,3 @@ async function init() {
 	await loadAwaitable;
 	return true;
 }
-
-exports.init = init;

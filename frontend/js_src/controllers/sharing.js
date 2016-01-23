@@ -1,6 +1,6 @@
 import * as ajax from '../utils/ajax.ts';
 import * as endpoints from '../consts/endpoints.ts';
-var user = require('../store/user.js');
+import user from '../store/user.ts';
 import schedules from '../store/schedules.ts';
 
 async function shareSchedule() {

@@ -1,24 +1,27 @@
-var EventEmitter = require('event-emitter');
+import EventEmitter from 'eventemitter3';
+
+import {User} from '../model/users.ts';
 
 import * as ajax from '../utils/ajax.ts';
 import * as endpoints from '../consts/endpoints.ts';
-var cookies = require('cookies-js');
+var cookies : any = require('cookies-js');
 
-var fb = require('../thirdparty/fb.js');
-var google = require('../thirdparty/google.js');
+import * as fb from '../thirdparty/fb.ts';
+import * as google from '../thirdparty/google.ts';
 
-var ana = require('../analytics/analytics.ts');
+import * as ana from '../analytics/analytics.ts';
+
+type SessionId = string;
 
 const LOGIN_EMAIL = 1, LOGIN_FB = 2;
 
 // Facebook Integration
-const FB_APP_ID = '399310430207216';
 const SCOPE = 'public_profile,email,user_friends';
 
 
 const REFRESH_SESSION_GRACE_PERIOD = 5 * 60 * 1000;
 
-function storeSession(sessionId, expires, isPersistent) {
+function storeSession(sessionId: SessionId, expires: number, isPersistent = false) {
     function scheduleRefreshSession(expirationTime) {
         window.setTimeout(async function() {
             console.log('refreshing session');
@@ -93,7 +96,7 @@ async function initLogin() {
 }
 
 
-function userLoggedIn(session, user) {
+function userLoggedIn(session: SessionId, user: User) {
     var previousUser = currentUser;
     currentUser = user;
     sessionId = session;
@@ -106,21 +109,10 @@ function userLoggedIn(session, user) {
     ana.suserid(user.id);
 }
 
+var store : UserStore;
 
-function User() {
-
-}
-
-User.prototype.fromBundle = function(bundle) {
-    this.name = bundle['name'];
-    this.profilePicture = bundle['profile_picture'];
-    this.id = bundle['id'];
-
-    return this;
-}
-
-var currentUser = null;
-var sessionId = null;
+var currentUser: User = null;
+var sessionId: SessionId = null;
 var loginMethod = null;
 
 function clearSession() {
@@ -137,29 +129,20 @@ function clearSession() {
 
 }
 
-function logout() {
-    if (loginMethod === LOGIN_FB) {
-        FB.logout();
-    }
-    loginMethod = null;
-
-    clearSession();
-}
-
-var store = EventEmitter({
-    loggedIn: function() {
+class UserStore extends EventEmitter {
+    loggedIn(): boolean {
         return currentUser !== null;
-    },
+    }
 
-    getCurrentUser: function() {
+    getCurrentUser(): User {
         return currentUser;
-    },
+    }
 
-    getSession: function() {
+    getSession(): SessionId {
         return sessionId;
-    },
+    }
 
-    signHeader: function(header) {
+    signHeader(header) {
         if (typeof header !== 'object') {
             header = {};
         }
@@ -168,9 +151,9 @@ var store = EventEmitter({
         }
 
         return header;
-    },
+    }
 
-    triggerLogin: async function(method) {
+    async triggerLogin(method) {
         if (method === 'fb') {
             FB.login(function(response) {
                 fbStatusChange(response);
@@ -189,25 +172,33 @@ var store = EventEmitter({
             });
 
         }
-    },
+    }
 
-    emailLogin: async function(email, password, rememberMe) {
+    async emailLogin(email, password, rememberMe = false) {
         var result = await ajax.post(endpoints.userLogin('email'), {'email' : email, 'password' : password});
 
 
         loginMethod = LOGIN_EMAIL;
         storeSession(result['session_id'], result['session_expires'], rememberMe);
         userLoggedIn(result['session_id'], new User().fromBundle(result['user']));
-    },
+    }
 
-    register: async function(userinfo) {
+    async register(userinfo) {
 
-    },
+    }
 
-    logout: logout,
-});
+    logout() {
+        if (loginMethod === LOGIN_FB) {
+            FB.logout((response) => {});
+        }
+        loginMethod = null;
 
-module.exports = store;
+        clearSession();
+    }
+}
+
+store = new UserStore();
+export default store;
 
 initLogin();
 

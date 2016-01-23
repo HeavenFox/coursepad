@@ -1,4 +1,4 @@
-var user : any = require('../../store/user.js');
+import user from '../../store/user.ts';
 
 var IfLoginStatus = React.createClass({
     getInitialState: function() {

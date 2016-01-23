@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 
 import simplejson
 import subprocess
@@ -25,8 +25,8 @@ from lib.subject_match import SubjectMatcher
 
 import config
 
-print 'CoursePad.me Roster Database Generator'
-print 'Current time is: %d' % (int(time.time()), )
+print('CoursePad.me Roster Database Generator')
+print('Current time is: %d' % (int(time.time()), ))
 
 ROOT = config.ROSTER_DATA_DIR
 
@@ -65,7 +65,7 @@ def make_api_call(endpoint, args=None):
             result = simplejson.load(urllib2.urlopen(url))
             break
         except Exception as e:
-            print 'Error: %s, retrying...' % e
+            print('Error: %s, retrying...' % e)
 
     if result is None:
         raise APIError('Cannot call API after retrying')
@@ -118,12 +118,14 @@ def backup_data_index():
 # def backup():
 #     subprocess.call(['tar', '-czf', os.path.join(config.BACKUP_DIR, 'data_' + time.strftime('%Y%m%d%H%M%S') + '.tar.gz'), config.ROSTER_DATA_DIR])
 
-
+def print_nolf(content):
+    print(content, end='')
+    sys.stdout.flush()
 
 def update_term(term, roster_time):
     global course_id_max
 
-    print 'Reading subject list...'
+    print('Reading subject list...')
 
     raw_data = {}
 
@@ -148,11 +150,12 @@ def update_term(term, roster_time):
 
     for subj in subjects:
         sub = subj['sub']
-        print "Getting " + sub
+        print_nolf("Getting " + sub + '...')
         raw_data[sub] = make_api_call('search/classes.json', {'roster': term.upper(), 'subject': sub})
 
         for cls in raw_data[sub]['classes']:
             course_parser.parse(cls)
+        print('Done.')
 
 
     courses = course_parser.courses
@@ -168,8 +171,8 @@ def update_term(term, roster_time):
     if term in meta['roster_time']:
         previous_db = simplejson.load(open(os.path.join(ROOT, 'data', 'termdb_%s_%d.json' % (term, meta['roster_time'][term]))))
 
-        print 'Previous Database Loaded. There are %d courses in total' % len(previous_db['roster'])
-        print 'Building Index on Previous DB'
+        print('Previous Database Loaded. There are %d courses in total' % len(previous_db['roster']))
+        print_nolf('Building Index on Previous DB...')
 
 
         previous_course_by_number = defaultdict(list)
@@ -183,25 +186,25 @@ def update_term(term, roster_time):
 
         course_matcher.match(previous_course_by_number, course_by_number)
 
-        print 'Done.'
+        print('Done.')
         modified = False
         if course_matcher.added:
             modified = True
-            print 'Added these courses'
+            print('Added these courses')
             for course in course_matcher.added:
-                print "%s %d: %s" % (course['sub'], course['nbr'], course['title'])
+                print("%s %d: %s" % (course['sub'], course['nbr'], course['title']))
 
         if course_matcher.deleted:
             modified = True
-            print 'Deleted these courses'
-            print course_matcher.deleted
+            print('Deleted these courses')
+            print(course_matcher.deleted)
 
         if course_matcher.modified:
             modified = True
-            print 'Modified %d courses' % len(course_matcher.modified)
+            print('Modified %d courses' % len(course_matcher.modified))
 
         if not modified:
-            print 'Nothing modified. Bailing out.'
+            print('Nothing modified. Bailing out.')
             return
 
 
@@ -218,6 +221,7 @@ def update_term(term, roster_time):
 
     else:
         isbrandnew = True
+        print('New semester. Will be added.')
 
         for course in courses:
             previous_maxid += 1
@@ -230,11 +234,15 @@ def update_term(term, roster_time):
     }
 
 
+    print_nolf('Writing term database...')
     simplejson.dump(raw_data, open(os.path.join(config.AUDIT_DIR, 'raw_data', '%s_%d.json' % (term, roster_time)), 'wb'))
 
     simplejson.dump(term_db, open(os.path.join(ROOT, 'data', 'termdb_%s_%d.json' % (term, roster_time)), 'wb'))
+    print('Done.')
+
 
     if not isbrandnew:
+        print_nolf('Writing diff...')
         diff_db = {
             'roster' : {
                 'modified' : course_matcher.modified,
@@ -251,7 +259,7 @@ def update_term(term, roster_time):
         }
 
         simplejson.dump(diff_db, open(os.path.join(ROOT, 'data', 'diffs', 'diff_termdb_%s_%d_%d.json' % (term, previous_db['time'], roster_time)), 'wb'))
-
+        print('Done.')
 
     meta['generated_at'] = int(time.time())
     meta['roster_time'][term] = roster_time
@@ -263,9 +271,12 @@ def update_term(term, roster_time):
 
     course_id_max = previous_maxid
 
+
+    print_nolf('Writing index and course id...')
     persist_index()
     with open(course_id_path, 'w') as f:
         f.write(str(course_id_max))
+    print('Done.')
 
 
 # Backup first
@@ -283,29 +294,29 @@ for roster in rosters['rosters']:
     term = slug.lower()
 
     if term in config.OMIT_TERM:
-        print 'Omitting %s due to config' % (term)
+        print('Omitting %s due to config' % (term, ))
         continue
 
     roster_time = isotime_to_unix(roster['lastModifiedDttm'])
     if term not in config.FORCE_TERM:
         if roster['archiveMode'] == 'Y':
-            print 'Omitting %s: archive mode' % (term)
+            print('Omitting %s: archive mode' % (term, ))
             continue
 
         if roster_time <= meta['roster_time'].get(term, 0):
-            print 'Omitting %s: not modified' % (term)
+            print('Omitting %s: not modified' % (term, ))
             continue
 
-    print 'Updating term %s' % (term)
+    print('Updating term %s' % (term, ))
 
     try:
         update_term(term, roster_time=roster_time)
     except UpdateError as e:
         err_occurred = True
-        print 'Unable to update term %s: %s' % (term, str(e))
+        print('\nUnable to update term %s: %s' % (term, str(e)))
     except Exception:
         err_occurred = True
-        print 'Error in updating term %s' % term
+        print('\nError in updating term %s' % term)
         traceback.print_exc()
 
 if err_occurred:

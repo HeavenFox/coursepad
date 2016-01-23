@@ -1,6 +1,6 @@
 var Drop : any = require('drop');
 
-var user : any = require('../store/user.js');
+import user from '../store/user.ts';
 var schedulestorage : any = require('../store/schedulestorage.js');
 var modal : any = require('../utils/modal.js');
 

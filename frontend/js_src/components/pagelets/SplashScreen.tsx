@@ -3,7 +3,7 @@
  */
 var modal : any = require('../../utils/modal.js');
 
-var user : any = require('../../store/user.js');
+import user from '../../store/user.ts';
 var campaign : any = require('../../store/campaign.js');
 
 import * as ana from '../../analytics/analytics.ts';

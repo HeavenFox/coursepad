@@ -2,7 +2,7 @@ import EventEmitter from 'eventemitter3';
 import * as router from '../router.ts';
 import termdb from './termdb.ts';
 import {Schedule, MutableSchedule, SharedSchedule} from '../model/schedules.ts';
-var user = require('./user.js');
+import user from './user.ts';
 var localStore = require('../persist/localStorage.js');
 var schedulestorage : any = require('./schedulestorage.js');
 
