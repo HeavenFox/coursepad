@@ -11,5 +11,4 @@ deploy.sh
 *.pyc
 *.bak
 *sublime*
-typings
 *.log
