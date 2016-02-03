@@ -1,10 +1,10 @@
 {
   "name": "coursepad-frontend",
-  "version": "0.1.0",
+  "version": "3.0.0",
   "description": "CoursePad Front End",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
@@ -19,14 +19,12 @@
   "homepage": "https://github.com/HeavenFox/coursepad",
   "dependencies": {
     "cookies-js": "^1.1.0",
-    "drop": "CoursePad/drop#cp",
+    "tether-drop": "CoursePad/drop#cp",
     "event-emitter": "^0.3.1",
     "eventemitter3": "^1.1.1",
     "filesaver": "CoursePad/FileSaver.js#cp",
-    "flux": "^2.0.1",
-    "lodash": "^3.10.1",
-    "react": "^0.11.2",
-    "tether": "HubSpot/tether"
+    "lodash": "~4.1.0",
+    "tether": "~1.1.0"
   },
   "devDependencies": {
     "autoprefixer-core": "^4.0.1",
@@ -38,30 +36,23 @@
     "del": "^0.1.3",
     "gulp": "^3.8.8",
     "gulp-babel": "^5.1.0",
-    "gulp-eslint": "^0.15.0",
     "gulp-filter": "^2.0.0",
-    "gulp-jshint": "^1.9.0",
     "gulp-jsx": "^0.5.0",
     "gulp-minify-html": "^0.1.8",
     "gulp-postcss": "^3.0.0",
-    "gulp-react": "^2.0.0",
     "gulp-replace": "^0.5.4",
     "gulp-rev": "^2.0.1",
     "gulp-rev-collector": "^0.1.2",
-    "gulp-ruby-sass": "sindresorhus/gulp-ruby-sass#master",
+    "gulp-ruby-sass": "~2.0.0",
     "gulp-sourcemaps": "^1.2.8",
     "gulp-uglify": "^1.0.1",
     "gulp-util": "^3.0.1",
-    "jshint": "^2.5.10",
     "json-loader": "^0.5.1",
-    "jsx-loader": "^0.12.0",
     "karma": "^0.13.19",
     "karma-chrome-launcher": "^0.2.2",
     "karma-mocha": "^0.2.1",
     "karma-webpack": "^1.7.0",
     "mocha": "^2.3.4",
-    "regenerator": "HeavenFox/regenerator#no_funexpr",
-    "regenerator-loader": "git://github.com/CoursePad/regenerator-loader#cp",
     "ts-loader": "^0.7.2",
     "typescript": "^1.7.3",
     "uglify-js": "^2.4.15",

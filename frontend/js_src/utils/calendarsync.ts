@@ -1,4 +1,4 @@
-import saveAs from 'FileSaver.js';
+import saveAs from 'filesaver';
 import {getShortLocation} from '../consts/humanize.ts';
 import {authorize} from '../thirdparty/google.ts';
 import {promisify} from '../utils/promise.ts'

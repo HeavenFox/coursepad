@@ -1,4 +1,4 @@
-var saveAs = require('FileSaver.js');
+var saveAs = require('filesaver');
 
 exports.export = function() {
     var store = {localStorage: {}};

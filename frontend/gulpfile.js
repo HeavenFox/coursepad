@@ -104,11 +104,10 @@ gulp.task('js', function() {
 gulp.task('css', function() {
     var sassConf = {
         style: DEV ? 'nested' : 'compressed',
-        sourcemap: DEV ? 'none' : 'none'
+        sourcemap: DEV ? true : false
     };
 
-    return gulp.src('sass_src/**/*.scss')
-        .pipe(sass(sassConf))
+    return sass('sass_src/**/*.scss', sassConf)
         .pipe(postcss([autoprefixer({})]))
         .pipe(prod(rev()))
         .pipe(gulp.dest(target() + 'css/'))

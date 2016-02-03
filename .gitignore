@@ -1,6 +1,7 @@
 *.DS_Store
 *.map
 .sass-cache
+.vscode
 node_modules
 frontend/_build
 frontend/app/js/main.js

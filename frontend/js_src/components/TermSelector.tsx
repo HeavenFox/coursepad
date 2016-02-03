@@ -1,4 +1,4 @@
-var Drop : any = require('drop');
+var Drop : any = require('tether-drop');
 
 import * as meta from '../store/meta.ts';
 import termdb from '../store/termdb.ts';

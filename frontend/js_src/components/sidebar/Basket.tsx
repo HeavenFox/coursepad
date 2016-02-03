@@ -3,7 +3,7 @@ import {Schedule, MutableSchedule} from '../../model/schedules.ts';
 
 import * as ana from '../../analytics/analytics.ts';
 
-var Drop : any = require('drop');
+var Drop : any = require('tether-drop');
 
 interface SelectionIndicatorProps {
     selected: boolean;
