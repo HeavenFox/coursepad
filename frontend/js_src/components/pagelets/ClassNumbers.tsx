@@ -1,7 +1,7 @@
 import schedules from '../../store/schedules.ts';
 import {SECTION_TYPE_PRIORITIES} from '../../consts/humanize.ts';
 
-var modal : any = require('../../utils/modal.js');
+import * as modal from '../../utils/modal';
 
 var ClassNumbers = React.createClass({
     componentDidMount: function() {

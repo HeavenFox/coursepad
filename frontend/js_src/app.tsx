@@ -1,3 +1,5 @@
+// import 'babel-polyfill';
+
 import * as humanize from './consts/humanize.ts';
 
 import schedules from './store/schedules.ts';

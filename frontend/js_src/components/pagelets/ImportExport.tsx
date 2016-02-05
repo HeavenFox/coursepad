@@ -1,5 +1,4 @@
-
-var modal : any = require('../../utils/modal.js');
+import * as modal from '../../utils/modal';
 
 var importexport : any = require('../../utils/importexport.js');
 

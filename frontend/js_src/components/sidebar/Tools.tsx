@@ -1,6 +1,6 @@
 import ClassNumbers from '../pagelets/ClassNumbers.tsx';
 import ImportExport from '../pagelets/ImportExport.tsx';
-var modal : any = require('../../utils/modal.js');
+import * as modal from '../../utils/modal';
 
 var Tools = React.createClass({
     _showClassNumbers: function() {

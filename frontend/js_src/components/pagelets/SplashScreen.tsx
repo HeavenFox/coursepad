@@ -1,7 +1,4 @@
-/**
- * @jsx React.DOM
- */
-var modal : any = require('../../utils/modal.js');
+import * as modal from '../../utils/modal';
 
 import user from '../../store/user.ts';
 var campaign : any = require('../../store/campaign.js');

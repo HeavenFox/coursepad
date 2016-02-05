@@ -40,7 +40,7 @@ function webpack_conf() {
         // Target chrome
         babel_query = {
             optional: ['runtime', 'asyncToGenerator'],
-            blacklist: ['es6.constants', 'es6.classes', 'es6.blockScoping'],
+            blacklist: ['es6.constants', 'es6.classes', 'es6.blockScoping', 'es6.arrowFunctions'],
         }
     };
     var conf = {
@@ -56,6 +56,9 @@ function webpack_conf() {
         },
         ts: {
             configFileName: 'tsconfig.webpack.json'
+        },
+        resolve: {
+            extensions: ['', '.ts', '.tsx', '.js']
         },
         plugins: [
             new webpack.DefinePlugin({

@@ -2,7 +2,7 @@ var Drop : any = require('tether-drop');
 
 import user from '../store/user.ts';
 var schedulestorage : any = require('../store/schedulestorage.js');
-var modal : any = require('../utils/modal.js');
+import * as modal from '../utils/modal';
 
 interface UserAvatarProps {
     className?: string;

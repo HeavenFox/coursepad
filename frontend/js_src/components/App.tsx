@@ -5,6 +5,9 @@ import TermSelector from './TermSelector.tsx';
 import User from './User.tsx';
 import LeftBar from './LeftBar.tsx';
 
+import Modal from './app/Modal';
+
+
 export default class App extends React.Component<{}, {}> {
     render() {
         return <div>
@@ -40,12 +43,7 @@ export default class App extends React.Component<{}, {}> {
             <div className="clearboth"></div>
             </div>;
         <div className="loading hidden">Loading...</div>
-        <div className="modal-container hidden">
-            <div className="modal-backdrop"></div>
-            <div className="modal-window">
-                <div id="class-number-list"></div>
-            </div>
-        </div>
+        <Modal />
         </div>;
         
         
