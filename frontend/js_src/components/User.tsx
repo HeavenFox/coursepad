@@ -186,12 +186,12 @@ var User = React.createClass({
         if (this.state.user) {
             userName = this.state.user.name;
         }
-        return <div className="current-user-inner">
+        return <div id="current-user"><div className="current-user-inner">
             <span ref="trigger" className="btnish">
                 <UserAvatar className="topbar-user-icon" pic={this.state.user && this.state.user.profilePicture} />
                 <span className="current-user-name">{userName + ' \u25BE'}</span>
             </span>
-            </div>;
+            </div></div>;
     }
 });
 

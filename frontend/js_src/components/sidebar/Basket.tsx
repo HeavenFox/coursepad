@@ -1,5 +1,6 @@
 import schedules from '../../store/schedules.ts';
 import {Schedule, MutableSchedule} from '../../model/schedules.ts';
+import {Course, CourseComponent} from '../../model/course';
 
 import * as ana from '../../analytics/analytics.ts';
 
@@ -33,7 +34,6 @@ var Basket = React.createClass({
     componentWillUnmount: function() {
         schedules.off('readystatechange', this._onReadyStateChange);
         schedules.off('change', this._update);
-
     },
 
     _onReadyStateChange: function() {
@@ -129,29 +129,29 @@ var Basket = React.createClass({
     render: function() {
         var self = this;
         var clusters = null;
-        var currentSchedule = schedules.getCurrentSchedule();
+        let currentSchedule = schedules.getCurrentSchedule();
         if (currentSchedule) {
-            var selectedSections = currentSchedule.getSelectedSectionIdsHash();
-            var selectedCourses = currentSchedule.getSelectedCourseIdsHash();
+            let selectedSections = currentSchedule.getSelectedSectionIdsHash();
+            let selectedCourses = currentSchedule.getSelectedCourseIdsHash();
 
-            clusters = this.state.clusters.map(function(cluster) {
-                var number = cluster[0].getNumber();
-                var clusterItems = null;
-                var className = currentSchedule.getColorForCourse(cluster[0].subject, cluster[0].number);
+            clusters = (this.state.clusters as Course[][]).map((cluster) => {
+                let number = cluster[0].getNumber();
+                let clusterItems = null;
+                let className = currentSchedule.getColorForCourse(cluster[0].subject, cluster[0].number);
 
-                var clusterVisible = !this.state.hidden[number];
+                let clusterVisible = !this.state.hidden[number];
 
                 if (!clusterVisible) {
                     className += ' invisible';
                 }
 
-                function listOfSections(sections) {
-                    return sections.map(function(section) {
-                        return <div className="content level-2"><SelectionIndicator selected={selectedSections[section.number]} action={self._changeSectionTo.bind(null, section.number)} />{section.type + ' ' + section.sec}</div>
-                    }, this);
+                function listOfSections(sections: CourseComponent[]) {
+                    return sections.map((section) => <div className="content level-2" key={'S' + section.number}>
+                        <SelectionIndicator selected={selectedSections[section.number]} action={self._changeSectionTo.bind(null, section.number)} />{section.type + ' ' + section.sec}
+                    </div>, this);
                 }
 
-                if (this.state['expansion'][number]) {
+                if (this.state.expansion[number]) {
                     if (cluster.length === 1) {
                         var sections = cluster[0].getAllSections();
                         clusterItems = listOfSections(sections);
@@ -163,8 +163,7 @@ var Basket = React.createClass({
                             if (sections.length > 1) {
                                 sectionsDom = listOfSections(sections);
                             }
-                            return <div className="content level-2"><SelectionIndicator selected={selectedCourses[course.id]} action={self._changeCourseTo.bind(null, course)} />{course.subject + ' ' + course.number}{sectionsDom}</div>
-
+                            return <div className="content level-2" key={'C' + course.id}><SelectionIndicator selected={selectedCourses[course.id]} action={self._changeCourseTo.bind(null, course)} />{course.subject + ' ' + course.number}{sectionsDom}</div>
                         });
 
                     }
@@ -191,7 +190,7 @@ var Basket = React.createClass({
         return <div className="basket utilities-item">
             <h2>Basket</h2>
         {clusters}
-        </div>
+        </div>;
     }
 });
 

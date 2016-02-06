@@ -15,12 +15,8 @@ export default class App extends React.Component<{}, {}> {
         <header>
             <div id="logo"></div>
             <div id="topnav">
-                <div id="term-selector">
-                    <TermSelector />
-                </div>
-                <div id="current-user">
-                    <User />
-                </div>
+                <TermSelector />
+                <User />
             </div>
             <div id="topsearch">
                 <SearchBar />
@@ -37,12 +33,11 @@ export default class App extends React.Component<{}, {}> {
                 <div id="utilities">
                     <Sidebar />
                 </div>
-                <div className="clearboth"></div>
+                <div className="clearboth" />
                 <footer>&copy; CoursePad.me. Data Courtesy of Cornell University Registrar. <a href="/static/tos.html">Term of Service</a> - <a href="/static/privacy.html">Privacy Policy</a> - <a href="/static/ack.html">Acknowledgement</a></footer>
             </div>
-            <div className="clearboth"></div>
-            </div>;
-        <div className="loading hidden">Loading...</div>
+            <div className="clearboth" />
+        </div>
         <Modal />
         </div>;
         

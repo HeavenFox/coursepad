@@ -101,7 +101,7 @@ var TermSelector = React.createClass({
                 currentTermName += '...';
             }
         }
-        return <div><span ref="selector" className="btnish">{currentTermName} &#9662;</span></div>
+        return <div id="term-selector"><span ref="selector" className="btnish">{currentTermName} &#9662;</span></div>
     }
 });
 

@@ -25,7 +25,7 @@ var ClassNumbers = React.createClass({
     },
 
 
-    render: function() {
+    render() {
         var schedule = schedules.getCurrentSchedule();
 
         var courseLis;
@@ -46,27 +46,25 @@ var ClassNumbers = React.createClass({
                 sectionsByCourseIdAndType[course.id][section.type] = section;
             });
 
-            var courseIds = Object.keys(sectionsByCourseIdAndType).sort(function(a, b) {
-                return courseIdToCourseHash[a].getNumber().localeCompare(courseIdToCourseHash[b].getNumber());
-            })
+            let courseIds = Object.keys(sectionsByCourseIdAndType).sort(
+                (a, b) => courseIdToCourseHash[a].getNumber().localeCompare(courseIdToCourseHash[b].getNumber())
+            );
 
-            courseLis = courseIds.map(function(courseId) {
+            courseLis = courseIds.map((courseId) => {
                 var course = courseIdToCourseHash[courseId];
-                var sectionsLis = SECTION_TYPE_PRIORITIES.filter(function(type) {
-                    return sectionsByCourseIdAndType[courseId][type];
-                }).map(function(type) {
+                var sectionsLis = SECTION_TYPE_PRIORITIES.filter(type => sectionsByCourseIdAndType[courseId][type]).map((type) => {
                     var section = sectionsByCourseIdAndType[courseId][type];
-                    return <li>
+                    return <li key={section.number}>
                         <span className="class-number">{section.number}</span>
                         <span className="section-number">{section.type + ' ' + section.sec}</span>
-                    </li>
+                    </li>;
                 });
-                return <li>
+                return <li key={courseId}>
                     <p className="course-title">{course.getNumber() + ': ' + course.title}</p>
                     <ul className="classnumber-section-list">
                         {sectionsLis}
                     </ul>
-                </li>
+                </li>;
 
             });
         }
@@ -78,7 +76,7 @@ var ClassNumbers = React.createClass({
             <ul className="classnumber-course-list">
             {courseLis}
             </ul>
-        </div>
+        </div>;
 
 
         

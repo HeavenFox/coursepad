@@ -49,9 +49,7 @@ var MeetingDropoff = React.createClass({
         var classNames = 'mtdropoff mtdropoff-' + this.props['nbr'] + ' ' + this.getClassName();
         return <div className={classNames} style={style} ref="dropoff">
             <div className="mtdropoff-inner">
-            {meetings.map(function(item) {
-                return <p className="mtdropoff-time">{item}</p>;
-            })}
+            {meetings.map((item, idx) => <p key={idx} className="mtdropoff-time">{item}</p>)}
             <p className="mtdropoff-loc">{this.props['location']}</p>
             </div>
         </div>;
