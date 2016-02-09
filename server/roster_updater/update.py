@@ -4,8 +4,6 @@ import simplejson
 import subprocess
 import argparse
 import sys
-import glob
-import xml.etree.ElementTree as et
 import re
 import os
 import time
