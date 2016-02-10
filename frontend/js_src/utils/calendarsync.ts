@@ -153,7 +153,6 @@ async function syncEvents(components: CourseComponent[], terms) {
 			'privateExtendedProperty': `coursepad.term=${term}`,
 		});
 		const response = await promisify(request.execute, request);
-		console.log(response);
 
 		const needDelete = [], needAdd = [], needUpdate = {};
 		const getId = a => parseInt(a['extendedProperties']['private']['coursepad.classid'], 10);
@@ -218,7 +217,6 @@ async function syncEvents(components: CourseComponent[], terms) {
 			}, event));
 		})
 		let result = await batch;
-		console.log(result);
 	});
 	
 	await Promise.all(requestPromises);

@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3';
-import * as router from '../router.ts';
+import * as router from '../routes/router.ts';
 import termdb from './termdb.ts';
 import {Schedule, MutableSchedule, SharedSchedule} from '../model/schedules.ts';
 import user from './user.ts';

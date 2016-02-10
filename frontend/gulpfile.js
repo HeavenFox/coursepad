@@ -40,7 +40,7 @@ function webpack_conf() {
         // Target chrome
         babel_query = {
             optional: ['runtime', 'asyncToGenerator'],
-            blacklist: ['es6.constants', 'es6.classes', 'es6.blockScoping', 'es6.arrowFunctions'],
+            blacklist: ['es6.constants', 'es6.blockScoping', 'es6.arrowFunctions'],
         }
     };
     var conf = {

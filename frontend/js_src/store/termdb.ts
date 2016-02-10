@@ -120,7 +120,6 @@ function checkForUpdates() {
 
                     return Promise.all(diffPromises);
                 }).then(function(diffs) {
-                    console.log(diffs);
                     return {term: term_id, diffs: diffs};
                 }).then(null, function(e) {
                     console.warn('update check error', e);
