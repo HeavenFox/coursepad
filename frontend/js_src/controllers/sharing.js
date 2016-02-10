@@ -5,7 +5,7 @@ import schedules from '../store/schedules.ts';
 
 async function shareSchedule() {
     var curUser = user.getCurrentUser();
-    var curSchedule = schedule.getCurrentSchedule();
+    var curSchedule = schedules.getCurrentSchedule();
     if (!curUser) {
         throw new Error('Need Sign In');
     }

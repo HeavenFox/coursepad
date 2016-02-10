@@ -81,7 +81,7 @@ var Sharing = React.createClass({
 
         if (this.state.url) {
             url = <div>
-                <input value={this.state.url} />
+                <input defaultValue={this.state.url} readOnly={true} />
             </div>;
             social = <SocialNetworks url={this.state.url} />;
         }
@@ -89,7 +89,10 @@ var Sharing = React.createClass({
         return <div className="sharing utilities-item">
         <h2>Sharing</h2>
         <div className="sharing-inner">
-            {[shareButton, failureMessage, url, social]}
+            {shareButton}
+            {failureMessage}
+            {url}
+            {social}
         </div>
         </div>;
     }
