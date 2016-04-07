@@ -1,8 +1,7 @@
 from __future__ import division, print_function
 
+import gc
 import simplejson
-import subprocess
-import argparse
 import sys
 import re
 import os
@@ -113,8 +112,6 @@ def backup_data_index():
 
     open(os.path.join(rollback_path, 'track', 'course_id'), 'w').write(str(course_id_max))
 
-# def backup():
-#     subprocess.call(['tar', '-czf', os.path.join(config.BACKUP_DIR, 'data_' + time.strftime('%Y%m%d%H%M%S') + '.tar.gz'), config.ROSTER_DATA_DIR])
 
 def print_nolf(content):
     print(content, end='')
@@ -130,8 +127,8 @@ def update_term(term, roster_time):
     # subjectlist
     subjects = []
 
-    raw_data['subjects'] = make_api_call('config/subjects.json', {'roster': term.upper()})
-    for node in raw_data['subjects']['subjects']:
+    raw_data_subjects = make_api_call('config/subjects.json', {'roster': term.upper()})
+    for node in raw_data_subjects['subjects']:
         subjects.append({
             'sub' : node.get('value'),
             'desc' : node.get('descrformal')
@@ -149,11 +146,13 @@ def update_term(term, roster_time):
     for subj in subjects:
         sub = subj['sub']
         print_nolf("Getting " + sub + '...')
-        raw_data[sub] = make_api_call('search/classes.json', {'roster': term.upper(), 'subject': sub})
+        raw_data_subj = make_api_call('search/classes.json', {'roster': term.upper(), 'subject': sub})
 
-        for cls in raw_data[sub]['classes']:
+        for cls in raw_data_subj['classes']:
             course_parser.parse(cls)
         print('Done.')
+
+        gc.collect()
 
 
     courses = course_parser.courses
@@ -216,7 +215,6 @@ def update_term(term, roster_time):
         subject_matcher = SubjectMatcher()
         subject_matcher.match(previous_subjects, subjects)
 
-
     else:
         isbrandnew = True
         print('New semester. Will be added.')
@@ -224,6 +222,8 @@ def update_term(term, roster_time):
         for course in courses:
             previous_maxid += 1
             course['id'] = previous_maxid
+
+    gc.collect()
 
     term_db = {
         'subjects' : subjects,
@@ -233,7 +233,7 @@ def update_term(term, roster_time):
 
 
     print_nolf('Writing term database...')
-    simplejson.dump(raw_data, open(os.path.join(config.AUDIT_DIR, 'raw_data', '%s_%d.json' % (term, roster_time)), 'wb'))
+    # simplejson.dump(raw_data, open(os.path.join(config.AUDIT_DIR, 'raw_data', '%s_%d.json' % (term, roster_time)), 'wb'))
 
     simplejson.dump(term_db, open(os.path.join(ROOT, 'data', 'termdb_%s_%d.json' % (term, roster_time)), 'wb'))
     print('Done.')
@@ -269,6 +269,7 @@ def update_term(term, roster_time):
 
     course_id_max = previous_maxid
 
+    gc.collect()
 
     print_nolf('Writing index and course id...')
     persist_index()
