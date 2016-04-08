@@ -547,7 +547,7 @@ function conflicts(section1, section2) {
             if (m2.startTimeHrs === undefined) {
                 continue;
             }
-            if ((m1.pattern & m2.pattern) && (m1.endTimeHrs > m2.startTimeHrs) && (m1.startTimeHrs < m2.endTimeHrs)) {
+            if ((m1.pattern & m2.pattern) && (m1.endTimeHrs > m2.startTimeHrs) && (m1.startTimeHrs < m2.endTimeHrs) && (!m1.startDateMills || !m2.startDateMills || ((m1.endDateMills >= m2.startDateMills) && (m1.startDateMills <= m2.endDateMills)))) {
                 return true;
             }
         }

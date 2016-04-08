@@ -33,6 +33,13 @@ function addLeadingZero(num: number) {
     return num < 10 ? '0' + num : '' + num;
 }
 
+export function strToDateObject(str: string): Date {
+    const dm = dateRegex.exec(str);
+    if (!dm) return null;
+    
+    return new Date(+dm[3], +dm[1] - 1, +dm[2]);
+}
+
 export function toRFC(date, time) {
     let year, month, dom;
     if (date instanceof Date) {

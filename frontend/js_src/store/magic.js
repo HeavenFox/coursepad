@@ -8,6 +8,8 @@ function arrayForSection(section) {
             return {
                 startTimeHrs: meeting.startTimeHrs,
                 endTimeHrs: meeting.endTimeHrs,
+                startDateMills: +meeting.getStartDateObject(),
+                endDateMills: +meeting.getEndDateObject(),
                 pattern: meeting.pattern
             };
         })

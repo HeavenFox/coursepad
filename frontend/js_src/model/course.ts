@@ -1,4 +1,6 @@
 import {timeStringToHour} from '../utils/datetime.ts';
+import {strToDateObject} from '../utils/datetime';
+
 
 export class Meeting {
     parent: CourseComponent;
@@ -31,6 +33,14 @@ export class Meeting {
             this.endTimeHrs = timeStringToHour(this.endTime);
     
         this.parent = parent;
+    }
+    
+    getStartDateObject(): Date {
+        return strToDateObject(this.startDate);
+    }
+    
+    getEndDateObject(): Date {
+        return strToDateObject(this.endDate);
     }
     
     getAlternateMeetings() {

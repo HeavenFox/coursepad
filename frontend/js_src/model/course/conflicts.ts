@@ -1,35 +1,35 @@
-function conflicts(meetings1, meetings2) {
-    for (var i=0; i < meetings1.length; i++) {
-        var m1 = meetings1[i];
-        if (m1.startTimeHrs === undefined) {
-            continue;
-        }
-        for (var j=0; j < meetings2.length; j++) {
-            var m2 = meetings2[j];
-            if (m2.startTimeHrs === undefined) {
-                continue;
-            }
-            if ((m1.pattern & m2.pattern) && (m1.endTimeHrs > m2.startTimeHrs) && (m1.startTimeHrs < m2.endTimeHrs)) {
-                return true;
-            }
-        }
-    }
-    return false;
+import {Meeting} from '../course';
+
+function mayConflict(meeting: Meeting) {
+    return meeting.startTimeHrs !== undefined && meeting.endTimeHrs !== undefined;
 }
 
-export function conflictIntervals(meetings1, meetings2) {
-    var intervals = [];
-    for (var i=0; i < meetings1.length; i++) {
-        var m1 = meetings1[i];
-        if (m1.startTimeHrs === undefined) {
+function hasDate(meeting: Meeting) {
+    return meeting.endDate !== undefined && meeting.startDate !== undefined;
+}
+
+export function conflicts(m1: Meeting, m2: Meeting) {
+    return mayConflict(m1) && mayConflict(m2) && ((m1.pattern & m2.pattern)
+        && (m1.endTimeHrs > m2.startTimeHrs) && (m1.startTimeHrs < m2.endTimeHrs))
+        && (!(hasDate(m1) && hasDate(m2)) || ((m1.getEndDateObject() >= m2.getStartDateObject()) && (m1.getStartDateObject() <= m2.getEndDateObject())))
+}
+
+interface IConflictInterval {
+    pattern: number;
+    startTimeHrs: number;
+    endTimeHrs: number;
+}
+
+export function conflictIntervals(meetings1: Meeting[], meetings2: Meeting[]) {
+    let intervals: IConflictInterval[] = [];
+    for (let i=0; i < meetings1.length; i++) {
+        let m1 = meetings1[i];
+        if (!mayConflict(m1)) {
             continue;
         }
-        for (var j=0; j < meetings2.length; j++) {
-            var m2 = meetings2[j];
-            if (m2.startTimeHrs === undefined) {
-                continue;
-            }
-            if ((m1.pattern & m2.pattern) && (m1.endTimeHrs > m2.startTimeHrs) && (m1.startTimeHrs < m2.endTimeHrs)) {
+        for (let j=0; j < meetings2.length; j++) {
+            let m2 = meetings2[j];
+            if (conflicts(m1, m2)) {
                 intervals.push({
                     pattern: m1.pattern & m2.pattern,
                     startTimeHrs: Math.max(m1.startTimeHrs, m2.startTimeHrs),
