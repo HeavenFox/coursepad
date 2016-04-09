@@ -93,8 +93,7 @@ var Basket = React.createClass({
 
         drop = new Drop({
             target: e.target,
-            openOn: 'now',
-            destroy: true,
+            remove: true,
             position: 'bottom right',
             content: menu,
             constrainToWindow: true,
@@ -107,6 +106,8 @@ var Basket = React.createClass({
                 ]
             }
         });
+
+        drop.open();
     },
 
     _changeSectionTo: function(sectionId) {

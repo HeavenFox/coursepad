@@ -105,6 +105,10 @@ class ScheduleStore extends EventEmitter {
         this.emit('change', {by: by});
     }
 
+    hasWeekIntervals() {
+        return this._possibleWeekIntervals && this._possibleWeekIntervals.length > 0;
+    }
+
     getWeekIntervalMoments() {
         return [this._weekIntervalStartMoment, this._weekIntervalEndMoment];
     }
@@ -167,8 +171,9 @@ class ScheduleStore extends EventEmitter {
                 this._weekIntervalIndex = 0;
             } else {
                 this._setWeekIntervalIndex(this._possibleWeekIntervals.length - 1);
-
             }
+        } else {
+            this._setWeekIntervalIndex(this._weekIntervalIndex);
         }
 
         this.emit('change', v);

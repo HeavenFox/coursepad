@@ -106,12 +106,11 @@ var BasicInfo = React.createClass({
     render: function() {
         var conflict = null;
         if (this.state.conflicts) {
-            conflict = <div className="basic-info-conflict"
+            conflict = <div className={"basic-info-conflict" + (this.state.showConflicts ? ' showing' : '')}
                             onMouseOver={this._mouseoverConflict}
                             onMouseOut={this._hideConflictsIfNotPinned}
                             onClick={this._toggleAlwaysShowConflicts}>
-                                <p>Note: this schedule has conflicts</p>
-                                <p><small>{this.state['showConflicts'] ? 'Click to remove highlight' : 'Hover to highlight conflicts'}</small></p>
+                                <p>Conflict Schedule</p>
                         </div>
         }
 
@@ -125,7 +124,7 @@ var BasicInfo = React.createClass({
 
         let weekSelector = null;
 
-        if (schedules.ready) {
+        if (schedules.ready && schedules.hasWeekIntervals()) {
             weekSelector = <WeekSelector all={schedules.showAllWeeks()}
                                          hasNext={schedules.hasNext()} hasPrev={schedules.hasPrev()}
                                          startMoment={startMoment} endMoment={endMoment}
@@ -136,6 +135,7 @@ var BasicInfo = React.createClass({
 
         return <div className={"utilities-item basic-info-container" + (this.state.conflicts ? ' conflicts' : '') + (this.state.isMutable ? ' mutable' : '')}>
             {isSharing}
+            <div className="basic-info-fixh">
             <div className={"basic-info-stats" + (creditIsRange ? ' total-credit-range' : '')}>
             <div className="basic-info">
                 <p className={'basic-info-value total-credit'}>
@@ -155,10 +155,11 @@ var BasicInfo = React.createClass({
             </div>
             <div style={{clear: 'both'}} />
             </div>
-            {weekSelector}
             <div className="basic-info-conflict-container">
             {conflict}
             </div>
+            </div>
+            {weekSelector}
         </div>
     }
 });

@@ -119,7 +119,7 @@ export abstract class Schedule extends EventEmitter {
             timePoints.push(dateToMoment(meeting.endDate).add(1, 'w'));
         });
 
-        if (timePoints.length < 2) return null;
+        if (timePoints.length < 2) return [];
 
         timePoints.sort((a, b) => +a-b);
 
@@ -138,8 +138,6 @@ export abstract class Schedule extends EventEmitter {
             }
             last = point;
         });
-
-        if (result.length == 0) return null;
 
         return result;
     }
