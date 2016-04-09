@@ -3,13 +3,13 @@ import ModalAlert from '../components/app/ModalAlert';
 
 export function show(component: JSX.Element) {
     $('body').addClass('modal-open');
-    
+
     showModal.dispatch({content: component});
 }
 
 export function stop() {
     $('body').removeClass('modal-open');
-    
+
     hideModal.dispatch({});
 }
 

@@ -181,7 +181,7 @@ var Basket = React.createClass({
                     <div className="content-title" title={courseTitle}>{courseTitle}</div>
                     </div>
                     {clusterItems}
-                </div> 
+                </div>
 
             }, this);
         }

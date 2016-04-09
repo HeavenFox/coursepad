@@ -69,7 +69,7 @@ var SingleMeeting = React.createClass<SingleMeetingProps, {}>({
 
         var classNames = 'meeting ' + this.getClassName();
         if (this._mutable) {
-            classNames += ' mutable';   
+            classNames += ' mutable';
         }
         if (this.props.length > this.longMeetingThreshold) {
             classNames += ' meeting-long';

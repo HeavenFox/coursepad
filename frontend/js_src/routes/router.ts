@@ -1,14 +1,14 @@
 export abstract class RoutingRule {
     pattern: RegExp;
-    
+
     init(...matches): (void|Promise<void>) {
         return;
     }
-    
+
     push(...matches): (void|Promise<void>) {
         return;
     }
-    
+
     pop(): (void|Promise<void>) {
         return;
     }
@@ -36,7 +36,7 @@ export function route() {
             } else {
                 registry[i].push(...matches);
             }
-            
+
             current = registry[i];
             break;
         }

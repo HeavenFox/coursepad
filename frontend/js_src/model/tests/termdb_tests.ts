@@ -137,21 +137,21 @@ describe('LocalTermDatabase', function() {
     before(function() {
         indexeddb.setDatabase('coursepad_test');
     });
-    
+
     after(function() {
-        return indexeddb.close(); 
+        return indexeddb.close();
     });
-    
-    
+
+
     describe('applyUpdates', function() {
         beforeEach(function() {
             return LocalTermDatabase.loadTerm(testTerm, testData);
         });
-        
+
         afterEach(function() {
             return LocalTermDatabase.deleteTerm(testTerm);
         });
-        
+
         it('should be able to update courses', async function() {
             let db = new LocalTermDatabase(testTerm);
 
@@ -164,19 +164,19 @@ describe('LocalTermDatabase', function() {
                     "modified": [modifiedCourse]
                 }
             };
-            
+
             let updates = {
                 term: testTerm,
                 diffs: [diff]
             };
-            
+
             await db.applyUpdates(updates);
-            
+
             let expectedCourses = [modifiedCourse, addedCourse];
             let observedCourses = await indexeddb.queryAllByIndex('roster', 'term', IDBKeyRange.only(testTerm));
 
             expect(observedCourses).to.eql(expectedCourses);
-            
+
             let comparator = (a,b) => a['title'].localeCompare(b['title']);
             let storedIndex = await indexeddb.getByKey('title_typeahead_index', testTerm);
             let observedIndex = storedIndex['index'].sort(comparator);
@@ -186,17 +186,17 @@ describe('LocalTermDatabase', function() {
                     'title': course['sub'] + course['nbr'] + ': ' + course['title']
                 };
             }).sort(comparator);
-            
+
             expect(observedIndex).to.eql(expectedIndex);
         });
-        
+
         it('should be able to update subjects', async function() {
             let db = new LocalTermDatabase(testTerm);
 
             let diff = {
                 "prev_time": 0,
                 "time": 1,
-                "subjects": {    
+                "subjects": {
                     "deleted": ["SPAN"],
                     "added": [addedSubject],
                     "modified": [modifiedSubject]
@@ -206,15 +206,15 @@ describe('LocalTermDatabase', function() {
                 term: testTerm,
                 diffs: [diff]
             };
-            
+
             await db.applyUpdates(updates);
-            
+
             let expected = [modifiedSubject, testData.subjects[2], addedSubject];
             let observed = await indexeddb.queryAllByIndex('subjects', 'term', IDBKeyRange.only(testTerm));
 
             expect(observed).to.eql(expected);
         });
-        
+
         it('should allow chained updates', async function() {
             let db = new LocalTermDatabase(testTerm);
             let diffs = [
@@ -235,7 +235,7 @@ describe('LocalTermDatabase', function() {
                         "added": [],
                         "modified": [modifiedCourse2]
                     },
-                    "subjects": {    
+                    "subjects": {
                         "deleted": ["SPAN"],
                         "added": [addedSubject],
                         "modified": [modifiedSubject]
@@ -246,15 +246,15 @@ describe('LocalTermDatabase', function() {
                 term: testTerm,
                 diffs: diffs
             };
-            
+
             await db.applyUpdates(updates);
-            
-            
+
+
             let expectedCourses = [modifiedCourse2, addedCourse];
             let observedCourses = await indexeddb.queryAllByIndex('roster', 'term', IDBKeyRange.only(testTerm));
 
             expect(observedCourses).to.eql(expectedCourses);
-            
+
             let expectedSubjects = [modifiedSubject, testData.subjects[2], addedSubject];
             let observedSubjects = await indexeddb.queryAllByIndex('subjects', 'term', IDBKeyRange.only(testTerm));
 

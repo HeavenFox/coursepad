@@ -203,12 +203,12 @@ var LeftBar = React.createClass({
                         </li>);
             }
         }
-        
+
         return <div id="sidebar-inner" onMouseOver={this._onHover} onMouseOut={this._onOut}>
                     <h3>MY SCHEDULES</h3>
                     <ul className="schedule-listing">
                         {lis}
-                        
+
                     </ul>
 
         </div>;

@@ -4,7 +4,7 @@ import {strToDateObject} from '../utils/datetime';
 
 export class Meeting {
     parent: CourseComponent;
-    
+
     startTime: string;
     endTime: string;
     startDate: string;
@@ -13,10 +13,10 @@ export class Meeting {
     building: string;
     room: string;
     professors: string[];
-    
+
     startTimeHrs: number;
     endTimeHrs: number;
-    
+
     constructor(parent, obj) {
         this.startTime = obj['st'];
         this.endTime = obj['et'];
@@ -26,23 +26,23 @@ export class Meeting {
         this.building = obj['bldg'];
         this.room = obj['rm'];
         this.professors = obj['profs'];
-    
+
         if (this.startTime)
             this.startTimeHrs = timeStringToHour(this.startTime);
         if (this.endTime)
             this.endTimeHrs = timeStringToHour(this.endTime);
-    
+
         this.parent = parent;
     }
-    
+
     getStartDateObject(): Date {
         return strToDateObject(this.startDate);
     }
-    
+
     getEndDateObject(): Date {
         return strToDateObject(this.endDate);
     }
-    
+
     getAlternateMeetings() {
         var alternatives = [];
         var type = this.parent.type;
@@ -59,12 +59,12 @@ export class Meeting {
 
 export class CourseComponent {
     parent: Course;
-    
+
     number: number;
     sec: string;
     type: string;
     meetings: Meeting[];
-    
+
     constructor(parent : Course, type, obj) {
         this.number = obj['nbr'];
         this.sec = obj['sec'];
@@ -77,7 +77,7 @@ export class CourseComponent {
         } else {
             this.meetings = [];
         }
-        
+
     }
 }
 
@@ -92,7 +92,7 @@ export class Course {
     title: string;
     units: number[];
     sections: { [type: string] : CourseComponent[] };
-    
+
     constructor(obj, term) {
         this.term = term;
         this.id = obj['id'];

@@ -195,7 +195,7 @@ async function syncEvents(components: CourseComponent[], terms) {
 				[].push.apply(needAdd, events);
 			}
 		});
-		
+
 		let batch = gapi.client.newBatch();
 		needAdd.forEach(event => {
 			batch.add(gapi.client.calendar.events.insert({
@@ -218,7 +218,7 @@ async function syncEvents(components: CourseComponent[], terms) {
 		})
 		let result = await batch;
 	});
-	
+
 	await Promise.all(requestPromises);
 }
 

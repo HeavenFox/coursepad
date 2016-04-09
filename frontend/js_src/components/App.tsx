@@ -40,8 +40,8 @@ export default class App extends React.Component<{}, {}> {
         </div>
         <Modal />
         </div>;
-        
-        
 
-    }   
+
+
+    }
 }

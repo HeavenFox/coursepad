@@ -10,16 +10,16 @@ const DEBUG = (LEVEL == 1);
 
 export abstract class TermDatabase extends EventEmitter {
     term: string;
-    
+
     constructor(term) {
         super();
         this.term = term;
     }
-    
+
     abstract getBasket(basket: string[]) : Promise<Course[][]>;
     abstract getCoursesBySubjectAndNumber(subject: string, number: number) : Promise<Course[]>;
     abstract searchByKeyword(keywords: string);
-    
+
     searchIn(toSearch, keywords) {
         var results = [];
         var i, j;
@@ -45,9 +45,9 @@ export abstract class TermDatabase extends EventEmitter {
                         lastSegment = [position, position + curTerm.length];
                         segments.push(lastSegment);
                     }
-    
+
                     lastLocation = position + curTerm.length;
-    
+
                 }
             }
             if (found) {
@@ -59,7 +59,7 @@ export abstract class TermDatabase extends EventEmitter {
         results.sort(function(a,b) {
             return (a.segments[0][0] - b.segments[0][0]) || a.title.localeCompare(b.title);
         });
-    
+
         return results;
     }
 }
@@ -71,29 +71,29 @@ interface ITermDBUpdates {
 
 export class LocalTermDatabase extends TermDatabase {
     titleIndex: any;
-    
+
     async getBasket(basket) {
         let clusters = await Promise.all(basket.map((c) => {
             var split = c.split(' ');
             if (split.length != 2) {
                     return null;
             }
-            return this.getCoursesBySubjectAndNumber(split[0], +split[1]); 
+            return this.getCoursesBySubjectAndNumber(split[0], +split[1]);
         }));
-        
+
         return clusters.filter((cluster) => Array.isArray(cluster) && cluster.length > 0);
     }
-    
-        
+
+
     /**
     * @param {String} keywords
     * @return {Promise}
-    */ 
+    */
     searchByKeyword(keywords) {
         var results = this.searchIn(this.titleIndex, keywords);
         return Promise.resolve(results);
     }
-    
+
     setTitleIndex(index) {
         this.titleIndex = [];
         index.index.forEach(function(item) {
@@ -101,14 +101,14 @@ export class LocalTermDatabase extends TermDatabase {
             this.titleIndex.push(item);
         }, this);
     }
-    
+
     async getCoursesBySubjectAndNumber(subject, number) {
         let courses = await indexeddb.queryAllByIndex('roster', 'course', IDBKeyRange.only([this.term, subject, number]))
         courses = courses.map(c => new Course(c, this.term));
-    
+
         return courses;
     }
-    
+
     static async deleteTerm(term: string) {
         await Promise.all([
             indexeddb.cursorByIndex('roster', 'term', IDBKeyRange.only(term), (cursor) => {
@@ -118,12 +118,12 @@ export class LocalTermDatabase extends TermDatabase {
                 cursor.delete();
             }, 'readwrite'),
             indexeddb.deleteRecord('title_typeahead_index', term)
-        ]);        
+        ]);
     }
-    
+
     static async loadTerm(term: string, data: any) {
         await this.deleteTerm(term);
-        
+
         let titleHash = Object.create(null);
 
         await indexeddb.queryObjectStore('roster', function(rosterStore) {
@@ -140,7 +140,7 @@ export class LocalTermDatabase extends TermDatabase {
                 }
             }
         }, 'readwrite');
-        
+
         await indexeddb.queryObjectStore('subjects', function(subjectsStore) {
             if (data.subjects) {
                 for (var i=0; i < data.subjects.length; i++) {
@@ -152,7 +152,7 @@ export class LocalTermDatabase extends TermDatabase {
                 }
             }
         }, 'readwrite');
-           
+
         let obj = {term: term, index: []};
         for (let title in titleHash) {
             obj.index.push({
@@ -162,7 +162,7 @@ export class LocalTermDatabase extends TermDatabase {
         }
         await indexeddb.add('title_typeahead_index', obj);
     }
-    
+
     async _applyDiff(termId, diff) {
         if (diff['roster']) {
             let rosterDiff = diff['roster'];
@@ -251,25 +251,25 @@ export class LocalTermDatabase extends TermDatabase {
         // Set local storage
         meta.addLocalTerm(termId, diff.time);
     }
-    
+
     async applyUpdates(updates: ITermDBUpdates) {
         if (updates.term != this.term) {
             return false;
         }
         let termId = updates.term;
         this.titleIndex = [];
-    
+
         let titleIndexKeysToDelete = [];
         await indexeddb.deleteRecord('title_typeahead_index', termId);
-    
+
         for (let i=0; i < updates.diffs.length; i++) {
             await this._applyDiff(termId, updates.diffs[i]);
         }
-    
+
         // Rebuild Index
         var indexHash = Object.create(null);
         var index = {term: termId, index: []};
-    
+
         await indexeddb.queryObjectStore('roster', function(rosterStore) {
             rosterStore.index('term').openCursor(IDBKeyRange.only(termId)).onsuccess = function(e) {
                 var cursor = (<IDBRequest>e.target).result;
@@ -306,22 +306,22 @@ export class RemoteTermDatabase extends TermDatabase {
             return [];
         });
     }
-    
+
     async getBasket(classNumbers) {
         var classes = classNumbers.join('|');
-    
+
         let basket = await ajax.getJson(endpoints.termdbBasket(this.term, classes));
-    
+
         basket.forEach(cluster => {
             cluster.forEach((c, i) => {
                 cluster[i] = new Course(c, this.term);
             });
         });
-    
+
         return basket;
-    
+
     }
-    
+
     searchByKeyword(keywords) {
         var self = this;
         return ajax.getJson(endpoints.termdbSearch(this.term, keywords)).then(function(toSearch) {

@@ -27,7 +27,7 @@ class WeekSelector extends React.Component<WeekSelectorProps, any> {
                     </div>;
         }
         let allButton = <div className={'week-selector-btn all-btn' + (this.props.all ? '' : ' unselected')} onClick={this.props.all ? undefined : e => this.props.enableAll(true)}>ALL</div>;
-        
+
         let weekClickable = this.props.all && this.props.startMoment && this.props.endMoment;
         let weekButton = <div className={'week-selector-btn week-btn' + (this.props.all ? ' unselected' : '') + (weekClickable ? ' clickable' : '')} onClick={weekClickable ? e => this.props.enableAll(false) : undefined}>
                 <div className={"prev-week" + (this.props.hasPrev ? ' enabled' : ' disabled')} onClick={this.props.hasPrev && !weekClickable ? this.props.move.bind(null, -1) : noop}>&#9664;</div>
@@ -118,13 +118,13 @@ var BasicInfo = React.createClass({
         var isSharing = this.state.isSharing ? <h2>Shared Schedule</h2> : null;
 
         var creditIsRange = this.state['units'][0] != this.state['units'][1];
-        
+
         let startMoment, endMoment;
         [startMoment, endMoment] = schedules.getWeekIntervalMoments();
         if (endMoment) endMoment = moment(endMoment).subtract(1, 'd');
-        
+
         let weekSelector = null;
-        
+
         if (schedules.ready) {
             weekSelector = <WeekSelector all={schedules.showAllWeeks()}
                                          hasNext={schedules.hasNext()} hasPrev={schedules.hasPrev()}
@@ -132,8 +132,8 @@ var BasicInfo = React.createClass({
                                          move={ schedules.moveWeek.bind(schedules) }
                                          enableAll={ schedules.setShowAllWeeks.bind(schedules) } />;
         }
-        
-        
+
+
         return <div className={"utilities-item basic-info-container" + (this.state.conflicts ? ' conflicts' : '') + (this.state.isMutable ? ' mutable' : '')}>
             {isSharing}
             <div className={"basic-info-stats" + (creditIsRange ? ' total-credit-range' : '')}>

@@ -43,7 +43,7 @@ export function addLocalTerm(term, time) {
 
 export async function getRemoteTerms(noCache = false) {
     let data = await getRemoteMeta(noCache);
-    
+
     return data.roster_time;
 }
 

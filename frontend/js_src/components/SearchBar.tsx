@@ -60,7 +60,7 @@ var SearchBar = React.createClass({
             source: this.dataSource,
             select: function(event, ui) {
                 let schedule = schedules.getCurrentSchedule() as MutableSchedule;
-                
+
                 schedule.addCourse(ui.item.course[0], ui.item.course[1]);
             }
         }).autocomplete("instance")._renderItem = this.renderItem;

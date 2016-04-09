@@ -69,7 +69,7 @@ var ClassNumbers = React.createClass({
             });
         }
 
-        
+
 
         return <div className="classnumber-list">
             <h2>Class Numbers <span className="clickable modal-close" onClick={modal.stop}>&#x2716;</span></h2>
@@ -79,7 +79,7 @@ var ClassNumbers = React.createClass({
         </div>;
 
 
-        
+
     }
 });
 

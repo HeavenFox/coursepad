@@ -16,7 +16,7 @@ const NO_PREFERENCE = 3;
 class ScheduleStore extends EventEmitter {
     ready: boolean;
     currentSchedule: Schedule;
-    
+
     private _weekIntervalStartMoment;
     private _weekIntervalEndMoment;
     private _possibleWeekIntervals: WeekInterval[];
@@ -47,7 +47,7 @@ class ScheduleStore extends EventEmitter {
                     return false;
                 }
             }
-            
+
             self.ready = false;
             self.emit('readystatechange', false);
         }
@@ -66,7 +66,7 @@ class ScheduleStore extends EventEmitter {
         await schedulestorage.getStorage().loadSchedule(schedule);
 
         self._setCurrentSchedule(schedule);
-        
+
         this._possibleWeekIntervals = schedule.getVisibleWeekIntervals();
         this._setShowAllWeeks(true);
         this._setWeekIntervalIndex(0);
@@ -104,43 +104,43 @@ class ScheduleStore extends EventEmitter {
 
         this.emit('change', {by: by});
     }
-    
+
     getWeekIntervalMoments() {
         return [this._weekIntervalStartMoment, this._weekIntervalEndMoment];
     }
-    
+
     setWeekIntervalIndex(index: number) {
         this._setWeekIntervalIndex(index);
         this.emit('change');
     }
-    
+
     showAllWeeks() {
         return this._showAllWeeks;
     }
-    
+
     moveWeek(shift: number) {
         this.setWeekIntervalIndex(this._weekIntervalIndex + shift);
     }
-    
+
     hasNext() {
         if (!this._possibleWeekIntervals) return false;
         return this._weekIntervalIndex < this._possibleWeekIntervals.length - 1;
     }
-    
+
     hasPrev() {
         if (!this._possibleWeekIntervals) return false;
         return this._weekIntervalIndex > 0;
     }
-    
+
     setShowAllWeeks(show: boolean) {
         this._setShowAllWeeks(show);
         this.emit('change');
     }
-    
+
     private _setShowAllWeeks(show: boolean) {
         this._showAllWeeks = show;
     }
-    
+
     private _setWeekIntervalIndex(index: number) {
         this._weekIntervalIndex = index;
         let interval = this._possibleWeekIntervals[index];
@@ -157,7 +157,7 @@ class ScheduleStore extends EventEmitter {
         this.currentSchedule = schedule;
         schedule.on('change', this._onScheduleChange);
     }
-    
+
     _onScheduleChange = (v) => {
         // Update current interval
         this._possibleWeekIntervals = this.currentSchedule.getVisibleWeekIntervals();
@@ -167,10 +167,10 @@ class ScheduleStore extends EventEmitter {
                 this._weekIntervalIndex = 0;
             } else {
                 this._setWeekIntervalIndex(this._possibleWeekIntervals.length - 1);
-                
+
             }
         }
-        
+
         this.emit('change', v);
     }
 
@@ -178,14 +178,14 @@ class ScheduleStore extends EventEmitter {
         if (!this.ready) { return null; }
         return this.currentSchedule;
     }
-    
+
     getVisibleMeetings(): Meeting[] {
         return this.currentSchedule.getVisibleMeetings().filter(meeting => {
             if (this._showAllWeeks) return true;
-            
+
             let startMoment = moment(meeting.getStartDateObject());
             let endMoment = moment(meeting.getEndDateObject());
-            
+
             return endMoment.isSameOrAfter(this._weekIntervalStartMoment) && startMoment.isBefore(this._weekIntervalEndMoment);
         });
     }

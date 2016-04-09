@@ -8,7 +8,7 @@ import schedules from '../store/schedules.ts';
 
 class RootRoute extends RoutingRule {
     pattern = /\/$/;
-    
+
     async init() {
         welcome();
         let term = meta.getSelectedTerm();
@@ -18,10 +18,10 @@ class RootRoute extends RoutingRule {
             let data = humanize.sortTerms(Object.keys(terms), true);
             term = data[0];
         }
-    
+
         await termdb.setCurrentTerm(term, termdb.PREFER_FASTER);
     }
-    
+
     async push() {
         var currentScheduleIndex = meta.getScheduleIndex() || 0;
         await schedules.setCurrentSchedule(undefined, currentScheduleIndex);

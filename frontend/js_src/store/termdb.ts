@@ -134,35 +134,35 @@ function checkForUpdates() {
 
 class TermDBStore extends EventEmitter {
     ready: boolean;
-    
+
     PREFER_REMOTE: DBPreference;
     PREFER_FASTER: DBPreference;
-    
+
     constructor() {
         super();
         this.PREFER_REMOTE = DBPreference.PREFER_REMOTE;
         this.PREFER_FASTER = DBPreference.PREFER_FASTER;
     }
-    
+
     getCurrentTerm(): TermDatabase {
         return currentTermDB;
     }
-    
+
     async setCurrentTerm(term, preference = undefined) {
         if (preference === undefined) {
             preference = currentPreference;
         }
-    
+
         if (preference === currentPreference && currentTermDB !== null && currentTermDB.term === term) {
             return false
         }
-    
+
         this.ready = false;
         this.emit('readystatechange');
-    
+
         // Use Remote Term to reduce latency
         currentTermDB = this.getRemoteTerm(term);
-    
+
         if (useLocal() && preference === DBPreference.PREFER_FASTER) {
             if (localTermDownloaded(term)) {
                 // Downloaded, so we can just use it
@@ -173,27 +173,27 @@ class TermDBStore extends EventEmitter {
                 downloadLocalTerm(term);
             }
         }
-    
-    
+
+
         meta.setSelectedTerm(term);
         this.ready = true;
         this.emit('readystatechange');
     }
-    
-    
+
+
     getRemoteTerm(term) {
         var db = new RemoteTermDatabase(term);
-    
+
         return db;
     }
-    
+
     async checkForUpdates() {
         let result = await checkForUpdates()
         if (result !== false) {
             this.emit('updateAvailable', result);
         }
     }
-    
+
 }
 
 

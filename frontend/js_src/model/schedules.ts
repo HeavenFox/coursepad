@@ -52,7 +52,7 @@ export abstract class Schedule extends EventEmitter {
         this.clear();
         this.term = term;
     }
-    
+
     clear(): void {
         this.colorMapping = {};
 
@@ -107,26 +107,26 @@ export abstract class Schedule extends EventEmitter {
 
         return meetings;
     }
-    
+
     getVisibleWeekIntervals(): WeekInterval[] {
         let timePoints = [];
         function dateToMoment(str: string) {
             return moment(str, 'MM/DD/YYYY').isoWeekday(1);
         }
-        
+
         this.getVisibleMeetings().forEach(meeting => {
             timePoints.push(dateToMoment(meeting.startDate));
             timePoints.push(dateToMoment(meeting.endDate).add(1, 'w'));
         });
-        
+
         if (timePoints.length < 2) return null;
-        
+
         timePoints.sort((a, b) => +a-b);
-        
+
         let result: WeekInterval[] = [];
-        
+
         let last = null;
-        
+
         timePoints.forEach(point => {
             if (last != null && !point.isSame(last)) {
                 result.push({
@@ -138,9 +138,9 @@ export abstract class Schedule extends EventEmitter {
             }
             last = point;
         });
-        
+
         if (result.length == 0) return null;
-        
+
         return result;
     }
 
@@ -248,8 +248,8 @@ export abstract class Schedule extends EventEmitter {
                 if (!meeting.startTime || !meeting.endTime) {
                     return;
                 }
-                totalHours += datetime.bitmaskToDay(meeting.pattern).length * 
-                                (datetime.timeStringToHour(meeting.endTime) - 
+                totalHours += datetime.bitmaskToDay(meeting.pattern).length *
+                                (datetime.timeStringToHour(meeting.endTime) -
                                 datetime.timeStringToHour(meeting.startTime));
 
             });
@@ -318,7 +318,7 @@ export abstract class Schedule extends EventEmitter {
         if (serialized.uniqueId) this.uniqueId = serialized.uniqueId;
 
         var basket = serialized.basket ? serialized.basket.slice() : [];
-            
+
         var clusters = await this.getTermDB().getBasket(basket);
         this.basket = clusters;
 
@@ -389,7 +389,7 @@ export abstract class Schedule extends EventEmitter {
         clusters.forEach(function(cluster) {
             hasSection[cluster[0].getNumber()] = {};
         });
-        
+
         this.sections = sections.map(function(sectionId) {
             for (var i=0; i < clusters.length; i++) {
                 for (var j=0; j < clusters[i].length; j++) {
@@ -490,7 +490,7 @@ export class MutableSchedule extends Schedule {
                     break;
                 }
             }
-            
+
             if (fromIndex === this.sections.length) {
                 // Find from courses in the cluster
                 var fromCourse = null;
@@ -689,7 +689,7 @@ export class MutableSchedule extends Schedule {
             return this;
         } else {
             let courses = await this.getTermDB().getCoursesBySubjectAndNumber(subject, number);
-            
+
             self._addCluster(courses);
 
             self.persistSections();
