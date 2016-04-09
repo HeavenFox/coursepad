@@ -1,7 +1,9 @@
 import EventEmitter from 'eventemitter3';
+import moment from 'moment';
 import * as router from '../routes/router.ts';
 import termdb from './termdb.ts';
-import {Schedule, MutableSchedule, SharedSchedule} from '../model/schedules.ts';
+import {Schedule, MutableSchedule, SharedSchedule, WeekInterval} from '../model/schedules.ts';
+import {Meeting} from '../model/course';
 import user from './user.ts';
 var localStore = require('../persist/localStorage.js');
 var schedulestorage : any = require('./schedulestorage.js');
@@ -14,6 +16,12 @@ const NO_PREFERENCE = 3;
 class ScheduleStore extends EventEmitter {
     ready: boolean;
     currentSchedule: Schedule;
+    
+    private _weekIntervalStartMoment;
+    private _weekIntervalEndMoment;
+    private _possibleWeekIntervals: WeekInterval[];
+    private _weekIntervalIndex: number;
+    private _showAllWeeks: boolean;
 
     __onScheduleChange: Function;
 
@@ -58,6 +66,10 @@ class ScheduleStore extends EventEmitter {
         await schedulestorage.getStorage().loadSchedule(schedule);
 
         self._setCurrentSchedule(schedule);
+        
+        this._possibleWeekIntervals = schedule.getVisibleWeekIntervals();
+        this._setShowAllWeeks(true);
+        this._setWeekIntervalIndex(0);
 
         self.ready = true;
         self.emit('readystatechange', true);
@@ -92,22 +104,90 @@ class ScheduleStore extends EventEmitter {
 
         this.emit('change', {by: by});
     }
+    
+    getWeekIntervalMoments() {
+        return [this._weekIntervalStartMoment, this._weekIntervalEndMoment];
+    }
+    
+    setWeekIntervalIndex(index: number) {
+        this._setWeekIntervalIndex(index);
+        this.emit('change');
+    }
+    
+    showAllWeeks() {
+        return this._showAllWeeks;
+    }
+    
+    moveWeek(shift: number) {
+        this.setWeekIntervalIndex(this._weekIntervalIndex + shift);
+    }
+    
+    hasNext() {
+        if (!this._possibleWeekIntervals) return false;
+        return this._weekIntervalIndex < this._possibleWeekIntervals.length - 1;
+    }
+    
+    hasPrev() {
+        if (!this._possibleWeekIntervals) return false;
+        return this._weekIntervalIndex > 0;
+    }
+    
+    setShowAllWeeks(show: boolean) {
+        this._setShowAllWeeks(show);
+        this.emit('change');
+    }
+    
+    private _setShowAllWeeks(show: boolean) {
+        this._showAllWeeks = show;
+    }
+    
+    private _setWeekIntervalIndex(index: number) {
+        this._weekIntervalIndex = index;
+        let interval = this._possibleWeekIntervals[index];
+        if (interval) {
+            this._weekIntervalStartMoment = moment(`${interval.startYear}-${interval.startWeek}-1`, 'GGGG-W-E');
+            this._weekIntervalEndMoment = moment(`${interval.endYear}-${interval.endWeek}-1`, 'GGGG-W-E');
+        } else {
+            this._weekIntervalStartMoment = null;
+            this._weekIntervalEndMoment = null;
+        }
+    }
 
     _setCurrentSchedule(schedule) {
         this.currentSchedule = schedule;
-        schedule.on('change', this._getOnScheduleChange());
+        schedule.on('change', this._onScheduleChange);
     }
-
-    _getOnScheduleChange() {
-        var self = this;
-        return this.__onScheduleChange || (this.__onScheduleChange = function(v) {
-            self.emit('change', v);
-        });
+    
+    _onScheduleChange = (v) => {
+        // Update current interval
+        this._possibleWeekIntervals = this.currentSchedule.getVisibleWeekIntervals();
+        if (this._weekIntervalIndex >= this._possibleWeekIntervals.length) {
+            if (this._possibleWeekIntervals.length === 0) {
+                this._setShowAllWeeks(true);
+                this._weekIntervalIndex = 0;
+            } else {
+                this._setWeekIntervalIndex(this._possibleWeekIntervals.length - 1);
+                
+            }
+        }
+        
+        this.emit('change', v);
     }
 
     getCurrentSchedule() {
         if (!this.ready) { return null; }
         return this.currentSchedule;
+    }
+    
+    getVisibleMeetings(): Meeting[] {
+        return this.currentSchedule.getVisibleMeetings().filter(meeting => {
+            if (this._showAllWeeks) return true;
+            
+            let startMoment = moment(meeting.getStartDateObject());
+            let endMoment = moment(meeting.getEndDateObject());
+            
+            return endMoment.isSameOrAfter(this._weekIntervalStartMoment) && startMoment.isBefore(this._weekIntervalEndMoment);
+        });
     }
 
     _onTermDBChange() {

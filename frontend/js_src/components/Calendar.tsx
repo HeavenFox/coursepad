@@ -51,7 +51,7 @@ var Calendar = React.createClass({
     },
 
     _onScheduleChange: function() {
-        this.setSchedule(schedules.getCurrentSchedule());
+        this.setSchedule(schedules.getVisibleMeetings(), schedules.getCurrentSchedule());
     },
 
     _onDragStartHandler: function(meeting) {
@@ -113,9 +113,7 @@ var Calendar = React.createClass({
         return singleMeetings;
     },
 
-    setSchedule: function(schedule) {
-        var meetings = schedule.getVisibleMeetings();
-        
+    setSchedule: function(meetings, schedule) {
         var singleMeetings = this._splitMeetings(meetings);
 
         singleMeetings.forEach(function(meeting) {

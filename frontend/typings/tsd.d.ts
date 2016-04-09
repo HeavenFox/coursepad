@@ -19,3 +19,5 @@
 /// <reference path="lodash/lodash.d.ts" />
 /// <reference path="twitter/twitter.d.ts" />
 /// <reference path="FileSaver/FileSaver.d.ts" />
+/// <reference path="moment/moment-node.d.ts" />
+/// <reference path="moment/moment.d.ts" />

@@ -75,6 +75,76 @@
     font-size: 0.7em;
 }
 
+//-------------------------------------------
+// Week Selector
+//-------------------------------------------
+.week-selector {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    
+    margin: 10px 5px 20px 10px;
+}
+
+.week-selector-btn {
+    border: 1px solid #979797;
+    border-radius: 4px;
+    font-size: 12px;
+    height: 20px;
+    color: #6C6C6C;
+    @include no-user-interaction;
+}
+
+.week-selector-btn.unselected {
+    opacity: 0.4;
+    cursor: pointer;
+}
+
+.all-btn {
+    font-weight: 500;
+    padding: 0 7px;
+    margin-right: 5px;
+    line-height: 20px;
+}
+
+.week-btn {
+    flex-grow: 1;
+    
+    display: flex;
+    align-items: center;
+}
+
+.week-btn .current-week {
+    flex-grow: 1;
+    text-align: center;
+}
+
+.prev-week, .next-week {
+    font-size: 8px;
+    padding: 4px 5px;
+    vertical-align: middle;
+    color: #979797;
+}
+
+.prev-week.disabled, .next-week.disabled {
+    color: #E3E3E3;
+}
+
+.prev-week.enabled, .next-week.enabled {
+    cursor: pointer;
+}
+
+@media (min-width: #{$small-screen-cutoff}) {
+    .dateinterval-short {
+        display: none;
+    }
+}
+@media (max-width: #{$small-screen-cutoff}) {
+    .dateinterval-long {
+        display: none;
+    }
+}
+
 
 .utilities-item > h2 {
     text-transform: uppercase;

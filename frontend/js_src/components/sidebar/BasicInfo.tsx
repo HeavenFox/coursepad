@@ -1,7 +1,42 @@
 import schedules from '../../store/schedules.ts';
 import {SharedSchedule, MutableSchedule} from '../../model/schedules.ts';
+import moment from 'moment';
 
 import * as ana from '../../analytics/analytics.ts';
+
+interface WeekSelectorProps {
+    all: boolean;
+    startMoment?: any;
+    endMoment?: any;
+    hasNext: boolean;
+    hasPrev: boolean;
+    move: Function;
+    enableAll: Function;
+}
+
+class WeekSelector extends React.Component<WeekSelectorProps, any> {
+    render() {
+        let noop = (e) => {}
+        const shortDateFormat = 'MM/DD';
+        const longDateFormat = 'MMM D, YYYY';
+        let dates = <div className="dateinterval">-</div>;
+        if (this.props.startMoment && this.props.endMoment) {
+            dates = <div className="dateinterval">
+                        <div className="dateinterval-long">{this.props.startMoment.format(longDateFormat) + ' - ' + this.props.endMoment.format(longDateFormat)}</div>
+                        <div className="dateinterval-short">{this.props.startMoment.format(shortDateFormat) + ' - ' + this.props.endMoment.format(shortDateFormat)}</div>
+                    </div>;
+        }
+        let allButton = <div className={'week-selector-btn all-btn' + (this.props.all ? '' : ' unselected')} onClick={this.props.all ? undefined : e => this.props.enableAll(true)}>ALL</div>;
+        
+        let weekClickable = this.props.all && this.props.startMoment && this.props.endMoment;
+        let weekButton = <div className={'week-selector-btn week-btn' + (this.props.all ? ' unselected' : '') + (weekClickable ? ' clickable' : '')} onClick={weekClickable ? e => this.props.enableAll(false) : undefined}>
+                <div className={"prev-week" + (this.props.hasPrev ? ' enabled' : ' disabled')} onClick={this.props.hasPrev && !weekClickable ? this.props.move.bind(null, -1) : noop}>&#9664;</div>
+                <div className="current-week">{dates}</div>
+                <div className={"next-week" + (this.props.hasNext ? ' enabled' : ' disabled')} onClick={this.props.hasNext && !weekClickable ? this.props.move.bind(null, 1) : noop}>&#9654;</div>
+            </div>;
+        return <div className="week-selector">{allButton}{weekButton}</div>;
+    }
+}
 
 var BasicInfo = React.createClass({
     componentWillMount: function() {
@@ -83,6 +118,22 @@ var BasicInfo = React.createClass({
         var isSharing = this.state.isSharing ? <h2>Shared Schedule</h2> : null;
 
         var creditIsRange = this.state['units'][0] != this.state['units'][1];
+        
+        let startMoment, endMoment;
+        [startMoment, endMoment] = schedules.getWeekIntervalMoments();
+        if (endMoment) endMoment = moment(endMoment).subtract(1, 'd');
+        
+        let weekSelector = null;
+        
+        if (schedules.ready) {
+            weekSelector = <WeekSelector all={schedules.showAllWeeks()}
+                                         hasNext={schedules.hasNext()} hasPrev={schedules.hasPrev()}
+                                         startMoment={startMoment} endMoment={endMoment}
+                                         move={ schedules.moveWeek.bind(schedules) }
+                                         enableAll={ schedules.setShowAllWeeks.bind(schedules) } />;
+        }
+        
+        
         return <div className={"utilities-item basic-info-container" + (this.state.conflicts ? ' conflicts' : '') + (this.state.isMutable ? ' mutable' : '')}>
             {isSharing}
             <div className={"basic-info-stats" + (creditIsRange ? ' total-credit-range' : '')}>
@@ -104,6 +155,7 @@ var BasicInfo = React.createClass({
             </div>
             <div style={{clear: 'both'}} />
             </div>
+            {weekSelector}
             <div className="basic-info-conflict-container">
             {conflict}
             </div>

@@ -1,4 +1,5 @@
 import EventEmitter from 'eventemitter3';
+import moment from 'moment';
 
 import * as datetime from '../utils/datetime.ts';
 import * as conflicts from './course/conflicts.ts';
@@ -9,6 +10,13 @@ import termdb from '../store/termdb.ts';
 
 import * as ana from '../analytics/analytics.ts';
 import {Meeting, CourseComponent, Course} from './course.ts';
+
+export interface WeekInterval {
+    startYear: number;
+    startWeek: number;
+    endYear: number;
+    endWeek: number;
+}
 
 const palette = [
     'lavender',
@@ -98,6 +106,42 @@ export abstract class Schedule extends EventEmitter {
         });
 
         return meetings;
+    }
+    
+    getVisibleWeekIntervals(): WeekInterval[] {
+        let timePoints = [];
+        function dateToMoment(str: string) {
+            return moment(str, 'MM/DD/YYYY').isoWeekday(1);
+        }
+        
+        this.getVisibleMeetings().forEach(meeting => {
+            timePoints.push(dateToMoment(meeting.startDate));
+            timePoints.push(dateToMoment(meeting.endDate).add(1, 'w'));
+        });
+        
+        if (timePoints.length < 2) return null;
+        
+        timePoints.sort((a, b) => +a-b);
+        
+        let result: WeekInterval[] = [];
+        
+        let last = null;
+        
+        timePoints.forEach(point => {
+            if (last != null && !point.isSame(last)) {
+                result.push({
+                    startYear: last.isoWeekYear(),
+                    startWeek: last.isoWeeks(),
+                    endYear: point.isoWeekYear(),
+                    endWeek: point.isoWeeks(),
+                });
+            }
+            last = point;
+        });
+        
+        if (result.length == 0) return null;
+        
+        return result;
     }
 
     _onChange() {

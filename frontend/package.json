@@ -19,12 +19,13 @@
   "homepage": "https://github.com/HeavenFox/coursepad",
   "dependencies": {
     "cookies-js": "^1.1.0",
-    "tether-drop": "CoursePad/drop#cp",
     "event-emitter": "^0.3.1",
     "eventemitter3": "^1.1.1",
     "filesaver": "CoursePad/FileSaver.js#cp",
     "lodash": "~4.1.0",
-    "tether": "~1.1.0"
+    "moment": "^2.12.0",
+    "tether": "~1.1.0",
+    "tether-drop": "CoursePad/drop#cp"
   },
   "devDependencies": {
     "autoprefixer-core": "^4.0.1",
