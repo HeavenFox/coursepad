@@ -1,6 +1,6 @@
 import schedules from '../../store/schedules.ts';
 import {Schedule, MutableSchedule} from '../../model/schedules.ts';
-import {Course, CourseComponent} from '../../model/course';
+import {Course, CourseComponent, Cluster} from '../../model/course';
 
 import * as ana from '../../analytics/analytics.ts';
 
@@ -22,6 +22,150 @@ function withMutableSchedule(schedule: Schedule, action: (s: MutableSchedule) =>
         action(schedule);
     } else {
         console.warn("Trying to mutate immutable schedule");
+    }
+}
+
+interface CourseItemProps {
+    key: any;
+
+    color: string;
+    cluster: Cluster;
+    hidden: boolean;
+    selectedCourses: {[id: number]: boolean};
+    selectedSections: {[id: number]: boolean};
+
+    onChangeSection: (id: number) => void;
+    onChangeCourse: (course: Course) => void;
+    onToggleVisibility: (num: string) => void;
+    onDelete: (num: string) => void;
+}
+
+interface CourseItemState {
+    expanded?: boolean;
+    menuOpen?: boolean;
+}
+
+class CourseItem extends React.Component<CourseItemProps, CourseItemState> {
+    drop: any;
+
+    constructor() {
+        super();
+        this.state = {expanded: false, menuOpen: false};
+    }
+
+    _toggleExpansion = () => {
+        this.setState({expanded: !this.state.expanded});
+
+        ana.sevent('basket', 'toggle_expansion', this.props.cluster[0].getNumber());
+    }
+
+    _toggleMenu = (courseNumber, e) => {
+        this.state.menuOpen = !this.state.menuOpen;
+        if (!this.drop) {
+            var menu = document.createElement('div');
+            menu.className = 'menu';
+            var ul = document.createElement('ul');
+            menu.appendChild(ul);
+
+            var li = document.createElement('li');
+            li.className = 'clickable menuitem';
+            li.innerHTML = 'Delete';
+            li.addEventListener('click', (e) => {
+                this.drop.close();
+                this.props.onDelete(courseNumber);
+            });
+
+            ul.appendChild(li);
+
+            this.drop = new Drop({
+                target: e.target,
+                remove: true,
+                position: 'bottom right',
+                content: menu,
+                constrainToWindow: true,
+                openOn: 'click',
+                tetherOptions: {
+                    constraints: [
+                        {
+                            to: 'scrollParent',
+                            pin: true
+                        }
+                    ]
+                }
+            });
+
+            this.drop.open();
+        }
+
+/*
+        if (this.drop.isOpened()) {
+            this.drop.close();
+        } else {
+        }
+        */
+    }
+
+    componentWillUnmount() {
+        if (this.drop) {
+            this.drop.destroy();
+            this.drop = null;
+        }
+    }
+
+    render() {
+        let cluster = this.props.cluster;
+        let selectedCourses = this.props.selectedCourses;
+        let selectedSections = this.props.selectedSections;
+
+        let number = cluster[0].getNumber();
+
+        let className = this.props.color;
+
+        let clusterVisible = !this.props.hidden;
+
+        if (!clusterVisible) {
+            className += ' invisible';
+        }
+
+        let listOfSections = (sections: CourseComponent[]) => {
+            return sections.map((section) => <div className="content level-2" key={'S' + section.number}>
+                <SelectionIndicator selected={selectedSections[section.number]} action={this.props.onChangeSection.bind(null, section.number)} />{section.type + ' ' + section.sec}
+            </div>, this);
+        }
+
+        let clusterItems: JSX.Element[];
+        if (this.state.expanded) {
+            if (cluster.length === 1) {
+                var sections = cluster[0].getAllSections();
+                clusterItems = listOfSections(sections);
+            } else {
+                clusterItems = cluster.map((course) => {
+                    var sections = course.getAllSections();
+                    var sectionsDom = null;
+                    if (sections.length > 1) {
+                        sectionsDom = listOfSections(sections);
+                    }
+                    return <div className="content level-2" key={'C' + course.id}>
+                            <SelectionIndicator selected={selectedCourses[course.id]} action={this.props.onChangeCourse.bind(null, course)} />
+                            {course.subject + ' ' + course.number}{sectionsDom}
+                        </div>;
+                });
+            }
+        }
+
+        var courseTitle = number + ": " + cluster[0].title;
+
+        return <div className={"basket-item " + className}>
+            <div className="content">
+                <div className="content-buttons">
+                    <div aria-role="button" className="btn menu-btn" onClick={this._toggleMenu.bind(null, number)}></div>
+                    <div aria-role="button" className={"btn visibility-btn" + (clusterVisible ? '' : ' closed')} onClick={this.props.onToggleVisibility.bind(null, number)}></div>
+                    <div aria-role="button" className={"btn expand-btn" + (this.state.expanded ? ' expanded' : '')} onClick={this._toggleExpansion}></div>
+                </div>
+            <div className="content-title" title={courseTitle}>{courseTitle}</div>
+            </div>
+            {clusterItems}
+        </div>
     }
 }
 
@@ -54,14 +198,6 @@ var Basket = React.createClass({
         return {clusters: [], sections: [], hidden: {}, expansion: {}};
     },
 
-    _toggleExpansion: function(identifier) {
-        var expansionState = this.state['expansion'];
-        expansionState[identifier] = !expansionState[identifier];
-        this.setState({expansion: expansionState});
-
-        ana.sevent('basket', 'toggle_expansion', identifier);
-    },
-
     _toggleVisibility: function(courseNumber) {
         withMutableSchedule(schedules.getCurrentSchedule(), schedule => {
             schedule.toggleVisibility(courseNumber);
@@ -72,42 +208,6 @@ var Basket = React.createClass({
         withMutableSchedule(schedules.getCurrentSchedule(), schedule => {
             schedule.removeCourseByNumber(courseNumber);
         });
-    },
-
-    _toggleMenu: function(courseNumber, e) {
-        var drop;
-        var menu = document.createElement('div');
-        menu.className = 'menu';
-        var ul = document.createElement('ul');
-        menu.appendChild(ul);
-
-        var li = document.createElement('li');
-        li.className = 'clickable menuitem';
-        li.innerHTML = 'Delete';
-        li.addEventListener('click', (function() {
-            drop.close();
-            this._deleteCourse(courseNumber);
-        }).bind(this));
-
-        ul.appendChild(li);
-
-        drop = new Drop({
-            target: e.target,
-            remove: true,
-            position: 'bottom right',
-            content: menu,
-            constrainToWindow: true,
-            tetherOptions: {
-                constraints: [
-                    {
-                        to: 'scrollParent',
-                        pin: true
-                    }
-                ]
-            }
-        });
-
-        drop.open();
     },
 
     _changeSectionTo: function(sectionId) {
@@ -135,62 +235,19 @@ var Basket = React.createClass({
             let selectedSections = currentSchedule.getSelectedSectionIdsHash();
             let selectedCourses = currentSchedule.getSelectedCourseIdsHash();
 
-            clusters = (this.state.clusters as Course[][]).map((cluster) => {
-                let number = cluster[0].getNumber();
-                let clusterItems = null;
-                let className = currentSchedule.getColorForCourse(cluster[0].subject, cluster[0].number);
-
-                let clusterVisible = !this.state.hidden[number];
-
-                if (!clusterVisible) {
-                    className += ' invisible';
-                }
-
-                function listOfSections(sections: CourseComponent[]) {
-                    return sections.map((section) => <div className="content level-2" key={'S' + section.number}>
-                        <SelectionIndicator selected={selectedSections[section.number]} action={self._changeSectionTo.bind(null, section.number)} />{section.type + ' ' + section.sec}
-                    </div>, this);
-                }
-
-                if (this.state.expansion[number]) {
-                    if (cluster.length === 1) {
-                        var sections = cluster[0].getAllSections();
-                        clusterItems = listOfSections(sections);
-
-                    } else {
-                        clusterItems = cluster.map(function(course) {
-                            var sections = course.getAllSections();
-                            var sectionsDom = null;
-                            if (sections.length > 1) {
-                                sectionsDom = listOfSections(sections);
-                            }
-                            return <div className="content level-2" key={'C' + course.id}><SelectionIndicator selected={selectedCourses[course.id]} action={self._changeCourseTo.bind(null, course)} />{course.subject + ' ' + course.number}{sectionsDom}</div>
-                        });
-
-                    }
-                }
-
-                var courseTitle = number + ": " + cluster[0].title;
-
-                return <div className={"basket-item " + className} key={number}>
-                    <div className="content">
-                        <div className="content-buttons">
-                            <div aria-role="button" className="btn menu-btn" onClick={this._toggleMenu.bind(null, number)}></div>
-                            <div aria-role="button" className={"btn visibility-btn" + (clusterVisible ? '' : ' closed')} onClick={this._toggleVisibility.bind(null, number)}></div>
-                            <div aria-role="button" className={"btn expand-btn" + (this.state.expansion[number] ? ' expanded' : '')} onClick={this._toggleExpansion.bind(null, number)}></div>
-                        </div>
-                    <div className="content-title" title={courseTitle}>{courseTitle}</div>
-                    </div>
-                    {clusterItems}
-                </div>
-
+            clusters = (this.state.clusters as Cluster[]).map((cluster) => {
+                let cNumber = cluster[0].getNumber();
+                let color = currentSchedule.getColorForCourse(cluster[0].subject, cluster[0].number);
+                return <CourseItem key={cNumber} color={color} cluster={cluster} hidden={this.state.hidden[cNumber]}
+                                   selectedCourses={selectedCourses} selectedSections={selectedSections}
+                                   onChangeSection={this._changeSectionTo} onToggleVisibility={this._toggleVisibility} onDelete={this._deleteCourse} onChangeCourse={this._changeCourseTo} />;
             }, this);
         }
 
 
         return <div className="basket utilities-item">
             <h2>Basket</h2>
-        {clusters}
+            {clusters}
         </div>;
     }
 });

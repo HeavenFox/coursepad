@@ -84,6 +84,8 @@ export class CourseComponent {
 
 const SECTION_PRIORITY = ['LEC', 'SEM', 'IND', 'DIS', 'LAB'];
 
+export type Cluster = Course[];
+
 export class Course {
     term : string;
     id: number;

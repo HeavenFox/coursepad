@@ -87,6 +87,7 @@ gulp.task('js', function() {
     var filter = gulpFilter(['main.js']);
     return gulp.src('js_src/app.tsx')
         .pipe(webpackStream(webpack_conf()))
+        .on('error', gutil.log)
         .pipe((LEVEL <= 7) ? gutil.noop() : uglify({
                 mangle: {
                     except: ['GeneratorFunction']
@@ -162,7 +163,7 @@ gulp.task('build', ['rev-static']);
 gulp.task('test', function(done) {
     var webpackConfig = webpack_conf();
     delete webpackConfig['output'];
-    
+
     new KarmaServer({
         files: ['js_src/**/tests/*.ts'],
         frameworks: ['mocha'],
