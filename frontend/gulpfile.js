@@ -3,7 +3,7 @@ var babel = require('gulp-babel');
 var webpack = require('webpack');
 var webpackStream = require('webpack-stream');
 var uglify = require('gulp-uglify');
-var sass = require('gulp-ruby-sass');
+var sass = require('gulp-sass');
 var del = require('del');
 var sourcemaps = require('gulp-sourcemaps');
 var gutil = require('gulp-util');
@@ -111,7 +111,8 @@ gulp.task('css', function() {
         sourcemap: DEV ? true : false
     };
 
-    return sass('sass_src/**/*.scss', sassConf)
+    return gulp.src('sass_src/**/*.scss')
+        .pipe(sass(sassConf).on('error', sass.logError))
         .pipe(postcss([autoprefixer({})]))
         .pipe(prod(rev()))
         .pipe(gulp.dest(target() + 'css/'))
