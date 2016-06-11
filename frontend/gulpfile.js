@@ -32,15 +32,15 @@ function target() {
 
 function webpack_conf() {
     var babel_query = {
-        optional: ['runtime'],
-        stage: 1
+        presets: ['es2015', 'stage-3', 'react'],
+        plugins: ['transform-runtime']
     };
 
     if (DEV) {
         // Target chrome
         babel_query = {
-            optional: ['runtime', 'asyncToGenerator'],
-            blacklist: ['es6.constants', 'es6.blockScoping', 'es6.arrowFunctions'],
+            presets: ['react'],
+            plugins: ['transform-es2015-modules-commonjs', 'transform-async-to-generator']
         }
     };
     var conf = {

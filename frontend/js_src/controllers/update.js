@@ -1,7 +1,7 @@
 var banner = require('./banner.js');
 var UpdateAvailable = require('../components/banners/UpdateAvailable.tsx');
 
-var termdb = require('../store/termdb.ts');
+import termdb from '../store/termdb.ts';
 
 function finish() {
     banner.stop('updateAvailable');
