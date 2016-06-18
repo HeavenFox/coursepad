@@ -1,11 +1,11 @@
 import saveAs from 'filesaver';
 import {getShortLocation} from '../consts/humanize.ts';
 import {authorize} from '../thirdparty/google.ts';
-import {promisify} from '../utils/promise.ts'
-import {toRFC} from '../utils/datetime.ts'
-import {serror} from '../analytics/analytics.ts'
+import {promisify} from '../utils/promise.ts';
+import {toRFC} from '../utils/datetime.ts';
+import {serror} from '../analytics/analytics.ts';
 import {CourseComponent} from '../model/course.ts';
-import _ from 'lodash'
+import _ from 'lodash';
 
 export function toiCal(components) {
 	let content = `BEGIN:VCALENDAR
@@ -17,7 +17,8 @@ METHOD:PUBLISH
 	let t = num => num < 10 ? '0' + num : num.toString();
 	let formatDateTime = rfc => {
 		let date = new Date(rfc);
-		return `${date.getFullYear()}${t(date.getMonth()+1)}${t(date.getDate())}T${t(date.getHours())}${t(date.getMinutes())}${t(date.getSeconds())}`;
+		return `${date.getFullYear()}${t(date.getMonth()+1)}${t(date.getDate())}` +
+			   `T${t(date.getHours())}${t(date.getMinutes())}${t(date.getSeconds())}`;
 	};
 	toGoogleCalendar(components).forEach(event => {
 		content += `BEGIN:VEVENT
@@ -27,7 +28,7 @@ SUMMARY:${event['summary']}
 LOCATION:${event['location']}
 DTSTART;TZID=${event['start']['timeZone']}:${formatDateTime(event['start']['dateTime'])}
 DTEND;TZID=${event['end']['timeZone']}:${formatDateTime(event['end']['dateTime'])}
-`
+`;
 		event['recurrence'].forEach(r => {
 			content += r;
 			content += '\n';
@@ -65,7 +66,9 @@ export function toGoogleCalendar(components) {
 			if (!startDateMatch) return;
 
 			// Start date is the first day when the class meets
-			let startDate = new Date(parseInt(startDateMatch[3], 10), parseInt(startDateMatch[1], 10) - 1, parseInt(startDateMatch[2], 10));
+			let startDate = new Date(parseInt(startDateMatch[3], 10),
+									 parseInt(startDateMatch[1], 10) - 1,
+									 parseInt(startDateMatch[2], 10));
 			if (!meeting.pattern || meeting.pattern < 0 || meeting.pattern >= (1<<7)) return;
 			let maxTries = 7;
 			while (!((1 << ((startDate.getDay() + 6) % 7)) & meeting.pattern)) {
@@ -126,8 +129,8 @@ export function toGoogleCalendar(components) {
 						'coursepad': '1',
 						'coursepad.term': course.term,
 						'coursepad.classid': comp.number.toString(),
-					}
-				}
+					},
+				},
 			});
 		});
 	});
@@ -136,9 +139,7 @@ export function toGoogleCalendar(components) {
 
 async function syncEvents(components: CourseComponent[], terms) {
 	await gapi.client.load('calendar', 'v3');
-	var request = gapi.client.calendar.events.list({
-		'calendarId': 'primary',
-	});
+
 	if (!terms) {
 		terms = components.map(comp => comp.parent.term);
 	}
@@ -160,8 +161,8 @@ async function syncEvents(components: CourseComponent[], terms) {
 
 		const serverEvents = response['items'];
 
-		const serverEventsByClassId = _.groupBy(serverEvents, getId)
-		const canonicalEventsByClassId = _.groupBy(canonicalEvents, getId)
+		const serverEventsByClassId = _.groupBy(serverEvents, getId);
+		const canonicalEventsByClassId = _.groupBy(canonicalEvents, getId);
 
 		_.forEach(serverEventsByClassId, (events, classId) => {
 			if (canonicalEventsByClassId.hasOwnProperty(classId)) {
@@ -199,23 +200,23 @@ async function syncEvents(components: CourseComponent[], terms) {
 		let batch = gapi.client.newBatch();
 		needAdd.forEach(event => {
 			batch.add(gapi.client.calendar.events.insert({
-				'calendarId': 'primary'
+				'calendarId': 'primary',
 			}, event));
 		});
 
 		needDelete.forEach(event => {
 			batch.add(gapi.client.calendar.events.delete({
 				'calendarId': 'primary',
-				'eventId': event
+				'eventId': event,
 			}));
 		});
 
 		_.forEach(needUpdate, (event, id) => {
 			batch.add(gapi.client.calendar.events.patch({
 				'calendarId': 'primary',
-				'eventId': id
+				'eventId': id,
 			}, event));
-		})
+		});
 		let result = await batch;
 	});
 

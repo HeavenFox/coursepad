@@ -2,7 +2,8 @@ import {TermDatabase, LocalTermDatabase} from '../termdb.ts';
 import * as indexeddb from '../../persist/indexeddb.ts';
 import {expect} from 'chai';
 
-var testData = {
+/* tslint:disable:trailing-comma */
+const testData = {
 	"subjects": [{
 		"sub": "PMA",
 		"desc": "Performing and Media Arts"

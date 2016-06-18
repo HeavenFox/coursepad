@@ -11,7 +11,9 @@ function hasDate(meeting: Meeting) {
 export function conflicts(m1: Meeting, m2: Meeting) {
     return mayConflict(m1) && mayConflict(m2) && ((m1.pattern & m2.pattern)
         && (m1.endTimeHrs > m2.startTimeHrs) && (m1.startTimeHrs < m2.endTimeHrs))
-        && (!(hasDate(m1) && hasDate(m2)) || ((m1.getEndDateObject() >= m2.getStartDateObject()) && (m1.getStartDateObject() <= m2.getEndDateObject())))
+        && (!(hasDate(m1) && hasDate(m2))
+            || ((m1.getEndDateObject() >= m2.getStartDateObject())
+                && (m1.getStartDateObject() <= m2.getEndDateObject())));
 }
 
 interface IConflictInterval {
@@ -33,7 +35,7 @@ export function conflictIntervals(meetings1: Meeting[], meetings2: Meeting[]) {
                 intervals.push({
                     pattern: m1.pattern & m2.pattern,
                     startTimeHrs: Math.max(m1.startTimeHrs, m2.startTimeHrs),
-                    endTimeHrs: Math.min(m1.endTimeHrs, m2.endTimeHrs)
+                    endTimeHrs: Math.min(m1.endTimeHrs, m2.endTimeHrs),
                 });
             }
         }
@@ -52,7 +54,7 @@ export function normalizeIntervals(intervals) {
                 intervalsByDay[d].push({
                     pattern: d,
                     startTimeHrs: interval.startTimeHrs,
-                    endTimeHrs: interval.endTimeHrs
+                    endTimeHrs: interval.endTimeHrs,
                 });
             }
         }

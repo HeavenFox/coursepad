@@ -1,7 +1,7 @@
 var eventga = null;
 
 var DIMS = {
-    'login_method' : '1'
+    'login_method' : '1',
 };
 
 export function sevent(...args) {

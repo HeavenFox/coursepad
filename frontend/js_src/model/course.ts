@@ -71,9 +71,7 @@ export class CourseComponent {
         this.parent = parent;
         this.type = type;
         if (obj['mt']) {
-            this.meetings = obj['mt'].map(function(obj) {
-                return new Meeting(this, obj);
-            }, this);
+            this.meetings = obj['mt'].map(meetingObj => new Meeting(this, meetingObj));
         } else {
             this.meetings = [];
         }
@@ -106,9 +104,7 @@ export class Course {
         this.sections = {};
         for (var type in obj['secs']) {
             if (obj['secs'].hasOwnProperty(type)) {
-                this.sections[type] = obj['secs'][type].map(function(obj) {
-                    return new CourseComponent(this, type, obj);
-                }, this);
+                this.sections[type] = obj['secs'][type].map(secObj => new CourseComponent(this, type, secObj));
             }
         }
     }

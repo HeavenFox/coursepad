@@ -103,7 +103,8 @@ export class LocalTermDatabase extends TermDatabase {
     }
 
     async getCoursesBySubjectAndNumber(subject, number) {
-        let courses = await indexeddb.queryAllByIndex('roster', 'course', IDBKeyRange.only([this.term, subject, number]))
+        let courses = await indexeddb.queryAllByIndex('roster', 'course',
+                                                      IDBKeyRange.only([this.term, subject, number]));
         courses = courses.map(c => new Course(c, this.term));
 
         return courses;
@@ -117,7 +118,7 @@ export class LocalTermDatabase extends TermDatabase {
             indexeddb.cursorByIndex('subjects', 'term', IDBKeyRange.only(term), (cursor) => {
                 cursor.delete();
             }, 'readwrite'),
-            indexeddb.deleteRecord('title_typeahead_index', term)
+            indexeddb.deleteRecord('title_typeahead_index', term),
         ]);
     }
 
@@ -135,7 +136,7 @@ export class LocalTermDatabase extends TermDatabase {
 
                     rosterStore.add(course);
 
-                    titleHash[course.sub + course.nbr + ': ' + course.title] = [course.sub, course.nbr]
+                    titleHash[course.sub + course.nbr + ': ' + course.title] = [course.sub, course.nbr];
 
                 }
             }
@@ -157,7 +158,7 @@ export class LocalTermDatabase extends TermDatabase {
         for (let title in titleHash) {
             obj.index.push({
                 title: title,
-                course: titleHash[title]
+                course: titleHash[title],
             });
         }
         await indexeddb.add('title_typeahead_index', obj);
@@ -200,12 +201,12 @@ export class LocalTermDatabase extends TermDatabase {
         if (diff['subjects']) {
             var subjectsDiff = diff['subjects'];
 
-            function hashify(diff) {
+            function hashify(subjDiff) {
                 var result = Object.create(null);
-                if (diff) {
-                    diff.forEach(function(subject) {
+                if (subjDiff) {
+                    subjDiff.forEach(function(subject) {
                         result[subject['sub']] = subject;
-                    })
+                    });
                 }
                 return result;
             }
@@ -278,12 +279,12 @@ export class LocalTermDatabase extends TermDatabase {
                     if (!(indexHash[number])) {
                         indexHash[number] = {
                             title: cursor.value['sub'] + cursor.value['nbr'] + ': ' + cursor.value['title'],
-                            course: [cursor.value['sub'], cursor.value['nbr']]
-                        }
+                            course: [cursor.value['sub'], cursor.value['nbr']],
+                        };
                     }
                     cursor.continue();
                 }
-            }
+            };
         });
 
         for (let i in indexHash) {

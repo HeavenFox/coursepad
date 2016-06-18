@@ -89,7 +89,7 @@ class ScheduleStore extends EventEmitter {
         var schedule = new SharedSchedule(term);
         schedule.getTermDB = function() {
             return db;
-        }
+        };
 
         await schedule.deserialize(serialized);
 
@@ -191,7 +191,8 @@ class ScheduleStore extends EventEmitter {
             let startMoment = moment(meeting.getStartDateObject());
             let endMoment = moment(meeting.getEndDateObject());
 
-            return endMoment.isSameOrAfter(this._weekIntervalStartMoment) && startMoment.isBefore(this._weekIntervalEndMoment);
+            return endMoment.isSameOrAfter(this._weekIntervalStartMoment)
+                && startMoment.isBefore(this._weekIntervalEndMoment);
         });
     }
 

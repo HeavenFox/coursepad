@@ -14,7 +14,7 @@ class RootRoute extends RoutingRule {
         let term = meta.getSelectedTerm();
 
         if (!term) {
-            let terms = await meta.getRemoteTerms()
+            let terms = await meta.getRemoteTerms();
             let data = humanize.sortTerms(Object.keys(terms), true);
             term = data[0];
         }

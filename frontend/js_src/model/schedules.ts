@@ -28,7 +28,7 @@ const palette = [
     'pink',
     'purple',
     'yellow',
-    'pearl'
+    'pearl',
 ];
 
 export abstract class Schedule extends EventEmitter {
@@ -191,7 +191,7 @@ export abstract class Schedule extends EventEmitter {
 
         this.sections.forEach(function(section) {
             result[section.parent.id] = true;
-        })
+        });
 
         return result;
     }
@@ -201,7 +201,7 @@ export abstract class Schedule extends EventEmitter {
 
         this.sections.forEach(function(section) {
             result[section.number] = true;
-        })
+        });
 
         return result;
     }
@@ -212,7 +212,9 @@ export abstract class Schedule extends EventEmitter {
             var visibleSections = this.getVisibleSections();
             for (var i=0; i < visibleSections.length; i++) {
                 for (var j=0; j < i; j++) {
-                    rawIntervals.push.apply(rawIntervals, conflicts.conflictIntervals(visibleSections[i].meetings, visibleSections[j].meetings));
+                    let intervals = conflicts.conflictIntervals(visibleSections[i].meetings,
+                                                                visibleSections[j].meetings);
+                    [].push.apply(rawIntervals, intervals);
                 }
             }
 
@@ -276,7 +278,8 @@ export abstract class Schedule extends EventEmitter {
         }
 
         function hasSameTime(curMeeting) {
-            return curMeeting.pattern == meeting.pattern && curMeeting.startTime == meeting.startTime && curMeeting.endTime == meeting.endTime;
+            return curMeeting.pattern == meeting.pattern
+                && curMeeting.startTime == meeting.startTime && curMeeting.endTime == meeting.endTime;
         }
 
         // Get other sections of the same course
@@ -335,7 +338,8 @@ export abstract class Schedule extends EventEmitter {
                         // Make sure there's only one component chosen per section type
                         // And sections do not cross course boundary
                         if (hasSection[courseNumber].hasOwnProperty(section.type) ||
-                            (courseByNumber[courseNumber] && courseByNumber[courseNumber]['id'] !== clusters[i][j]['id'])) {
+                            (courseByNumber[courseNumber] &&
+                            courseByNumber[courseNumber]['id'] !== clusters[i][j]['id'])) {
                             perfectDeserialization = false;
                             console.warn("Section " + sectionId + " is a duplicate, or crossed boundary");
                             return null;
@@ -396,8 +400,9 @@ export abstract class Schedule extends EventEmitter {
                         var courseNumber = clusters[i][j].getNumber();
                         // Make sure there's only one component chosen per section type
                         // And sections do not cross course boundary
-                        if (hasSection[courseNumber].hasOwnProperty(section.type) ||
-                            (courseByNumber[courseNumber] && courseByNumber[courseNumber]['id'] !== clusters[i][j]['id'])) {
+                        if (hasSection[courseNumber].hasOwnProperty(section.type)
+                            || (courseByNumber[courseNumber]
+                                && courseByNumber[courseNumber]['id'] !== clusters[i][j]['id'])) {
                             return null;
                         } else {
                             hasSection[courseNumber][section.type] = true;
@@ -513,7 +518,8 @@ export class MutableSchedule extends Schedule {
                 this._changeCourse(toSection.parent, fromCourse);
 
                 for (fromIndex = 0; fromIndex < this.sections.length; fromIndex++) {
-                    if (this.sections[fromIndex].parent == toSection.parent && this.sections[fromIndex].type == toSection.type) {
+                    if (this.sections[fromIndex].parent == toSection.parent
+                        && this.sections[fromIndex].type == toSection.type) {
                         break;
                     }
                 }
@@ -550,7 +556,8 @@ export class MutableSchedule extends Schedule {
                 this._changeCourse(toSection.parent, fromSection.parent);
 
                 for (fromIndex = 0; fromIndex < this.sections.length; fromIndex++) {
-                    if (this.sections[fromIndex].parent == toSection.parent && this.sections[fromIndex].type == toSection.type) {
+                    if (this.sections[fromIndex].parent == toSection.parent
+                        && this.sections[fromIndex].type == toSection.type) {
                         break;
                     }
                 }
@@ -624,7 +631,9 @@ export class MutableSchedule extends Schedule {
                     if (prevSection.meetings.length > 0) {
                         for (i=0; i < toCourse.sections[type].length; i++) {
                             var curSection = toCourse.sections[type][i];
-                            if (curSection.meetings.length > 0 && curSection.meetings[0].startTime == prevSection.meetings[0].startTime && curSection.meetings[0].pattern == prevSection.meetings[0].pattern) {
+                            if (curSection.meetings.length > 0
+                                && curSection.meetings[0].startTime == prevSection.meetings[0].startTime
+                                && curSection.meetings[0].pattern == prevSection.meetings[0].pattern) {
                                 added = true;
                                 newSections.push(curSection);
                                 break;
@@ -714,7 +723,7 @@ export class MutableSchedule extends Schedule {
     };
 
     serialize() {
-        var persist = {}
+        var persist = {};
         persist['sections'] = this.serializeSections(this.sections);
         persist['basket'] = this.serializeBasket(this.basket);
         persist['colorMapping'] = $.extend({}, this.colorMapping);

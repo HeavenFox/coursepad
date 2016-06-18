@@ -103,7 +103,7 @@ function userLoggedIn(session: SessionId, user: User) {
 
     store.emit('loginstatuschange', {
         oldUser: previousUser,
-        newUser: currentUser
+        newUser: currentUser,
     });
 
     ana.suserid(user.id);
@@ -124,7 +124,7 @@ function clearSession() {
 
     store.emit('loginstatuschange', {
         oldUser: prev,
-        newUser: currentUser
+        newUser: currentUser,
     });
 
 }
@@ -168,7 +168,7 @@ class UserStore extends EventEmitter {
                 'scope': 'profile',
                 'callback': function(data) {
                     console.log(data);
-                }
+                },
             });
 
         }

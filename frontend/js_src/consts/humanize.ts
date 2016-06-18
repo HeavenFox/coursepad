@@ -4,8 +4,8 @@ var sectionType = {
     "CLN" : "Clinic",
     "LAB" : "Labs",
     "RSC" : "Research",
-    "DIS" : "Discussion"
-}
+    "DIS" : "Discussion",
+};
 
 var buildingNamesShort = {
     'ACH': 'Alice Cook House',
@@ -102,7 +102,7 @@ var buildingNamesShort = {
     'WHT': 'White Hall',
     'WLL': 'Weill Hall',
     'WNG': 'Wing Hall',
-    'WRN': 'Warren Hall'
+    'WRN': 'Warren Hall',
 };
 
 var buildingNamesLong = {

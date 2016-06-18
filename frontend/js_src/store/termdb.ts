@@ -23,7 +23,8 @@ function useLocal() {
     } catch (e) {
         return false;
     }
-    return window.indexedDB && !(navigator && navigator.userAgent.indexOf('Safari') > -1 && navigator.userAgent.indexOf('Chrome') == -1);
+    return window.indexedDB && !(navigator && navigator.userAgent.indexOf('Safari') > -1
+           && navigator.userAgent.indexOf('Chrome') == -1);
 }
 
 function localTermDownloaded(term) {
@@ -89,7 +90,7 @@ async function loadTerm(term, progress = null) {
                     reject(e);
                 });
             },
-            dataType: 'json'
+            dataType: 'json',
         });
     });
 
@@ -108,14 +109,16 @@ function checkForUpdates() {
                     var timestamps = history['term_db'][term_id];
                     var index = timestamps.indexOf(localTerms[term_id]);
                     if (index < 0) {
-                        throw new Error('cannot find history')
+                        throw new Error('cannot find history');
                     }
 
                     var path = timestamps.slice(index);
 
                     var diffPromises = [];
                     for (var i=0; i < path.length-1; i++) {
-                        diffPromises.push(ajax.getJson(endpoints.db('diffs/diff_termdb_' + term_id + '_' + path[i] + '_' + path[i+1] + '.json')));
+                        diffPromises.push(
+                            ajax.getJson(endpoints.db(`diffs/diff_termdb_${term_id}_${path[i]}_${path[i+1]}.json`))
+                        );
                     }
 
                     return Promise.all(diffPromises);
@@ -154,7 +157,7 @@ class TermDBStore extends EventEmitter {
         }
 
         if (preference === currentPreference && currentTermDB !== null && currentTermDB.term === term) {
-            return false
+            return false;
         }
 
         this.ready = false;
@@ -188,7 +191,7 @@ class TermDBStore extends EventEmitter {
     }
 
     async checkForUpdates() {
-        let result = await checkForUpdates()
+        let result = await checkForUpdates();
         if (result !== false) {
             this.emit('updateAvailable', result);
         }

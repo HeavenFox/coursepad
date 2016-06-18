@@ -23,7 +23,7 @@ export async function init() {
 				    appId : FB_APP_ID,
 				    xfbml : false,
 				    cookie : false,
-				    version : 'v2.2'
+				    version : 'v2.2',
 				});
 				initialized = true;
 				resolve(true);

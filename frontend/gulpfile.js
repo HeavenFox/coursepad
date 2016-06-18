@@ -14,6 +14,7 @@ var rev = require('gulp-rev');
 var revCollector = require('gulp-rev-collector');
 var minifyHTML   = require('gulp-minify-html');
 var gulpFilter = require('gulp-filter');
+var tslint = require("gulp-tslint");
 
 var KarmaServer = require('karma').Server;
 
@@ -141,6 +142,12 @@ gulp.task('default', function() {
 
 gulp.task('clean', function() {
     del(['_build/prod/**']);
+});
+
+gulp.task('lint', function() {
+    gulp.src("js_src/**/*.ts")
+        .pipe(tslint())
+        .pipe(tslint.report("verbose"))
 });
 
 gulp.task('rev-index', ['js', 'css', 'static'], function() {

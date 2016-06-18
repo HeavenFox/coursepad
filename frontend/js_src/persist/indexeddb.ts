@@ -22,7 +22,7 @@ export function open() {
                 } else {
                     upgradeSchema(request.transaction, e.oldVersion);
                 }
-            }
+            };
         });
     }
 
@@ -61,7 +61,7 @@ function upgradeSchema(transaction: IDBTransaction, version: number) {
                     newCacheStore.add(index[term]);
                 }
             }
-        }
+        };
     }
 }
 
@@ -99,7 +99,11 @@ export function queryObjectStore(store: string, query: (store: IDBObjectStore) =
     });
 }
 
-export function keyCursorByIndex(objectStore: string, index: string, keyRange: IDBKeyRange, callback: (c: IDBCursor)=>void, mode: string) {
+export function keyCursorByIndex(objectStore: string,
+                                 index: string,
+                                 keyRange: IDBKeyRange,
+                                 callback: (c: IDBCursor)=>void,
+                                 mode: string) {
     return open().then(function(db) {
         return new Promise(function(resolve, reject) {
             var transaction = db.transaction([objectStore], mode);
@@ -112,16 +116,18 @@ export function keyCursorByIndex(objectStore: string, index: string, keyRange: I
                     callback(cursor);
                     cursor.continue();
                 }
-              }
+              };
             transaction.oncomplete = function() {
                 resolve(true);
-            }
+            };
 
         });
     });
 }
 
-export function cursorByIndex(objectStore, index, keyRange, callback: (c: IDBCursorWithValue)=>void, mode = 'readonly') {
+export function cursorByIndex(objectStore, index, keyRange,
+                              callback: (c: IDBCursorWithValue)=>void,
+                              mode = 'readonly') {
     return open().then(function(db) {
         return new Promise(function(resolve, reject) {
             var transaction = db.transaction([objectStore], mode);
@@ -134,10 +140,10 @@ export function cursorByIndex(objectStore, index, keyRange, callback: (c: IDBCur
                         callback(cursor);
                         cursor.continue();
                     }
-                }
+                };
             transaction.oncomplete = function(e) {
                 resolve(true);
-            }
+            };
         });
     });
 }
@@ -159,7 +165,7 @@ export function getByKey(objectStore, key) {
               .get(key)
               .onsuccess = function(e) {
                 resolve((<IDBRequest>e.target).result);
-              }
+              };
         });
     });
 }
@@ -171,16 +177,16 @@ export function getByKeys(objectStore: string, keys: any[]) {
             var tr = db.transaction([objectStore]);
             var os = tr.objectStore(objectStore);
             for (var i=0; i < keys.length; i++) {
-                (function(i) {
-                    os.get(keys[i]).onsuccess = function(e) {
-                        result[i] = (<IDBRequest>e.target).result;
-                    }
+                (function(ii) {
+                    os.get(keys[ii]).onsuccess = function(e) {
+                        result[ii] = (<IDBRequest>e.target).result;
+                    };
                 })(i);
             }
 
             tr.oncomplete = function(e) {
                 resolve(result);
-            }
+            };
         });
     });
 }
@@ -199,7 +205,7 @@ export function add(objectStore: string, obj, key = undefined) {
 
             tr.oncomplete = function(e) {
                 resolve(true);
-            }
+            };
         });
     });
 }
@@ -214,11 +220,11 @@ export function deleteRecord(objectStore: string, key: any) {
 
             tr.oncomplete = function(e) {
                 resolve(true);
-            }
+            };
 
             tr.onerror = function(e) {
                 reject(e.target);
-            }
+            };
         });
     });
 }

@@ -24,10 +24,10 @@ export function getLocalTerms() {
     if (Array.isArray(localTerms)) {
         var newFormat = {};
         var times = {
-            "fa14": 1410981659, "sp15": 1414178138
+            "fa14": 1410981659, "sp15": 1414178138,
         };
         localTerms.forEach(function(t) {
-            newFormat[t] = times[t]
+            newFormat[t] = times[t];
         });
         localTerms = newFormat;
         localStore.set('terms', newFormat);

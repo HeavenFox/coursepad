@@ -7,9 +7,9 @@ export function ajax(settings): any {
             error: function(xhr, status, error) {
                 reject({
                     status: xhr.status,
-                    body: xhr.responseText
+                    body: xhr.responseText,
                 });
-            }
+            },
         }, settings));
     });
 }
@@ -17,7 +17,7 @@ export function ajax(settings): any {
 export function getJson(url, options = {}): any {
     var settings = $.extend({
         url: url,
-        dataType: 'json'
+        dataType: 'json',
     }, options);
     return ajax(settings);
 }
@@ -27,7 +27,7 @@ export function post(url, data, options = {}): any {
         method: 'POST',
         url: url,
         data: data,
-        dataType: 'json'
+        dataType: 'json',
     }, options);
     return ajax(settings);
 }

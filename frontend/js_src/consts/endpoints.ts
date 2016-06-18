@@ -58,7 +58,8 @@ export function shared(slug) {
 }
 
 export function sync(session, clientId) {
-    return WS_SERVER + 'endpoints/sync/websocket?sid=' + encodeURIComponent(session) + '&clientid=' + encodeURIComponent(clientId);
+    return WS_SERVER + 'endpoints/sync/websocket?sid=' + encodeURIComponent(session)
+                     + '&clientid=' + encodeURIComponent(clientId);
 }
 
 export function getSchedule(term) {
