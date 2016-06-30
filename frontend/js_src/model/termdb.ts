@@ -72,6 +72,25 @@ interface ITermDBUpdates {
 export class LocalTermDatabase extends TermDatabase {
     titleIndex: any;
 
+    /**
+     * Quick sanity check of the database.
+     */
+    async checkIntegrity() {
+        let subjCount = await indexeddb.countByIndex('subjects', 'term', IDBKeyRange.only(this.term));
+        if (subjCount < 1) {
+            return false;
+        }
+        let rosterCount = await indexeddb.countByIndex('roster', 'term', IDBKeyRange.only(this.term));
+        if (rosterCount < 1) {
+            return false;
+        }
+        let indexCount = await indexeddb.countByKeyRange('title_typeahead_index', IDBKeyRange.only(this.term));
+        if (indexCount < 1) {
+            return false;
+        }
+        return true;
+    }
+
     async getBasket(basket) {
         let clusters = await Promise.all(basket.map((c) => {
             var split = c.split(' ');
@@ -164,7 +183,7 @@ export class LocalTermDatabase extends TermDatabase {
         await indexeddb.add('title_typeahead_index', obj);
     }
 
-    async _applyDiff(termId, diff) {
+    private async _applyDiff(termId, diff) {
         if (diff['roster']) {
             let rosterDiff = diff['roster'];
             await indexeddb.queryObjectStore('roster', function(rosterStore) {
@@ -253,18 +272,15 @@ export class LocalTermDatabase extends TermDatabase {
         meta.addLocalTerm(termId, diff.time);
     }
 
-    async applyUpdates(updates: ITermDBUpdates) {
-        if (updates.term != this.term) {
-            return false;
-        }
-        let termId = updates.term;
+    async applyUpdates(updates: any[]) {
+        let termId = this.term;
         this.titleIndex = [];
 
         let titleIndexKeysToDelete = [];
         await indexeddb.deleteRecord('title_typeahead_index', termId);
 
-        for (let i=0; i < updates.diffs.length; i++) {
-            await this._applyDiff(termId, updates.diffs[i]);
+        for (let i=0; i < updates.length; i++) {
+            await this._applyDiff(termId, updates[i]);
         }
 
         // Rebuild Index
@@ -294,7 +310,37 @@ export class LocalTermDatabase extends TermDatabase {
         await indexeddb.add('title_typeahead_index', index);
 
         this.setTitleIndex(index);
-        this.emit('update');
+    }
+
+    async update() {
+        let diffs = await indexeddb.queryAllByIndex('diffs', 'diff', IDBKeyRange.only(this.term));
+        if (diffs.length === 0) return;
+        let currentTimestamp = meta.getLocalTerms()[this.term];
+        if (!currentTimestamp) {
+            console.error('trying to update a term that is not loaded ' + this.term);
+            return;
+        }
+
+        diffs = diffs.map(row => row['diff']);
+        diffs.sort((a, b) => a['prev_time'] - b['prev_time']);
+
+        // Make sure diffs are chained together
+        let usableDiffs = [];
+        for (let i=0; i < diffs.length; i++) {
+            if (diffs[i]['prev_time'] === currentTimestamp) {
+                usableDiffs.push(diffs[i]);
+                currentTimestamp = diffs[i]['time'];
+            }
+        }
+        if (usableDiffs.length === 0) {
+            return;
+        }
+        await this.applyUpdates(usableDiffs);
+
+        // clear applied updates
+        indexeddb.cursorByIndex('diffs', 'diff', IDBKeyRange.only(this.term), cursor => {
+            cursor.delete();
+        }, 'readwrite');
     }
 }
 

@@ -1,4 +1,4 @@
-var VERSION = 3;
+var VERSION = 4;
 
 var dbPromise: Promise<IDBDatabase>;
 
@@ -62,21 +62,27 @@ function upgradeSchema(transaction: IDBTransaction, version: number) {
                 }
             }
         };
+        /* falls through */
+    case 3:
+        let diffsStore = transaction.db.createObjectStore('diffs', {autoIncrement: true});
+        diffsStore.createIndex('diff', 'term', {unique: false});
     }
 }
 
 function initSchema(db: IDBDatabase) {
-    // FIXME: TS Bug: compound key not supported. Use <any> as workaround
     var rosterStore = db.createObjectStore('roster', {keyPath: 'id'});
     rosterStore.createIndex('term', 'term', {unique: false});
-    rosterStore.createIndex('course', <any>['term', 'sub', 'nbr'], {unique: false});
-    rosterStore.createIndex('subject', <any>['term', 'sub'], {unique: false});
+    rosterStore.createIndex('course', ['term', 'sub', 'nbr'], {unique: false});
+    rosterStore.createIndex('subject', ['term', 'sub'], {unique: false});
 
     var subjectsStore = db.createObjectStore('subjects', {autoIncrement: true});
-    subjectsStore.createIndex('subject', <any>['term', 'sub'], {unique: false});
+    subjectsStore.createIndex('subject', ['term', 'sub'], {unique: false});
     subjectsStore.createIndex('term', 'term', {unique: false});
 
     db.createObjectStore('title_typeahead_index', {keyPath: 'term'});
+
+    let diffsStore = db.createObjectStore('diffs', {autoIncrement: true});
+    diffsStore.createIndex('diff', 'term', {unique: false});
 }
 
 export function queryObjectStore(store: string, query: (store: IDBObjectStore) => void, mode = 'readonly') {
@@ -126,7 +132,7 @@ export function keyCursorByIndex(objectStore: string,
 }
 
 export function cursorByIndex(objectStore, index, keyRange,
-                              callback: (c: IDBCursorWithValue)=>void,
+                              callback: (c: IDBCursorWithValue)=>void|Promise<void>,
                               mode = 'readonly') {
     return open().then(function(db) {
         return new Promise(function(resolve, reject) {
@@ -137,8 +143,13 @@ export function cursorByIndex(objectStore, index, keyRange,
                 .onsuccess = function(e) {
                     let cursor: IDBCursorWithValue = (<IDBRequest>e.target).result;
                     if (cursor) {
-                        callback(cursor);
-                        cursor.continue();
+                        let result = callback(cursor);
+                        if (result instanceof Promise) {
+
+                        } else {
+                            cursor.continue();
+
+                        }
                     }
                 };
             transaction.oncomplete = function(e) {
@@ -155,6 +166,22 @@ export function queryAllByIndex(objectStore, index, keyRange) {
     }).then(function() {
         return results;
     });
+}
+
+export function countByIndex(objectStore: string, index: string, keyRange): Promise<Number> {
+    return open().then(db => new Promise((resolve, reject) => {
+        let req = db.transaction([objectStore], 'readonly').objectStore(objectStore).index(index).count(keyRange);
+        req.onsuccess = () => { resolve(req.result); };
+        req.onerror = reject;
+    }));
+}
+
+export function countByKeyRange(objectStore: string, keyRange): Promise<Number> {
+    return open().then(db => new Promise((resolve, reject) => {
+        let req = db.transaction([objectStore], 'readonly').objectStore(objectStore).count(keyRange);
+        req.onsuccess = () => { resolve(req.result); };
+        req.onerror = reject;
+    }));
 }
 
 export function getByKey(objectStore, key) {

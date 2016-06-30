@@ -41,6 +41,11 @@ export function addLocalTerm(term, time) {
     localStore.fsync('terms');
 }
 
+export function removeLocalTerm(term) {
+    delete localStore.get('terms', Object)[term];
+    localStore.fsync('terms');
+}
+
 export async function getRemoteTerms(noCache = false) {
     let data = await getRemoteMeta(noCache);
 

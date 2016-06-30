@@ -31,41 +31,50 @@ function localTermDownloaded(term) {
     return meta.getLocalTerms().hasOwnProperty(term);
 }
 
-function downloadLocalTerm(term) {
-    var db: LocalTermDatabase;
-    console.log('Using indexedDB');
-    var dbLoadedPromise;
-    if (localTermDownloaded(term)) {
-        dbLoadedPromise = Promise.resolve();
-    } else {
-        console.log("start downloading");
-        dbLoadedPromise = loadTerm(term);
+function undownloadLocalTerm(term) {
+    meta.removeLocalTerm(term);
+}
+
+async function downloadLocalTerm(term) {
+    console.log("Downloading term DB: " + term);
+    return await loadTerm(term);
+}
+
+async function replaceWithLocalTerm(term) {
+    if (!currentTermDB || currentTermDB.term === term) {
+        await setLocalTerm(term);
+        return true;
+    }
+    return false;
+}
+
+async function setLocalTerm(term) {
+    console.log(`Loading term ${term} from indexeddb`);
+
+    let db = new LocalTermDatabase(term);
+    if (!(await db.checkIntegrity())) {
+        return false;
     }
 
-    return dbLoadedPromise.then(function() {
-        console.log("start loading");
-        db = new LocalTermDatabase(term);
-        db.titleIndex = [];
+    await db.update();
 
-        db.on('update', function() {
-            store.emit('change');
-        });
+    db.titleIndex = [];
 
-        return indexeddb.getByKey('title_typeahead_index', term);
-    })
-    .then(function(index) {
-        if (index !== undefined) {
-            db.setTitleIndex(index);
-        }
+    let index = await indexeddb.getByKey('title_typeahead_index', term);
 
-        currentTermDB = db;
+    if (index !== undefined) {
+        db.setTitleIndex(index);
+    }
 
-        console.log("done");
-    });
+    currentTermDB = db;
+
+    console.log("indexeddb loaded");
+
+    return true;
 }
 
 async function loadTerm(term, progress = null) {
-    if (!progress) progress = function(){};
+    if (!progress) progress = () => {};
     // Download meta
     var remoteTerms = await meta.getRemoteTerms();
     if (!remoteTerms || !remoteTerms[term]) {
@@ -97,42 +106,43 @@ async function loadTerm(term, progress = null) {
     return true;
 }
 
-function checkForUpdates() {
+async function checkForUpdates() {
     var current_term = store.getCurrentTerm();
     if (current_term && current_term.term) {
         var term_id = current_term.term;
-        return meta.getRemoteTerms().then(function(remoteTerms) {
-            var localTerms = meta.getLocalTerms();
+        let remoteTerms = await meta.getRemoteTerms();
+        let localTerms = meta.getLocalTerms();
             if (remoteTerms[term_id] > localTerms[term_id]) {
                 // Need upgrade
-                return ajax.getJson(endpoints.dbIndex('version_history.json')).then(function(history) {
-                    var timestamps = history['term_db'][term_id];
-                    var index = timestamps.indexOf(localTerms[term_id]);
-                    if (index < 0) {
-                        throw new Error('cannot find history');
-                    }
+                let history = await ajax.getJson(endpoints.dbIndex('version_history.json'));
+                let timestamps = history['term_db'][term_id];
+                let index = timestamps.indexOf(localTerms[term_id]);
+                if (index < 0) {
+                    throw new Error('cannot find history');
+                }
 
-                    var path = timestamps.slice(index);
+                let path = timestamps.slice(index);
 
-                    var diffPromises = [];
-                    for (var i=0; i < path.length-1; i++) {
-                        diffPromises.push(
-                            ajax.getJson(endpoints.db(`diffs/diff_termdb_${term_id}_${path[i]}_${path[i+1]}.json`))
-                        );
-                    }
+                var diffPromises = [];
+                for (let i=0; i < path.length-1; i++) {
+                    diffPromises.push(
+                        ajax.getJson(endpoints.db(`diffs/diff_termdb_${term_id}_${path[i]}_${path[i+1]}.json`))
+                    );
+                }
 
-                    return Promise.all(diffPromises);
-                }).then(function(diffs) {
-                    return {term: term_id, diffs: diffs};
-                }).then(null, function(e) {
-                    console.warn('update check error', e);
-                });
+                let diffs = await Promise.all(diffPromises);
+
+                // Add sequentially, to prevent dangling diff
+                for (const d of diffs) {
+                    await indexeddb.add('diffs', {term: term_id, diff: d});
+                }
+
+                return true;
             } else {
                 return false;
             }
-        });
     }
-    return Promise.resolve(false);
+    return false;
 }
 
 class TermDBStore extends EventEmitter {
@@ -166,17 +176,30 @@ class TermDBStore extends EventEmitter {
         // Use Remote Term to reduce latency
         currentTermDB = this.getRemoteTerm(term);
 
+        // Kick off download, but don't wait for it
+        let asyncDownload = () => {
+            downloadLocalTerm(term).then(() => {
+                replaceWithLocalTerm(term);
+            });
+        };
+
         if (useLocal() && preference === DBPreference.PREFER_FASTER) {
+            console.log('Using indexedDB');
             if (localTermDownloaded(term)) {
                 // Downloaded, so we can just use it
-                await downloadLocalTerm(term);
-                this.checkForUpdates();
+                if (await setLocalTerm(term)) {
+                    this.checkForUpdates();
+                } else {
+                    console.log('Integrity check failed. Redownloading.');
+                    // Remove the term from meta
+                    undownloadLocalTerm(term);
+
+                    asyncDownload();
+                }
             } else {
-                // Kick off download, but don't wait for it
-                downloadLocalTerm(term);
+                asyncDownload();
             }
         }
-
 
         meta.setSelectedTerm(term);
         this.ready = true;
@@ -185,18 +208,12 @@ class TermDBStore extends EventEmitter {
 
 
     getRemoteTerm(term) {
-        var db = new RemoteTermDatabase(term);
-
-        return db;
+        return new RemoteTermDatabase(term);
     }
 
-    async checkForUpdates() {
-        let result = await checkForUpdates();
-        if (result !== false) {
-            this.emit('updateAvailable', result);
-        }
+    checkForUpdates() {
+        return checkForUpdates();
     }
-
 }
 
 

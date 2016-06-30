@@ -132,7 +132,7 @@ let modifiedCourse2 = {
     "unit": [4]
 };
 
-var testTerm = 'fa09';
+const testTerm = 'fa09';
 
 describe('LocalTermDatabase', function() {
     before(function() {
@@ -143,6 +143,77 @@ describe('LocalTermDatabase', function() {
         return indexeddb.close();
     });
 
+    describe('checkIntegrity', function() {
+        let addSubject = async function() {
+            await indexeddb.add('subjects', {
+                'term': testTerm,
+                "sub": "PMA",
+                "desc": "Performing & Media Arts",
+            });
+        };
+
+        let addRoster = async function() {
+            await indexeddb.add('roster', {
+                'term': testTerm,
+                "sub": "PSYCH",
+                "title": "Social Psychology II",
+                "nbr": 2530,
+                "secs": {
+                    "LEC": [{
+                        "nbr": 4421,
+                        "sec": "001",
+                        "mt": [{
+                            "ed": "05/11/2016",
+                            "sd": "01/27/2016"
+                        }]
+                    }]
+                },
+                "session": "1",
+                "id": 3,
+                "unit": [4],
+            });
+        };
+
+        let addIndex = async function() {
+            await indexeddb.add('title_typeahead_index', {
+                'term': testTerm,
+                'index': [],
+            });
+        };
+
+        afterEach(function() {
+            return LocalTermDatabase.deleteTerm(testTerm);
+        });
+
+        it('should reject term without subjects', async function() {
+            let db = new LocalTermDatabase(testTerm);
+            await addIndex();
+            await addRoster();
+            expect(await db.checkIntegrity()).to.be.false;
+        });
+
+        it('should reject term without roster', async function() {
+            let db = new LocalTermDatabase(testTerm);
+            await addIndex();
+            await addSubject();
+            expect(await db.checkIntegrity()).to.be.false;
+        });
+
+        it('should reject term without index', async function() {
+            let db = new LocalTermDatabase(testTerm);
+            await addSubject();
+            await addRoster();
+            expect(await db.checkIntegrity()).to.be.false;
+        });
+
+        it('should accept seemingly valid term db', async function() {
+            let db = new LocalTermDatabase(testTerm);
+            await addSubject();
+            await addRoster();
+            await addIndex();
+            expect(await db.checkIntegrity()).to.be.true;
+        });
+    });
 
     describe('applyUpdates', function() {
         beforeEach(function() {
@@ -166,12 +237,7 @@ describe('LocalTermDatabase', function() {
                 }
             };
 
-            let updates = {
-                term: testTerm,
-                diffs: [diff]
-            };
-
-            await db.applyUpdates(updates);
+            await db.applyUpdates([diff]);
 
             let expectedCourses = [modifiedCourse, addedCourse];
             let observedCourses = await indexeddb.queryAllByIndex('roster', 'term', IDBKeyRange.only(testTerm));
@@ -203,12 +269,8 @@ describe('LocalTermDatabase', function() {
                     "modified": [modifiedSubject]
                 }
             };
-            let updates = {
-                term: testTerm,
-                diffs: [diff]
-            };
 
-            await db.applyUpdates(updates);
+            await db.applyUpdates([diff]);
 
             let expected = [modifiedSubject, testData.subjects[2], addedSubject];
             let observed = await indexeddb.queryAllByIndex('subjects', 'term', IDBKeyRange.only(testTerm));
@@ -243,12 +305,8 @@ describe('LocalTermDatabase', function() {
                     }
                 }
             ];
-            let updates = {
-                term: testTerm,
-                diffs: diffs
-            };
 
-            await db.applyUpdates(updates);
+            await db.applyUpdates(diffs);
 
 
             let expectedCourses = [modifiedCourse2, addedCourse];

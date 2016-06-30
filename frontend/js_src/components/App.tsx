@@ -11,7 +11,6 @@ import Modal from './app/Modal';
 export default class App extends React.Component<{}, {}> {
     render() {
         return <div>
-        <div id="banner-container"></div>
         <header>
             <div id="logo"></div>
             <div id="topnav">
