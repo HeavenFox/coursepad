@@ -1,4 +1,4 @@
-var saveAs = require('filesaver');
+import {saveAs} from 'filesaver';
 
 exports.export = function() {
     var store = {localStorage: {}};
@@ -29,7 +29,7 @@ exports.import = function(file) {
         }
 
         window.location.reload();
-        
+
     }
 
     reader.readAsText(file);
