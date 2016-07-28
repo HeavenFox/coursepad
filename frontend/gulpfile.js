@@ -31,13 +31,13 @@ function target() {
     }
 }
 
-function webpack_conf() {
+function webpack_conf(bleedingEdge) {
     var babel_query = {
         presets: ['es2015', 'stage-3', 'react'],
         plugins: ['transform-runtime']
     };
 
-    if (DEV) {
+    if (bleedingEdge) {
         // Target chrome
         babel_query = {
             presets: ['react'],
@@ -87,7 +87,7 @@ function dev(t) {
 gulp.task('js', function() {
     var filter = gulpFilter(['main.js']);
     return gulp.src('js_src/app.tsx')
-        .pipe(webpackStream(webpack_conf()))
+        .pipe(webpackStream(webpack_conf(DEV)))
         .on('error', gutil.log)
         .pipe((LEVEL <= 7) ? gutil.noop() : uglify({
                 mangle: {
@@ -169,7 +169,7 @@ gulp.task('rev-static', ['rev-index'], function() {
 gulp.task('build', ['rev-static']);
 
 gulp.task('test', function(done) {
-    var webpackConfig = webpack_conf();
+    var webpackConfig = webpack_conf(false);
     delete webpackConfig['output'];
 
     new KarmaServer({
@@ -191,7 +191,7 @@ gulp.task('test', function(done) {
 
         // start these browsers
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-        browsers: ['Chrome'],
+        browsers: ['PhantomJS'],
 
         webpack: webpackConfig,
         webpackMiddleware: {
@@ -202,7 +202,7 @@ gulp.task('test', function(done) {
         plugins: [
             'karma-webpack',
             'karma-mocha',
-            'karma-chrome-launcher'
+            'karma-phantomjs-launcher'
         ],
         singleRun: true
     }, done).start();
