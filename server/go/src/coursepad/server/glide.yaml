@@ -1,0 +1,22 @@
+package: coursepad/server
+import:
+- package: github.com/garyburd/redigo
+  version: ~1.0.0
+  subpackages:
+  - redis
+- package: github.com/golang/freetype
+  subpackages:
+  - truetype
+- package: github.com/gorilla/websocket
+  version: ~1.0.0
+- package: github.com/lib/pq
+- package: github.com/llgcode/draw2d
+- package: github.com/vharitonsky/iniflags
+- package: github.com/zenazn/goji
+  version: ~1.0.0
+  subpackages:
+  - graceful
+  - web
+- package: golang.org/x/crypto
+  subpackages:
+  - bcrypt
