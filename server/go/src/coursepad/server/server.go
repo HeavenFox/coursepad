@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/vharitonsky/iniflags"
-	"github.com/zenazn/goji"
-	"github.com/zenazn/goji/graceful"
-	"coursepad/server/conduit"
 	"coursepad/server/sharing"
 	"coursepad/server/sync"
 	"coursepad/server/termdb"
 	"coursepad/server/user"
 	"time"
+
+	"github.com/vharitonsky/iniflags"
+	"github.com/zenazn/goji"
+	"github.com/zenazn/goji/graceful"
 )
 
 func main() {
@@ -37,8 +37,6 @@ func main() {
 
 	goji.Get("/shared/:slug/image.png", sharing.GetSharedImageHandler)
 	goji.Get("/shared/:slug", sharing.SharedPageHandler)
-
-	goji.Post("/endpoints/conduit/", conduit.ConduitHandler)
 
 	goji.Serve()
 }
