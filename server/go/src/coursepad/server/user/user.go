@@ -1,25 +1,26 @@
 package user
 
 import (
+	"coursepad/server/common/db"
+	"coursepad/server/common/httperror"
 	"crypto/md5"
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"github.com/garyburd/redigo/redis"
-	_ "github.com/lib/pq"
-	"github.com/zenazn/goji/web"
-	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
-	"coursepad/server/common/db"
-	"coursepad/server/common/httperror"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/garyburd/redigo/redis"
+	_ "github.com/lib/pq"
+	"github.com/zenazn/goji/web"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const SESSION_TIMEOUT_EPHEMERAL = 7200
@@ -144,7 +145,7 @@ func makeSessionId() SessionId {
 }
 
 func facebookProfilePicture(fbid string) string {
-	return "https://graph.facebook.com/v2.2/" + fbid + "/picture"
+	return "https://graph.facebook.com/v2.7/" + fbid + "/picture"
 }
 
 func rediskeyForUserId(s SessionId) string {
@@ -317,8 +318,9 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (Session, *User
 	accessToken := r.Form.Get("access_token")
 	query := url.Values{}
 	query.Set("access_token", accessToken)
+	query.Set("fields", "id,name,email")
 
-	respData, err := callApi("https://graph.facebook.com/v2.2/me", query)
+	respData, err := callApi("https://graph.facebook.com/v2.7/me", query)
 	if err != nil {
 		return redisSession{}, nil, errors.New("Unable to communicate with Facebook")
 	}

@@ -393,7 +393,7 @@ func ShareHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 
 	// Asynchronously try to prefetch shared url for Facebook
 	go func() {
-		resp, err := http.Get("https://graph.facebook.com/v2.2/?id=" + url.QueryEscape(sharedUrl) + "&access_token=" + url.QueryEscape(fb.AppToken()))
+		resp, err := http.Get("https://graph.facebook.com/v2.7/?id=" + url.QueryEscape(sharedUrl) + "&access_token=" + url.QueryEscape(fb.AppToken()))
 		if err == nil {
 			resp.Body.Close()
 		} else {
