@@ -1,10 +1,10 @@
 # Installing CoursePad.me
 
-Thank you for contributing to CoursePad.me! In order to start coding, you will need to set up development environment first.
+Thank you for contributing to CoursePad.me! In order to start coding, you will need to set up your development environment first.
 
 CoursePad.me is an offline-first single-page application (SPA). Therefore, the vast majority of the code (and development) is in frontend, written in TypeScript (with some legacy JavaScript which need to be converted or removed). The backend is written in Go, and supports features such as sharing and syncing. In addition, there is a roster database updater, written in python, whose job is to load the roster from university registrar and convert it into a format CoursePad.me understands.
 
-As a rule of thumb, in the majority of the cases, you will not need to install the backend environment, because CoursePad.me is designed to function as such. 
+As a rule of thumb, in the majority of the cases, you will not need to install the backend environment. CoursePad.me can function without one.
 
 This tutorial assumes that you use a Unix-like environment. CoursePad.me is written on macOS (née OS X) and the server runs Ubuntu 12.04. Windows will probably work but YMMV.
 
@@ -44,7 +44,7 @@ Of course you may use any server software but we recommend nginx.
 
 Install nginx. Once again, we recommend using homebrew on macOS.
 
-Edit nginx config file and add a stanza in `http {}` like this (replacing paths as necessary)
+Edit nginx config file (If you installed with homebrew, it should be at `/usr/local/ect/nginx/nginx.conf`) and add a stanza in `http {}` like this (replacing paths as necessary)
 
 ```
 server {
@@ -82,6 +82,11 @@ Download and install Postgres. You need at least 9.4. On macOS, `Postgres.app` i
 Create a database `CREATE DATABASE coursepad;`
 
 Import the schema file in `server/schema/`. Don't forget to switch to your database first! (e.g. `\c coursepad`)
+
+#### Install Redis
+CoursePad.me uses Redis to manage sessions, as well as a message queue.
+
+You simply need to download redis and run it. It's that simple.
 
 #### Install Go
 Install Go. CoursePad.me is known to work on 1.7.
