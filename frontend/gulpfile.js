@@ -1,27 +1,19 @@
-var gulp = require('gulp');
-var babel = require('gulp-babel');
-var webpack = require('webpack');
-var webpackStream = require('webpack-stream');
-var uglify = require('gulp-uglify');
-var sass = require('gulp-sass');
-var del = require('del');
-var sourcemaps = require('gulp-sourcemaps');
-var gutil = require('gulp-util');
-var replace = require('gulp-replace');
-var postcss = require('gulp-postcss');
-var autoprefixer = require('autoprefixer-core');
-var rev = require('gulp-rev');
-var revCollector = require('gulp-rev-collector');
-var minifyHTML   = require('gulp-minify-html');
-var gulpFilter = require('gulp-filter');
-var tslint = require("gulp-tslint");
+const gulp = require('gulp');
+const gulpLoadPlugins = require('gulp-load-plugins');
+
+const webpack = require('webpack');
+const webpackStream = require('webpack-stream');
+const del = require('del');
+const autoprefixer = require('autoprefixer-core');
+
+const $ = gulpLoadPlugins();
 
 var KarmaServer = require('karma').Server;
 
 var LEVEL = +process.env.LEVEL;
 if (!LEVEL) LEVEL = 1;
 
-var DEV = LEVEL == 1;
+const DEV = LEVEL == 1;
 
 function target() {
     if (DEV) {
@@ -31,7 +23,7 @@ function target() {
     }
 }
 
-function webpack_conf(bleedingEdge) {
+function genWebpackConfig(bleedingEdge) {
     var babel_query = {
         presets: ['es2015', 'stage-3', 'react'],
         plugins: ['transform-runtime']
@@ -72,7 +64,7 @@ function webpack_conf(bleedingEdge) {
 
 function prod(t) {
     if (DEV) {
-        return gutil.noop();
+        return $.util.noop();
     }
     return t;
 }
@@ -81,15 +73,15 @@ function dev(t) {
     if (DEV) {
         return t;
     }
-    return gutil.noop();
+    return $.util.noop();
 }
 
 gulp.task('js', function() {
-    var filter = gulpFilter(['main.js']);
+    var filter = $.filter(['main.js']);
     return gulp.src('js_src/app.tsx')
-        .pipe(webpackStream(webpack_conf(DEV)))
-        .on('error', gutil.log)
-        .pipe((LEVEL <= 7) ? gutil.noop() : uglify({
+        .pipe(webpackStream(genWebpackConfig(DEV)))
+        .on('error', $.util.log)
+        .pipe((LEVEL <= 7) ? $.util.noop() : $.uglify({
                 mangle: {
                     except: ['GeneratorFunction']
                 },
@@ -98,43 +90,42 @@ gulp.task('js', function() {
                 }
              }))
         .pipe(prod(filter))
-            .pipe(prod(rev()))
+            .pipe(prod($.rev()))
         .pipe(prod(filter.restore()))
 
         .pipe(gulp.dest(target() + 'js/'))
-        .pipe(prod(rev.manifest()))
+        .pipe(prod($.rev.manifest()))
         .pipe(prod(gulp.dest( '/tmp/rev/js' )));
 });
 
 gulp.task('css', function() {
-    var sassConf = {
+    const sassConf = {
         style: DEV ? 'nested' : 'compressed',
         sourcemap: DEV ? true : false
     };
 
     return gulp.src('sass_src/**/*.scss')
-        .pipe(sass(sassConf).on('error', sass.logError))
-        .pipe(postcss([autoprefixer({})]))
-        .pipe(prod(rev()))
+        .pipe($.plumber())
+        .pipe($.sass(sassConf).on('error', $.sass.logError))
+        .pipe($.postcss([autoprefixer({})]))
+        .pipe(prod($.rev()))
         .pipe(gulp.dest(target() + 'css/'))
-        .pipe( prod(rev.manifest()) )
-        .pipe( prod(gulp.dest( '/tmp/rev/css' )) );
+        .pipe(prod($.rev.manifest()))
+        .pipe(prod(gulp.dest( '/tmp/rev/css' )));
 });
 
 gulp.task('static', function() {
-    var filter = gulpFilter(['index.html'], {restore: true});
+    var filter = $.filter(['index.html'], {restore: true});
     return gulp.src('static/**')
+               .pipe($.plumber())
                .pipe(dev(filter))
-               .pipe(dev(replace('react.min.js', 'react.js')))
-               .pipe(dev(replace('react-dom.min.js', 'react-dom.js')))
+               .pipe(dev($.replace('react.min.js', 'react.js')))
+               .pipe(dev($.replace('react-dom.min.js', 'react-dom.js')))
                .pipe(dev(filter.restore()))
                .pipe(gulp.dest(target()));
 });
 
-gulp.task('default', function() {
-    DEV = true;
-    gulp.run('js', 'css', 'static');
-
+gulp.task('default', ['js', 'css', 'static'], () => {
     gulp.watch('js_src/**/*', ['js']);
     gulp.watch('sass_src/**/*.scss', ['css']);
     gulp.watch('static/**', ['static']);
@@ -145,14 +136,14 @@ gulp.task('clean', function() {
 });
 
 gulp.task('lint', function() {
-    gulp.src("js_src/**/*.ts")
-        .pipe(tslint())
-        .pipe(tslint.report("verbose"))
+    return gulp.src("js_src/**/*.ts")
+               .pipe($.tslint())
+               .pipe($.tslint.report("verbose"))
 });
 
 gulp.task('rev-index', ['js', 'css', 'static'], function() {
     return gulp.src(['/tmp/rev/**/*.json', target() + 'index.html'])
-        .pipe(revCollector({
+        .pipe($.revCollector({
             replaceReved: true
         }))
         .pipe(gulp.dest(target()))
@@ -160,7 +151,7 @@ gulp.task('rev-index', ['js', 'css', 'static'], function() {
 
 gulp.task('rev-static', ['rev-index'], function() {
     return gulp.src(['/tmp/rev/**/*.json', target() + 'static/*.html'])
-        .pipe(revCollector({
+        .pipe($.revCollector({
             replaceReved: true
         }))
         .pipe(gulp.dest(target() + 'static/'))
@@ -169,7 +160,7 @@ gulp.task('rev-static', ['rev-index'], function() {
 gulp.task('build', ['rev-static']);
 
 gulp.task('test', function(done) {
-    var webpackConfig = webpack_conf(false);
+    const webpackConfig = genWebpackConfig(false);
     delete webpackConfig['output'];
 
     new KarmaServer({
@@ -177,26 +168,13 @@ gulp.task('test', function(done) {
         frameworks: ['mocha'],
         preprocessors: {'js_src/**/tests/*.ts': ['webpack']},
         reporters: ['progress'],
-        // web server port
         port: 9876,
-
-
-        // enable / disable colors in the output (reporters and logs)
         colors: true,
-
-
-        // enable / disable watching file and executing tests whenever any file changes
         autoWatch: false,
-
-
-        // start these browsers
-        // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
         browsers: ['PhantomJS'],
 
         webpack: webpackConfig,
         webpackMiddleware: {
-            // webpack-dev-middleware configuration
-            // i. e.
             noInfo: true
         },
         plugins: [
