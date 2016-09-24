@@ -1,30 +1,33 @@
 import user from '../../store/user.ts';
 
-var IfLoginStatus = React.createClass({
-    getInitialState: function() {
-        return {loggedIn: user.loggedIn()};
-    },
+interface IfLoginStatusState {
+    loggedIn: boolean;
+}
 
-    _update: function() {
+export default class IfLoginStatus extends React.Component<React.Props<IfLoginStatus>, IfLoginStatusState> {
+    state = {loggedIn: user.loggedIn()};
+
+    _update() {
         this.setState({loggedIn: user.loggedIn()});
-    },
+    }
 
-    componentDidMount: function() {
+    componentDidMount() {
         user.on('loginstatuschange', this._update);
-    },
+    }
 
-    shouldComponentUpdate: function(nextProps, nextState) {
+    shouldComponentUpdate(nextProps, nextState) {
         return nextState.loggedIn !== this.state.loggedIn;
-    },
+    }
 
-    render: function() {
+    render() {
         if (this.state.loggedIn) {
-            return Array.isArray(this.props.children) ? this.props.children[0] : this.props.children;
+            return (
+                <div>{Array.isArray(this.props.children) ? this.props.children[0] : this.props.children}</div>
+            );
         } else {
-            return Array.isArray(this.props.children) ? (this.props.children[1] || null) : null;
+            return (
+                <div>{Array.isArray(this.props.children) ? (this.props.children[1] || null) : null}</div>
+            );
         }
-
-    },
-});
-
-export default IfLoginStatus;
+    }
+}

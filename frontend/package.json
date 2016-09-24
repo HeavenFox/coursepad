@@ -62,7 +62,7 @@
     "mocha": "^2.3.4",
     "ts-loader": "^0.8.0",
     "tslint": "^3.11.0",
-    "typescript": "^1.8.0",
+    "typescript": "^2.0.0",
     "uglify-js": "^2.4.15",
     "webpack": "^1.13.0",
     "webpack-stream": "^3.2.0",
