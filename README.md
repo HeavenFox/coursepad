@@ -11,6 +11,11 @@
 ## Installing
 See [INSTALLING.md](INSTALLING.md)
 
+## Contributing
+We welcome your contribution!
+
+Before sending a pull request, please see [CONTRIBUTING.md](CONTRIBUTING.md) for our guideline.
+
 ## License
 > Copyright 2014- Jingsi Zhu
 
