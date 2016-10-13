@@ -33,7 +33,9 @@ export default class App extends React.Component<{}, {}> {
                     <Sidebar />
                 </div>
                 <div className="clearboth" />
-                <footer>&copy; CoursePad.me. Data Courtesy of Cornell University Registrar. <a href="/static/tos.html">Term of Service</a> - <a href="/static/privacy.html">Privacy Policy</a> - <a href="/static/ack.html">Acknowledgement</a></footer>
+                <footer>
+                    CoursePad.me is <a href="https://open.coursepad.me">Open Source Software</a>. Data Courtesy of Cornell University Registrar. <a href="/static/tos.html">Term of Service</a> - <a href="/static/privacy.html">Privacy Policy</a> - <a href="/static/ack.html">Acknowledgement</a>
+                </footer>
             </div>
             <div className="clearboth" />
         </div>
