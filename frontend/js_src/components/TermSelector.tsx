@@ -1,9 +1,10 @@
-var Drop : any = require('tether-drop');
+import React from 'react';
+import Drop from 'tether-drop';
 
-import * as meta from '../store/meta.ts';
-import termdb from '../store/termdb.ts';
-import schedules from '../store/schedules.ts';
-import * as humanize from '../consts/humanize.ts';
+import * as meta from '../store/meta';
+import termdb from '../store/termdb';
+import schedules from '../store/schedules';
+import * as humanize from '../consts/humanize';
 
 interface TermListProps {
     clickHandler: Function;

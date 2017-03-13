@@ -1,8 +1,8 @@
 import SplashScreen from '../components/pagelets/SplashScreen.tsx';
-var campaign = require('../store/campaign.js');
+import * as campaign from '../store/campaign.js';
 import * as modal from './modal';
 
-module.exports = function() {
+export default function welcome() {
     if (!campaign.hasRun('welcome_v2')) {
         modal.show(<SplashScreen />);
     }

@@ -1,6 +1,7 @@
-import schedules from '../store/schedules.ts';
-var schedulestorage : any = require('../store/schedulestorage.js');
-import * as ana from '../analytics/analytics.ts';
+import React from 'react';
+import schedules from '../store/schedules';
+import schedulestorage from '../store/schedulestorage.js';
+import * as ana from '../analytics/analytics';
 
 interface ScheduleIconProps {
     color: string;
@@ -119,11 +120,11 @@ var ScheduleLine = React.createClass<ScheduleLineProps, any>({
 
 var LeftBar = React.createClass({
     _onHover: function() {
-        $('#main-container').addClass('schedules-open');
+        document.getElementById('main-container').classList.add('schedules-open');
     },
 
     _onOut: function() {
-        $('#main-container').removeClass('schedules-open');
+        document.getElementById('main-container').classList.remove('schedules-open');
     },
 
     getInitialState: function() {

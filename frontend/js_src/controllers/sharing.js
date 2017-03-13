@@ -3,7 +3,7 @@ import * as endpoints from '../consts/endpoints.ts';
 import user from '../store/user.ts';
 import schedules from '../store/schedules.ts';
 
-async function shareSchedule() {
+export async function shareSchedule() {
     var curUser = user.getCurrentUser();
     var curSchedule = schedules.getCurrentSchedule();
     if (!curUser) {
@@ -23,6 +23,3 @@ async function shareSchedule() {
         'term': curSchedule.term
     }, options);
 }
-
-
-exports.shareSchedule = shareSchedule;

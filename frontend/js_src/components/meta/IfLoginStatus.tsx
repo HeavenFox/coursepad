@@ -1,4 +1,5 @@
-import user from '../../store/user.ts';
+import React from 'react';
+import user from '../../store/user';
 
 interface IfLoginStatusState {
     loggedIn: boolean;

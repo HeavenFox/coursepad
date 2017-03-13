@@ -1,6 +1,6 @@
 import {saveAs} from 'filesaver';
 
-exports.export = function() {
+export function exportData() {
     var store = {localStorage: {}};
     for (var i=0; i < localStorage.length; i++) {
         var key = localStorage.key(i);
@@ -15,7 +15,7 @@ exports.export = function() {
     saveAs(blob, 'coursepad.json');
 }
 
-exports.import = function(file) {
+export function importData(file) {
     console.log(file);
     var reader = new FileReader();
     reader.onload = function(e) {

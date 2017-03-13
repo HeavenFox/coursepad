@@ -1,6 +1,4 @@
-import {timeStringToHour} from '../utils/datetime.ts';
-import {strToDateObject} from '../utils/datetime';
-
+import {timeStringToHour, strToDateObject} from '../utils/datetime';
 
 export class Meeting {
     parent: CourseComponent;

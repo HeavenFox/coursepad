@@ -1,6 +1,8 @@
-import CalendarElementMixin from './CalendarElementMixin.tsx';
-import {CalendarElementMixinProps} from './CalendarElementMixin.tsx';
-import schedules from '../store/schedules.ts';
+import React from 'react';
+import CalendarElementMixin from './CalendarElementMixin';
+import {CalendarElementMixinProps} from './CalendarElementMixin';
+import schedules from '../store/schedules';
+//import $ from 'jquery';
 
 // Make a function that can only be run once
 function makeRunOnce(f) {

@@ -12,3 +12,4 @@ interface Window {
 
 declare var LEVEL : number;
 declare var gapi: any;
+declare const $: any;

@@ -4,7 +4,7 @@ function reset() {
     getNext = undefined;
 }
 
-function nextSchedule() {
+export function nextSchedule() {
     if (getNext === undefined) {
         return null;
     }
@@ -54,7 +54,7 @@ function printSchedule(clusters) {
 */
 
 
-function makeSchedule(clusters, selected, priorities) {
+export function makeSchedule(clusters, selected, priorities) {
     reset();
 
     priorityLateStart = priorities['lateStart'];
@@ -83,9 +83,6 @@ function makeSchedule(clusters, selected, priorities) {
 
     return result;
 }
-
-exports.makeSchedule = makeSchedule;
-exports.nextSchedule = nextSchedule;
 
 //---------------------------------------------------------------
 // Days starting <= this time gets 0
@@ -139,7 +136,7 @@ function populateStartEndTimes(sections, startTimes, endTimes) {
                         }
                     }
                 }
-            }   
+            }
         }
     }
 }
@@ -446,7 +443,7 @@ function searchForSolution(clusters, fixed) {
     var startTimesFixed = new Array(5);
     var endTimesFixed = new Array(5);
     populateStartEndTimes(fixed, startTimesFixed, endTimesFixed);
-    
+
     var lunchMeetingsFixed = [[], [], [], [], []];
     populateLunchMeetings(fixed, lunchMeetingsFixed);
 

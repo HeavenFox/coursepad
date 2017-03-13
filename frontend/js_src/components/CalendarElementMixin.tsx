@@ -1,3 +1,5 @@
+import React from 'react';
+
 var CalendarElementMixin = {
     unitHeight: 65,
 

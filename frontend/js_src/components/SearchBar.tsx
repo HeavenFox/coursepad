@@ -1,6 +1,9 @@
-import {MutableSchedule} from '../model/schedules.ts';
-import termdb from '../store/termdb.ts';
-import schedules from '../store/schedules.ts';
+import React from 'react';
+import ReactDOM from 'react-dom';
+//import $ from 'jquery';
+import {MutableSchedule} from '../model/schedules';
+import termdb from '../store/termdb';
+import schedules from '../store/schedules';
 
 var SearchBar = React.createClass({
     componentWillMount: function() {

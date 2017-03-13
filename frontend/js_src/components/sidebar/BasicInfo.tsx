@@ -1,8 +1,8 @@
-import schedules from '../../store/schedules.ts';
-import {SharedSchedule, MutableSchedule} from '../../model/schedules.ts';
+import React from 'react';
+import schedules from '../../store/schedules';
+import {SharedSchedule, MutableSchedule} from '../../model/schedules';
 import moment from 'moment';
-
-import * as ana from '../../analytics/analytics.ts';
+import * as ana from '../../analytics/analytics';
 
 interface WeekSelectorProps {
     all: boolean;
@@ -86,11 +86,11 @@ var BasicInfo = React.createClass({
     },
 
     _showConflicts: function() {
-        $('#conflict-overlay').addClass('show');
+        document.getElementById('conflict-overlay').classList.add('show');
     },
 
     _hideConflicts: function() {
-        $('#conflict-overlay').removeClass('show');
+        document.getElementById('conflict-overlay').classList.remove('show');
     },
 
     _hideConflictsIfNotPinned: function() {

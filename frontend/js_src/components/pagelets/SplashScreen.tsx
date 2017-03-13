@@ -1,9 +1,10 @@
+import React from 'react';
 import * as modal from '../../utils/modal';
 
-import user from '../../store/user.ts';
-var campaign : any = require('../../store/campaign.js');
+import user from '../../store/user';
+import * as campaign from '../../store/campaign';
 
-import * as ana from '../../analytics/analytics.ts';
+import * as ana from '../../analytics/analytics';
 
 var LoginWindow = React.createClass<any, any>({
     getInitialState: function() {

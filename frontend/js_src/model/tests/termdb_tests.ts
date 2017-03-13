@@ -1,5 +1,5 @@
-import {TermDatabase, LocalTermDatabase} from '../termdb.ts';
-import * as indexeddb from '../../persist/indexeddb.ts';
+import {TermDatabase, LocalTermDatabase} from '../termdb';
+import * as indexeddb from '../../persist/indexeddb';
 import {expect} from 'chai';
 
 /* tslint:disable:trailing-comma */

@@ -1,9 +1,10 @@
-import Calendar from './Calendar.tsx';
-import SearchBar from './SearchBar.tsx';
-import Sidebar from './Sidebar.tsx';
-import TermSelector from './TermSelector.tsx';
-import User from './User.tsx';
-import LeftBar from './LeftBar.tsx';
+import React from 'react';
+import Calendar from './Calendar';
+import SearchBar from './SearchBar';
+import Sidebar from './Sidebar';
+import TermSelector from './TermSelector';
+import User from './User';
+import LeftBar from './LeftBar';
 
 import Modal from './app/Modal';
 

@@ -1,3 +1,5 @@
+import React from 'react';
+
 interface ModalAlertProps {
     title: string;
     content: string;

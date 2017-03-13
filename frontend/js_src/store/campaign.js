@@ -1,10 +1,10 @@
-var localStore = require('../persist/localStorage.js');
+import localStore from '../persist/localStorage';
 
-exports.hasRun = function(name) {
+export function hasRun(name) {
 	return !!localStore.get('campaigns', {})[name];
 }
 
-exports.markRun = function(name) {
+export function markRun(name) {
 	localStore.get('campaigns', {})[name] = true;
 	localStore.fsync('campaigns');
 }

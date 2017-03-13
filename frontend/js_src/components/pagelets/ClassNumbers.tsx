@@ -1,5 +1,6 @@
-import schedules from '../../store/schedules.ts';
-import {SECTION_TYPE_PRIORITIES} from '../../consts/humanize.ts';
+import React from 'react';
+import schedules from '../../store/schedules';
+import {SECTION_TYPE_PRIORITIES} from '../../consts/humanize';
 
 import * as modal from '../../utils/modal';
 

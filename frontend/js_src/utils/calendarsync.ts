@@ -1,10 +1,10 @@
 import {saveAs} from 'filesaver';
-import {getShortLocation} from '../consts/humanize.ts';
-import {authorize} from '../thirdparty/google.ts';
-import {promisify} from '../utils/promise.ts';
-import {toRFC} from '../utils/datetime.ts';
-import {serror} from '../analytics/analytics.ts';
-import {CourseComponent} from '../model/course.ts';
+import {getShortLocation} from '../consts/humanize';
+import {authorize} from '../thirdparty/google';
+import {promisify} from '../utils/promise';
+import {toRFC} from '../utils/datetime';
+import {serror} from '../analytics/analytics';
+import {CourseComponent} from '../model/course';
 import _ from 'lodash';
 
 export function toiCal(components) {

@@ -1,8 +1,10 @@
-import {MutableSchedule} from '../model/schedules.ts';
-import schedules from '../store/schedules.ts';
-import CalendarElementMixin from './CalendarElementMixin.tsx';
+import React from 'react';
+import {MutableSchedule} from '../model/schedules';
+import schedules from '../store/schedules';
+import CalendarElementMixin from './CalendarElementMixin';
 
-import * as ana from '../analytics/analytics.ts';
+import * as ana from '../analytics/analytics';
+//import $ from 'jquery';
 
 var MeetingDropoff = React.createClass({
     mixins : [CalendarElementMixin],

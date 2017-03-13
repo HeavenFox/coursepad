@@ -1,11 +1,11 @@
-import EventEmitter from 'eventemitter3';
+import {EventEmitter} from 'eventemitter3';
 
-import * as meta from './meta.ts';
-import {TermDatabase, LocalTermDatabase, RemoteTermDatabase} from '../model/termdb.ts';
+import * as meta from './meta';
+import {TermDatabase, LocalTermDatabase, RemoteTermDatabase} from '../model/termdb';
 
-import * as endpoints from '../consts/endpoints.ts';
-import * as indexeddb from '../persist/indexeddb.ts';
-import * as ajax from '../utils/ajax.ts';
+import * as endpoints from '../consts/endpoints';
+import * as indexeddb from '../persist/indexeddb';
+import * as ajax from '../utils/ajax';
 
 
 enum DBPreference {
@@ -80,28 +80,12 @@ async function loadTerm(term, progress = null) {
     if (!remoteTerms || !remoteTerms[term]) {
         throw new Error('invalid term');
     }
-    await new Promise(function(resolve, reject) {
-        $.ajax({
-            url: endpoints.db('termdb_' + term + '_' + remoteTerms[term] +  '.json'),
-            beforeSend: function(jqXHR) {
+    let data = await ajax.getJson(endpoints.db('termdb_' + term + '_' + remoteTerms[term] +  '.json'));
 
-            },
-            error: function(jqXHR, status, error) {
-                reject(status);
-            },
-            success: function(data) {
-                LocalTermDatabase.loadTerm(term, data).then(() => {
-                    meta.addLocalTerm(term, data.time);
-                    progress(1);
-                    resolve(true);
-                }).then(null, (e) => {
-                    console.warn(e);
-                    reject(e);
-                });
-            },
-            dataType: 'json',
-        });
-    });
+    await LocalTermDatabase.loadTerm(term, data);
+
+    meta.addLocalTerm(term, data.time);
+    progress(1);
 
     return true;
 }

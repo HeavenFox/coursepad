@@ -1,14 +1,15 @@
+import React from 'react';
 import {show as showModal, hide as hideModal} from '../actions/modal';
 import ModalAlert from '../components/app/ModalAlert';
 
 export function show(component: JSX.Element) {
-    $('body').addClass('modal-open');
+    document.getElementsByTagName('body')[0].classList.add('modal-open');
 
     showModal.dispatch({content: component});
 }
 
 export function stop() {
-    $('body').removeClass('modal-open');
+    document.getElementsByTagName('body')[0].classList.remove('modal-open');
 
     hideModal.dispatch({});
 }

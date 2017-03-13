@@ -1,7 +1,8 @@
-var magic : any = require('../../store/magic.js');
-import schedules from '../../store/schedules.ts';
-import {MutableSchedule} from '../../model/schedules.ts';
-import {sevent} from '../../analytics/analytics.ts';
+import React from 'react';
+import magic from '../../store/magic.js';
+import schedules from '../../store/schedules';
+import {MutableSchedule} from '../../model/schedules';
+import {sevent} from '../../analytics/analytics';
 
 interface PriorityProps {
     label: string;

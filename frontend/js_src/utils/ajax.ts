@@ -1,3 +1,5 @@
+//import $ from 'jquery';
+
 export function ajax(settings): any {
     return new Promise(function(resolve, reject) {
         $.ajax($.extend({

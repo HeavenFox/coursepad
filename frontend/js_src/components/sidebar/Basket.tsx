@@ -1,10 +1,11 @@
-import schedules from '../../store/schedules.ts';
-import {Schedule, MutableSchedule} from '../../model/schedules.ts';
+import React from 'react';
+import schedules from '../../store/schedules';
+import {Schedule, MutableSchedule} from '../../model/schedules';
 import {Course, CourseComponent, Cluster} from '../../model/course';
 
-import * as ana from '../../analytics/analytics.ts';
+import * as ana from '../../analytics/analytics';
 
-var Drop : any = require('tether-drop');
+import Drop from 'tether-drop';
 
 interface SelectionIndicatorProps {
     selected: boolean;
@@ -60,7 +61,8 @@ class CourseItem extends React.Component<CourseItemProps, CourseItemState> {
     }
 
     _toggleMenu = (courseNumber, e) => {
-        this.state.menuOpen = !this.state.menuOpen;
+        this.setState({menuOpen: !this.state.menuOpen});
+
         if (!this.drop) {
             var menu = document.createElement('div');
             menu.className = 'menu';
@@ -96,13 +98,6 @@ class CourseItem extends React.Component<CourseItemProps, CourseItemState> {
 
             this.drop.open();
         }
-
-/*
-        if (this.drop.isOpened()) {
-            this.drop.close();
-        } else {
-        }
-        */
     }
 
     componentWillUnmount() {
@@ -158,9 +153,9 @@ class CourseItem extends React.Component<CourseItemProps, CourseItemState> {
         return <div className={"basket-item " + className}>
             <div className="content">
                 <div className="content-buttons">
-                    <div aria-role="button" className="btn menu-btn" onClick={this._toggleMenu.bind(null, number)}></div>
-                    <div aria-role="button" className={"btn visibility-btn" + (clusterVisible ? '' : ' closed')} onClick={this.props.onToggleVisibility.bind(null, number)}></div>
-                    <div aria-role="button" className={"btn expand-btn" + (this.state.expanded ? ' expanded' : '')} onClick={this._toggleExpansion}></div>
+                    <div role="button" className="btn menu-btn" onClick={this._toggleMenu.bind(null, number)}></div>
+                    <div role="button" className={"btn visibility-btn" + (clusterVisible ? '' : ' closed')} onClick={this.props.onToggleVisibility.bind(null, number)}></div>
+                    <div role="button" className={"btn expand-btn" + (this.state.expanded ? ' expanded' : '')} onClick={this._toggleExpansion}></div>
                 </div>
             <div className="content-title" title={courseTitle}>{courseTitle}</div>
             </div>

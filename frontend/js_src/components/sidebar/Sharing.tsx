@@ -1,6 +1,8 @@
-var sharing : any = require('../../controllers/sharing.js');
-import * as fb from '../../thirdparty/fb.ts';
-import * as twitter from '../../thirdparty/twitter.ts';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import * as sharing from '../../controllers/sharing.js';
+import * as fb from '../../thirdparty/fb';
+import * as twitter from '../../thirdparty/twitter';
 
 interface SocialNetworksProps {
     url: string;

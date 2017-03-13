@@ -1,6 +1,6 @@
+import React from 'react';
 import * as modal from '../../utils/modal';
-
-var importexport : any = require('../../utils/importexport.js');
+import * as importexport from '../../utils/importexport';
 
 
 var ImportExport = React.createClass({
@@ -9,7 +9,7 @@ var ImportExport = React.createClass({
     },
 
     _save: function() {
-        importexport.export();
+        importexport.exportData();
     },
 
     _load: function() {
@@ -17,7 +17,7 @@ var ImportExport = React.createClass({
         if (files.length === 0) {
             alert("You need to choose a file");
         } else {
-            importexport.import(files[0]);
+            importexport.importData(files[0]);
         }
     },
 

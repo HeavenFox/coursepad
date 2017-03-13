@@ -1,5 +1,6 @@
-import ClassNumbers from '../pagelets/ClassNumbers.tsx';
-import ImportExport from '../pagelets/ImportExport.tsx';
+import React from 'react';
+import ClassNumbers from '../pagelets/ClassNumbers';
+import ImportExport from '../pagelets/ImportExport';
 import * as modal from '../../utils/modal';
 
 var Tools = React.createClass({

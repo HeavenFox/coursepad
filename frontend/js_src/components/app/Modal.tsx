@@ -1,3 +1,4 @@
+import React from 'react';
 import modal from '../../store/modal';
 
 export default class Modal extends React.Component<{}, {modal: JSX.Element}> {

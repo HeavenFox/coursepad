@@ -4,7 +4,7 @@ const gulpLoadPlugins = require('gulp-load-plugins');
 const webpack = require('webpack');
 const webpackStream = require('webpack-stream');
 const del = require('del');
-const autoprefixer = require('autoprefixer-core');
+const autoprefixer = require('autoprefixer');
 
 const $ = gulpLoadPlugins();
 
@@ -23,35 +23,24 @@ function target() {
     }
 }
 
-function genWebpackConfig(bleedingEdge) {
-    var babel_query = {
-        presets: ['es2015', 'stage-3', 'react'],
-        plugins: ['transform-runtime']
-    };
-
-    if (bleedingEdge) {
-        // Target chrome
-        babel_query = {
-            presets: ['react'],
-            plugins: ['transform-es2015-modules-commonjs', 'transform-async-to-generator']
-        }
-    };
+function genWebpackConfig(isDnevMode) {
     var conf = {
+        entry: "./js_src/app",
         output: {
             filename: "main.js",
             publicPath: "/js/"
         },
         module: {
-            loaders: [
-                {test: /\.tsx?$/, loaders: ['babel?' + JSON.stringify(babel_query), 'ts-loader']},
-                {test: /\.js$/, exclude: /node_modules/, loader: "babel", query: babel_query},
+            rules: [
+                {
+                    test: /\.(tsx?|js)$/,
+                    loaders: ['ts-loader'],
+                    exclude: /node_modules/
+                }
             ]
         },
-        ts: {
-            configFileName: 'tsconfig.webpack.json'
-        },
         resolve: {
-            extensions: ['', '.ts', '.tsx', '.js']
+            extensions: ['.ts', '.tsx', '.js']
         },
         plugins: [
             new webpack.DefinePlugin({
@@ -77,21 +66,13 @@ function dev(t) {
 }
 
 gulp.task('js', function() {
-    var filter = $.filter(['main.js']);
-    return gulp.src('js_src/app.tsx')
-        .pipe(webpackStream(genWebpackConfig(DEV)))
+    var filter = $.filter(['main.js'], {restore: true});
+    return gulp.src('js_src/**/*')
+        .pipe(webpackStream(genWebpackConfig(DEV), webpack))
         .on('error', $.util.log)
-        .pipe((LEVEL <= 7) ? $.util.noop() : $.uglify({
-                mangle: {
-                    except: ['GeneratorFunction']
-                },
-                compress: {
-                    drop_console: true
-                }
-             }))
         .pipe(prod(filter))
             .pipe(prod($.rev()))
-        .pipe(prod(filter.restore()))
+        .pipe(prod(filter.restore))
 
         .pipe(gulp.dest(target() + 'js/'))
         .pipe(prod($.rev.manifest()))
@@ -121,7 +102,7 @@ gulp.task('static', function() {
                .pipe(dev(filter))
                .pipe(dev($.replace('react.min.js', 'react.js')))
                .pipe(dev($.replace('react-dom.min.js', 'react-dom.js')))
-               .pipe(dev(filter.restore()))
+               .pipe(dev(filter.restore))
                .pipe(gulp.dest(target()));
 });
 
@@ -171,7 +152,7 @@ gulp.task('test', function(done) {
         port: 9876,
         colors: true,
         autoWatch: false,
-        browsers: ['PhantomJS'],
+        browsers: ['Firefox'],
 
         webpack: webpackConfig,
         webpackMiddleware: {
@@ -180,7 +161,7 @@ gulp.task('test', function(done) {
         plugins: [
             'karma-webpack',
             'karma-mocha',
-            'karma-phantomjs-launcher'
+            'karma-firefox-launcher'
         ],
         singleRun: true
     }, done).start();

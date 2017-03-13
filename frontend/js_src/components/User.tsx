@@ -1,7 +1,8 @@
-var Drop : any = require('tether-drop');
+import React from 'react';
+import Drop from 'tether-drop';
 
-import user from '../store/user.ts';
-var schedulestorage : any = require('../store/schedulestorage.js');
+import user from '../store/user';
+import schedulestorage from '../store/schedulestorage';
 import * as modal from '../utils/modal';
 
 interface UserAvatarProps {

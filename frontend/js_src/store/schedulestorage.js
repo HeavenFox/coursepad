@@ -1,12 +1,12 @@
-var EventEmitter = require('event-emitter');
+import EventEmitter from 'event-emitter';
 import {int31 as randomInt31} from '../utils/rand.ts';
 import * as endpoints from '../consts/endpoints.ts';
 import user from './user.ts';
 import * as ajax from '../utils/ajax.ts';
 
 import schedules from './schedules.ts';
-var localStore = require('../persist/localStorage.js');
-var color = require('../utils/color.ts');
+import localStore from '../persist/localStorage.js';
+import * as color from '../utils/color.ts';
 
 var currentStorage;
 
@@ -238,7 +238,7 @@ async function getWebSocket() {
             }
         }
     }
-    
+
     return webSocket;
 }
 
@@ -305,7 +305,7 @@ ScheduleStorage.prototype.reloadSchedule = async function(schedule) {
 
 ScheduleStorage.prototype.persistAndDirtySchedule = function(schedule) {
     var listChanged = (this.numberOfSchedules() === 0)
-    
+
     var stored = localStore.get(this.getStoreKey(), Array);
     stored[schedule.index] = schedule.serialize();
     this.persistAndDirtyStorage();
@@ -393,7 +393,7 @@ ScheduleStorage.prototype.publish = async function() {
     ackCallbacks.push(function(data) {
         if (data['term'] === self.term) {
             self.inflight = false;
-            var syncStatus = self.getSyncStatus(); 
+            var syncStatus = self.getSyncStatus();
             syncStatus['version'] = data['version'];
             syncStatus['dirty'] = !!self.dirtySinceSync;
             self.dirtySinceSync = false;
@@ -695,4 +695,4 @@ ScheduleStorage.prototype.getAllSchedules = function() {
 };
 
 
-module.exports = store;
+export default store;

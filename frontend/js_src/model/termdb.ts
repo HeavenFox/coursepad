@@ -1,10 +1,10 @@
-import EventEmitter from 'eventemitter3';
-import {Course} from '../model/course.ts';
-import * as meta from '../store/meta.ts';
+import {EventEmitter} from 'eventemitter3';
+import {Course} from '../model/course';
+import * as meta from '../store/meta';
 
-import * as endpoints from '../consts/endpoints.ts';
-import * as ajax from '../utils/ajax.ts';
-import * as indexeddb from '../persist/indexeddb.ts';
+import * as endpoints from '../consts/endpoints';
+import * as ajax from '../utils/ajax';
+import * as indexeddb from '../persist/indexeddb';
 
 const DEBUG = (LEVEL == 1);
 
@@ -51,7 +51,7 @@ export abstract class TermDatabase extends EventEmitter {
                 }
             }
             if (found) {
-                var currentResult = $.extend({}, toSearch[i]);
+                var currentResult = {...toSearch[i]};
                 currentResult.segments = segments;
                 results.push(currentResult);
             }
@@ -220,7 +220,7 @@ export class LocalTermDatabase extends TermDatabase {
         if (diff['subjects']) {
             var subjectsDiff = diff['subjects'];
 
-            function hashify(subjDiff) {
+            const hashify = (subjDiff) => {
                 var result = Object.create(null);
                 if (subjDiff) {
                     subjDiff.forEach(function(subject) {

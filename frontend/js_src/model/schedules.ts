@@ -1,15 +1,15 @@
-import EventEmitter from 'eventemitter3';
+import {EventEmitter} from 'eventemitter3';
 import moment from 'moment';
 
-import * as datetime from '../utils/datetime.ts';
-import * as conflicts from './course/conflicts.ts';
+import * as datetime from '../utils/datetime';
+import * as conflicts from './course/conflicts';
 
-import {int31 as randomInt31} from '../utils/rand.ts';
+import {int31 as randomInt31} from '../utils/rand';
 
-import termdb from '../store/termdb.ts';
+import termdb from '../store/termdb';
 
-import * as ana from '../analytics/analytics.ts';
-import {Meeting, CourseComponent, Course} from './course.ts';
+import * as ana from '../analytics/analytics';
+import {Meeting, CourseComponent, Course} from './course';
 
 export interface WeekInterval {
     startYear: number;
@@ -72,10 +72,10 @@ export abstract class Schedule extends EventEmitter {
         let clone : this = new (<any>this.constructor);
 
         clone.term = this.term;
-        clone.colorMapping = $.extend({}, this.colorMapping);
+        clone.colorMapping = {...this.colorMapping};
         clone.basket = this.basket.slice(0);
         clone.sections = this.sections.slice(0);
-        clone.hidden = $.extend({}, this.hidden);
+        clone.hidden = {...this.hidden};
         clone.color = this.color;
         clone.name = this.name;
         clone.uniqueId = this.uniqueId;
@@ -726,8 +726,8 @@ export class MutableSchedule extends Schedule {
         var persist = {};
         persist['sections'] = this.serializeSections(this.sections);
         persist['basket'] = this.serializeBasket(this.basket);
-        persist['colorMapping'] = $.extend({}, this.colorMapping);
-        persist['hidden'] = $.extend({}, this.hidden);
+        persist['colorMapping'] = {...this.colorMapping};
+        persist['hidden'] = {...this.hidden};
         persist['color'] = this.color;
         persist['name'] = this.name;
         if (this.uniqueId === -1) {

@@ -1,4 +1,4 @@
-var magic = require('../magic/magic.js');
+import * as magic from '../magic/magic';
 
 onmessage = function(e) {
 	var message = e.data;
@@ -8,7 +8,7 @@ onmessage = function(e) {
 			'cmd' : 'schedule',
 			'val' : magic.makeSchedule.apply(null, message['args'])
 		};
-		postMessage(reply);
+		postMessage(reply, "*");
 		break;
 
 	case 'next':
@@ -16,7 +16,7 @@ onmessage = function(e) {
 			'cmd' : 'schedule',
 			'val' : magic.nextSchedule()
 		}
-		postMessage(reply);
+		postMessage(reply, "*");
 		break;
 	}
 };

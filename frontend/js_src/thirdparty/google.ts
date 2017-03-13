@@ -32,8 +32,9 @@ export async function init() {
 }
 
 export function authorize(params, callback) {
-	let newParams = $.extend({
+	let newParams = {
 		'client_id': CLIENT_ID,
-	}, params);
+	 	...params
+	};
 	gapi.auth.authorize(newParams, callback);
 }

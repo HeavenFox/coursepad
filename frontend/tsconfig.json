@@ -1,9 +1,18 @@
 {
   "compilerOptions": {
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es6",
+    "alwaysStrict": true,
+    "target": "es5",
+    "module": "es6",
     "sourceMap": true,
-    "jsx": "preserve",
-    "moduleResolution": "node"
-  }
+    "jsx": "react",
+    "moduleResolution": "node",
+    "lib": [
+      "dom", "es5", "scripthost", "es2015.promise"
+    ]
+  },
+  "files": [
+    "./js_src/coursepad.d.ts"
+  ]
 }

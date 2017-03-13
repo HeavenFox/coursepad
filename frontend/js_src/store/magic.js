@@ -1,4 +1,4 @@
-var EventEmitter = require('event-emitter');
+import EventEmitter from 'event-emitter';
 import schedules from '../store/schedules.ts';
 
 function arrayForSection(section) {
@@ -35,7 +35,7 @@ function arrayForSchedule(schedule) {
     });
 }
 
-var MagicWorker = require('worker!../workers/magic.js');
+var MagicWorker = require('worker-loader!../workers/magic');
 
 var worker;
 
@@ -101,4 +101,4 @@ var magic = EventEmitter({
     }
 });
 
-module.exports = magic;
+export default magic;

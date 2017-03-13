@@ -52,7 +52,7 @@ function keys() {
     return result;
 }
 
-module.exports = localStore;
+export default localStore;
 
 window.addEventListener('storage', function(e) {
     var inCache = cache.hasOwnProperty(e.key);

@@ -1,4 +1,4 @@
-import EventEmitter from 'eventemitter3';
+import {EventEmitter} from 'eventemitter3';
 import {show as showModal, hide as hideModal} from '../actions/modal';
 
 class ModalStore extends EventEmitter {

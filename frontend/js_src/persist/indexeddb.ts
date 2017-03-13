@@ -169,7 +169,7 @@ export function queryAllByIndex(objectStore, index, keyRange) {
 }
 
 export function countByIndex(objectStore: string, index: string, keyRange): Promise<Number> {
-    return open().then(db => new Promise((resolve, reject) => {
+    return open().then(db => new Promise<Number>((resolve, reject) => {
         let req = db.transaction([objectStore], 'readonly').objectStore(objectStore).index(index).count(keyRange);
         req.onsuccess = () => { resolve(req.result); };
         req.onerror = reject;
@@ -177,7 +177,7 @@ export function countByIndex(objectStore: string, index: string, keyRange): Prom
 }
 
 export function countByKeyRange(objectStore: string, keyRange): Promise<Number> {
-    return open().then(db => new Promise((resolve, reject) => {
+    return open().then(db => new Promise<Number>((resolve, reject) => {
         let req = db.transaction([objectStore], 'readonly').objectStore(objectStore).count(keyRange);
         req.onsuccess = () => { resolve(req.result); };
         req.onerror = reject;

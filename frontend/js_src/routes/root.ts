@@ -1,10 +1,10 @@
 import {RoutingRule, register} from './router';
 
-var welcome : any = require('../utils/welcome.js');
-import * as meta from '../store/meta.ts';
-import * as humanize from '../consts/humanize.ts';
-import termdb from '../store/termdb.ts';
-import schedules from '../store/schedules.ts';
+import welcome from '../utils/welcome.js';
+import * as meta from '../store/meta';
+import * as humanize from '../consts/humanize';
+import termdb from '../store/termdb';
+import schedules from '../store/schedules';
 
 class RootRoute extends RoutingRule {
     pattern = /\/$/;

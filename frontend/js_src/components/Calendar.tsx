@@ -1,11 +1,12 @@
-import SingleMeeting from './SingleMeeting.tsx';
-import MeetingDropoff from './MeetingDropoff.tsx';
-import ConflictIndicator from './ConflictIndicator.tsx';
+import React from 'react';
+import SingleMeeting from './SingleMeeting';
+import MeetingDropoff from './MeetingDropoff';
+import ConflictIndicator from './ConflictIndicator';
 
-import schedules from '../store/schedules.ts';
+import schedules from '../store/schedules';
 
-import * as datetime from '../utils/datetime.ts';
-import * as humanize from '../consts/humanize.ts';
+import * as datetime from '../utils/datetime';
+import * as humanize from '../consts/humanize';
 
 var DropoffSet = React.createClass<React.Props<any>, any>({
     getInitialState: function() {

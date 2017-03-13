@@ -1,5 +1,6 @@
-import CalendarElementMixin from './CalendarElementMixin.tsx';
-import {CalendarElementMixinProps} from './CalendarElementMixin.tsx';
+import React from 'react';
+import CalendarElementMixin from './CalendarElementMixin';
+import {CalendarElementMixinProps} from './CalendarElementMixin';
 
 interface ConflictIndicatorProps extends CalendarElementMixinProps {
     key: any;

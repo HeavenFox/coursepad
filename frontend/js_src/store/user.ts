@@ -1,15 +1,15 @@
-import EventEmitter from 'eventemitter3';
+import {EventEmitter} from 'eventemitter3';
 
-import {User} from '../model/users.ts';
+import {User} from '../model/users';
 
-import * as ajax from '../utils/ajax.ts';
-import * as endpoints from '../consts/endpoints.ts';
-var cookies : any = require('cookies-js');
+import * as ajax from '../utils/ajax';
+import * as endpoints from '../consts/endpoints';
+import * as cookies from 'cookies-js';
 
-import * as fb from '../thirdparty/fb.ts';
-import * as google from '../thirdparty/google.ts';
+import * as fb from '../thirdparty/fb';
+import * as google from '../thirdparty/google';
 
-import * as ana from '../analytics/analytics.ts';
+import * as ana from '../analytics/analytics';
 
 type SessionId = string;
 

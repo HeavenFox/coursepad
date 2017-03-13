@@ -1,12 +1,12 @@
-import EventEmitter from 'eventemitter3';
+import {EventEmitter} from 'eventemitter3';
 import moment from 'moment';
-import * as router from '../routes/router.ts';
-import termdb from './termdb.ts';
-import {Schedule, MutableSchedule, SharedSchedule, WeekInterval} from '../model/schedules.ts';
+import * as router from '../routes/router';
+import termdb from './termdb';
+import {Schedule, MutableSchedule, SharedSchedule, WeekInterval} from '../model/schedules';
 import {Meeting} from '../model/course';
-import user from './user.ts';
-var localStore = require('../persist/localStorage.js');
-var schedulestorage : any = require('./schedulestorage.js');
+import user from './user';
+import localStore from '../persist/localStorage.js';
+import schedulestorage from './schedulestorage.js';
 
 
 const PREFER_LOCAL = 1;
