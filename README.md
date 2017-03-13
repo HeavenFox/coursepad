@@ -1,5 +1,5 @@
 # CoursePad.me
-![Build Status](https://travis-ci.com/HeavenFox/coursepad.svg?token=LrYeWHNbCWHuP5sKiHsZ&branch=master)
+![Build Status](https://travis-ci.org/HeavenFox/coursepad.svg?branch=master)
 
 [CoursePad.me](https://coursepad.me) is a course planning application originally designed for Cornell University. It supports advanced features such as
 
