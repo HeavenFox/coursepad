@@ -12,3 +12,5 @@ deploy.sh
 *.bak
 *sublime*
 *.log
+*.sh
+server/configs/cpserver/*.conf
