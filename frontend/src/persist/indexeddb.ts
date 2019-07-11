@@ -8,25 +8,21 @@ export function setDatabase(name: string) {
   DB_NAME = name;
 }
 
-export function open() {
-  if (dbPromise === undefined) {
-    dbPromise = new Promise(function(resolve, reject) {
-      let request = window.indexedDB.open(DB_NAME, VERSION);
-      request.onsuccess = function(e) {
-        resolve(request.result);
-      };
+export function open(): Promise<IDBDatabase> {
+  return new Promise(function(resolve, reject) {
+    let request = window.indexedDB.open(DB_NAME, VERSION);
+    request.onsuccess = function(e) {
+      resolve(request.result);
+    };
 
-      request.onupgradeneeded = function(e) {
-        if (e.oldVersion === 0) {
-          initSchema(request.result);
-        } else {
-          upgradeSchema(request.transaction, e.oldVersion);
-        }
-      };
-    });
-  }
-
-  return dbPromise;
+    request.onupgradeneeded = function(e) {
+      if (e.oldVersion === 0) {
+        initSchema(request.result);
+      } else {
+        upgradeSchema(request.transaction, e.oldVersion);
+      }
+    };
+  });
 }
 
 export function close(): Promise<void> {

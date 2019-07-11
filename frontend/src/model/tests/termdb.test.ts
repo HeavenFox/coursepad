@@ -1,3 +1,5 @@
+import "fake-indexeddb/auto";
+
 import { TermDatabase, LocalTermDatabase } from "../termdb";
 import * as indexeddb from "../../persist/indexeddb";
 
