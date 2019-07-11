@@ -1,18 +1,19 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "alwaysStrict": true,
     "target": "es5",
-    "module": "es6",
-    "sourceMap": true,
-    "jsx": "react",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
     "moduleResolution": "node",
-    "lib": [
-      "dom", "es5", "scripthost", "es2015.promise"
-    ]
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve"
   },
-  "files": [
-    "./js_src/coursepad.d.ts"
-  ]
+  "include": ["src"]
 }
