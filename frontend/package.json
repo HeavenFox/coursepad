@@ -12,7 +12,7 @@
     "event-emitter": "^0.3.1",
     "eventemitter3": "^2.0.0",
     "filesaver": "CoursePad/FileSaver.js#cp",
-    "lodash": "~4.1.0",
+    "lodash": "~4.7.0",
     "moment": "^2.17.0",
     "node-sass": "^4.12.0",
     "react": "^16.8.6",
