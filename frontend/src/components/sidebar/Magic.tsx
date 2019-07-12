@@ -1,5 +1,5 @@
 import React from "react";
-import magic from "../../store/magic.js";
+import magic from "../../store/magic";
 import schedules from "../../store/schedules";
 import { MutableSchedule } from "../../model/schedules";
 import { sevent } from "../../analytics/analytics";

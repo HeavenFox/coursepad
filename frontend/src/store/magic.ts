@@ -1,5 +1,8 @@
 import EventEmitter from "event-emitter";
-import schedules from "../store/schedules.ts";
+import schedules from "../store/schedules";
+
+import MagicWorker from "../workers/magic.fakeworker";
+import { withMutableSchedule } from "../model/schedules";
 
 function arrayForSection(section) {
   return {
@@ -36,14 +39,12 @@ function arrayForSchedule(schedule) {
     });
 }
 
-var MagicWorker = require("../workers/magic.worker.ts");
-
-var worker;
+let worker: MagicWorker | undefined;
 
 var oldSchedule;
 
 var magic = EventEmitter({
-  applySchedule: function(sections) {
+  applySchedule(sections) {
     oldSchedule = schedules.getCurrentSchedule();
     var newSchedule = oldSchedule.clone();
 
@@ -52,11 +53,11 @@ var magic = EventEmitter({
     schedules.setSchedule(newSchedule, "magic-new");
   },
 
-  revert: function() {
+  revert() {
     schedules.setSchedule(oldSchedule, "magic-revert");
   },
 
-  makeSchedule: function(schedule, priorities) {
+  makeSchedule(schedule, priorities) {
     var self = this;
     if (worker === undefined) {
       worker = new MagicWorker();
@@ -85,20 +86,22 @@ var magic = EventEmitter({
     });
   },
 
-  next: function() {
+  next() {
     worker.postMessage({
       cmd: "next"
     });
   },
 
-  cancel: function() {
+  cancel() {
     if (worker) {
       worker.terminate();
     }
   },
 
-  save: function() {
-    schedules.getCurrentSchedule().persistSections();
+  save() {
+    withMutableSchedule(schedules.getCurrentSchedule(), s =>
+      s.persistSections()
+    );
   }
 });
 

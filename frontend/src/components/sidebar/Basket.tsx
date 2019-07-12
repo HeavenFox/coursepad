@@ -1,6 +1,6 @@
 import React from "react";
 import schedules from "../../store/schedules";
-import { Schedule, MutableSchedule } from "../../model/schedules";
+import { withMutableSchedule } from "../../model/schedules";
 import { Course, CourseComponent, Cluster } from "../../model/course";
 
 import * as ana from "../../analytics/analytics";
@@ -27,17 +27,6 @@ var SelectionIndicator: React.FC<SelectionIndicatorProps> = props => {
     </div>
   );
 };
-
-function withMutableSchedule(
-  schedule: Schedule,
-  action: (s: MutableSchedule) => void
-) {
-  if (schedule instanceof MutableSchedule) {
-    action(schedule);
-  } else {
-    console.warn("Trying to mutate immutable schedule");
-  }
-}
 
 interface CourseItemProps {
   key: any;
