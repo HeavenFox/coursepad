@@ -6,7 +6,7 @@ interface IfLoginStatusState {
 }
 
 export default class IfLoginStatus extends React.Component<
-  IfLoginStatus,
+  {},
   IfLoginStatusState
 > {
   state = { loggedIn: user.loggedIn() };
