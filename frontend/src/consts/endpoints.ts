@@ -6,11 +6,19 @@ if (process.env.NODE_ENV === "production") {
   LEVEL = 5;
 }
 
+let DATA_PATH_BASE = "";
+if (process.env.NODE_ENV === "production") {
+  DATA_PATH_BASE = "https://data.coursepad.me";
+}
+
+let ENDPOINT_PATH_BASE = "";
+if (process.env.NODE_ENV === "production") {
+  ENDPOINT_PATH_BASE = "https://api.coursepad.me";
+}
+
 var WS_SERVER;
-if (LEVEL >= 9) {
+if (process.env.NODE_ENV === "production") {
   WS_SERVER = "wss://ws.coursepad.me/";
-} else if (LEVEL >= 5) {
-  WS_SERVER = "wss://staging-ws.coursepad.me/";
 } else {
   WS_SERVER = "ws://ws-test.coursepad.me/";
 }
@@ -28,16 +36,17 @@ function queryString(p) {
   return result;
 }
 
-export function db(path) {
-  return "/static/data/" + path;
+export function db(path: string) {
+  return DATA_PATH_BASE + "/static/data/" + path;
 }
 
-export function dbIndex(path) {
-  return "/static/data_index/" + path;
+export function dbIndex(path: string) {
+  return DATA_PATH_BASE + "/static/data_index/" + path;
 }
 
 export function termdbSearch(term, query) {
   return (
+    ENDPOINT_PATH_BASE +
     "/endpoints/termdb/" +
     encodeURIComponent(term) +
     "/search?q=" +
@@ -47,6 +56,7 @@ export function termdbSearch(term, query) {
 
 export function termdbBasket(term, basket) {
   return (
+    ENDPOINT_PATH_BASE +
     "/endpoints/termdb/" +
     encodeURIComponent(term) +
     "/basket?classes=" +
@@ -55,23 +65,29 @@ export function termdbBasket(term, basket) {
 }
 
 export function userLogin(method) {
-  return "/endpoints/user/signin/" + encodeURIComponent(method);
+  return (
+    ENDPOINT_PATH_BASE + "/endpoints/user/signin/" + encodeURIComponent(method)
+  );
 }
 
 export function bundleFromSession(session) {
-  return "/endpoints/user/session?sid=" + encodeURIComponent(session);
+  return (
+    ENDPOINT_PATH_BASE +
+    "/endpoints/user/session?sid=" +
+    encodeURIComponent(session)
+  );
 }
 
 export function refreshSession() {
-  return "/endpoints/user/refreshsession";
+  return ENDPOINT_PATH_BASE + "/endpoints/user/refreshsession";
 }
 
 export function share() {
-  return "/endpoints/sharing/share";
+  return ENDPOINT_PATH_BASE + "/endpoints/sharing/share";
 }
 
 export function shared(slug) {
-  return "/endpoints/sharing/shared/" + slug;
+  return ENDPOINT_PATH_BASE + "/endpoints/sharing/shared/" + slug;
 }
 
 export function sync(session, clientId) {
@@ -85,5 +101,7 @@ export function sync(session, clientId) {
 }
 
 export function getSchedule(term) {
-  return "/endpoints/sync/schedule/" + encodeURIComponent(term);
+  return (
+    ENDPOINT_PATH_BASE + "/endpoints/sync/schedule/" + encodeURIComponent(term)
+  );
 }
