@@ -5,6 +5,7 @@ import (
 	"coursepad/server/sync"
 	"coursepad/server/termdb"
 	"coursepad/server/user"
+	"math/rand"
 	"time"
 
 	"github.com/vharitonsky/iniflags"
@@ -13,6 +14,8 @@ import (
 )
 
 func main() {
+	rand.Seed(time.Now().UTC().UnixNano())
+
 	iniflags.Parse()
 	err := termdb.InitTermDatabase()
 	if err != nil {

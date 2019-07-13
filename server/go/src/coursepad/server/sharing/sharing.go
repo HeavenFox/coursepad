@@ -378,6 +378,7 @@ func ShareHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 		case "23":
 			retries--
 			if retries < 0 {
+				fmt.Fprintf(os.Stderr, "Duplicate slug: %s\n", slug)
 				panic(err)
 			}
 			continue
