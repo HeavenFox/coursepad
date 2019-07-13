@@ -1,211 +1,221 @@
-
 .classnumber-list > h2 {
-    font-weight: normal;
-    font-size: 16px;
-    padding: 10px;
+  font-weight: normal;
+  font-size: 16px;
+  padding: 10px;
 }
 
 .classnumber-list {
-    padding-bottom: 10px;
+  padding-bottom: 10px;
 }
 
-
-
 span.class-number {
-    display: inline-block;
-    width: 70px;
+  display: inline-block;
+  width: 70px;
 }
 
 .import-export {
-    padding: 10px;
+  padding: 10px;
 }
 
 .import-export h2 {
-    margin: 4px 0 8px 0;
-    font-size: 1.3em;
+  margin: 4px 0 8px 0;
+  font-size: 1.3em;
 }
 
 .import-export h3 {
-    margin: 2px 0;
-    font-size: 1.1em;
+  margin: 2px 0;
+  font-size: 1.1em;
 }
 
 .import-export p {
-    margin: 0.4em 0;
+  margin: 0.4em 0;
 }
 
 .import-export .close-btn-container {
-    margin-top: 12px;
+  margin-top: 12px;
 }
 
 .modal-window .btn {
-    display: inline-block;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 4px;
-    font-size: 14px;
+  display: inline-block;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 14px;
 }
 
 .modal-window .btn-blue {
-    border: 1px solid #357ebd;
-    background-color: #428bca;
-    color: #fff;
+  border: 1px solid #357ebd;
+  background-color: #428bca;
+  color: #fff;
 }
 
 .modal-window-inner .close-btn-container {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-align: center;
 }
 
 .modal-window-inner .close-btn {
-    display: inline-block;
-    cursor: pointer;
-    padding: 5px;
-    border: 1px solid #aaa;
-    border-radius: 4px;
-    background-color: #eee;
+  display: inline-block;
+  cursor: pointer;
+  padding: 5px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background-color: #eee;
 }
 
 .sadface {
-    font-weight: bold;
-    font-size: 36px;
-    text-align: center;
-    padding-top: 40px;
+  font-weight: bold;
+  font-size: 36px;
+  text-align: center;
+  padding-top: 40px;
 }
 
 .unsupported-browser-content {
-    margin: 10px;
+  margin: 10px;
 }
 
 .splash-screen {
-    box-shadow: 0px 0px 25px 0px rgba(75,75,75,1);
+  box-shadow: 0px 0px 25px 0px rgba(75, 75, 75, 1);
 }
 
 .splash-screen-header {
-    @include centered-img-with-size('splash-header', 700px, 80px);
-    height: 80px;
+  @include centered-img-with-size("splash-header", 700px, 80px);
+  height: 80px;
 }
 
 .splash-screen-inner {
-    padding: 10px;
+  padding: 10px;
 }
 
 .splash-screen-inner h2 {
-    margin-top: 5px;
-    margin-bottom: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .splash-screen-inner h3 {
-    font-weight: normal;
-    margin: 3px 0;
+  font-weight: normal;
+  margin: 3px 0;
 }
 
 .splash-screen-container {
-    margin-top: 15px;
+  margin-top: 15px;
 }
 
 .splash-screen-item-container {
-    float: left;
-    width: 70%;
+  float: left;
+  width: 70%;
 }
 
 .splash-screen-item {
-    font-size: 14px;
+  font-size: 14px;
 }
 
 .splash-screen-item em {
-    font-style: normal;
-    font-weight: 500;
+  font-style: normal;
+  font-weight: 500;
 }
 
 .splash-screen .splash-screen-item p {
-    margin-top: 5px;
+  margin-top: 5px;
 }
 
 .start-using-btn-container {
-    font-size: 14px;
+  font-size: 14px;
 
-    float: right;
-    width: calc(30% - 10px);
+  float: right;
+  width: calc(30% - 10px);
 }
 
 .start-using-btn-container p.linkish {
-    margin: 2px 0;
+  margin: 2px 0;
 }
 
 .splash-screen-img {
-    float: left;
+  float: left;
 }
 
-$splash-screen-img-size : 30px;
+$splash-screen-img-size: 30px;
 
 .splash-screen-cloud-img {
-    width: $splash-screen-img-size + 10;
-    height: $splash-screen-img-size;
-    @include centered-img-with-size('splash-cloud', $splash-screen-img-size, $splash-screen-img-size);
+  width: $splash-screen-img-size + 10;
+  height: $splash-screen-img-size;
+  @include centered-img-with-size(
+    "splash-cloud",
+    $splash-screen-img-size,
+    $splash-screen-img-size
+  );
 }
 
 .splash-screen-sharing-img {
-    width: $splash-screen-img-size + 10;
-    height: $splash-screen-img-size;
-    @include centered-img-with-size('splash-sharing', $splash-screen-img-size, $splash-screen-img-size);
+  width: $splash-screen-img-size + 10;
+  height: $splash-screen-img-size;
+  @include centered-img-with-size(
+    "splash-sharing",
+    $splash-screen-img-size,
+    $splash-screen-img-size
+  );
 }
 
 .splash-screen-magic-img {
-    width: $splash-screen-img-size + 10;
-    height: $splash-screen-img-size;
-    @include centered-img-with-size('splash-magic', $splash-screen-img-size, $splash-screen-img-size);
+  width: $splash-screen-img-size + 10;
+  height: $splash-screen-img-size;
+  @include centered-img-with-size(
+    "splash-magic",
+    $splash-screen-img-size,
+    $splash-screen-img-size
+  );
 }
 
 .splash-screen .start-using-btn {
-    display: inline-block;
-    cursor: pointer;
-    padding: 5px;
-    border: 1px solid #357ebd;
-    border-radius: 4px;
-    background-color: #428bca;
-    color: #fff;
-    font-size: 14px;
+  display: inline-block;
+  cursor: pointer;
+  padding: 5px;
+  border: 1px solid #357ebd;
+  border-radius: 4px;
+  background-color: #428bca;
+  color: #fff;
+  font-size: 14px;
 }
 
-.loginwithfb {
-    font-family: 'Lucida Grande', Tahoma, Geneva, Verdana, Helvetica, Arial, sans-serif;
-    font-size: 14px;
-    padding: 10px;
-    padding-left: 34px;
-    color: white;
-    background-color: #183B95;
+.btn.loginwithfb {
+  font-family: "Lucida Grande", Tahoma, Geneva, Verdana, Helvetica, Arial,
+    sans-serif;
+  font-size: 14px;
+  padding: 10px;
+  padding-left: 34px;
+  color: white;
+  background-color: #183b95;
 
-    border-radius: 2px;
-    display: inline-block;
+  border-radius: 2px;
+  display: inline-block;
 
-    background-repeat: no-repeat;
-    background-position: 8px center;
-    background-size: 20px 20px;
-    background-image: url('../img/loginwithfb@2x.png');
+  background-repeat: no-repeat;
+  background-position: 8px center;
+  background-size: 20px 20px;
+  background-image: url("../img/loginwithfb@2x.png");
 }
 p.headline {
-    margin-bottom: 3px;
+  margin-bottom: 3px;
 }
 p.olduser {
-    margin: 0;
-    font-size: 14px;
+  margin: 0;
+  font-size: 14px;
 }
 
 p.olduser a {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 p.olduser a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .splash-screen .promise {
-    font-size: 10px;
-    margin: 1px 0;
+  font-size: 10px;
+  margin: 1px 0;
 }
 
 .classnumber-course-list {
-    margin: 10px;
+  margin: 10px;
 }
