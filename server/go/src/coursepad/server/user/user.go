@@ -320,7 +320,7 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (Session, *User
 	query.Set("access_token", accessToken)
 	query.Set("fields", "id,name,email")
 
-	respData, err := callApi("https://graph.facebook.com/v2.7/me", query)
+	respData, err := callApi("https://graph.facebook.com/v3.3/me", query)
 	if err != nil {
 		return redisSession{}, nil, errors.New("Unable to communicate with Facebook")
 	}
@@ -356,56 +356,6 @@ func handleFacebookLogin(w http.ResponseWriter, r *http.Request) (Session, *User
 	}
 
 	session := MakeSession(userBundle, SESSION_TIMEOUT_EPHEMERAL)
-
-	// Fetch friend list
-	go func() {
-		userIds := make([]string, 0)
-
-		url := "https://graph.facebook.com/v2.2/me/friends?" + query.Encode()
-
-		for {
-			fqlResponse := fqlFriendResponse{}
-
-			data, err := httpGet(url)
-
-			if err != nil {
-				log.Println(err)
-				return
-			}
-
-			err = json.Unmarshal(data, &fqlResponse)
-
-			if err != nil {
-				log.Println(err)
-				return
-			}
-
-			for _, friend := range fqlResponse.Data {
-				userIds = append(userIds, friend.Id)
-			}
-
-			if fqlResponse.Paging == nil || fqlResponse.Paging.Next == nil {
-				break
-			} else {
-				url = *fqlResponse.Paging.Next
-			}
-		}
-
-		tx, err := conn.Begin()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		tx.Exec("DELETE FROM fb_friends WHERE id = $1", userBundle.Id)
-		for _, id := range userIds {
-			_, err := tx.Exec("INSERT INTO fb_friends (id, friend_fbid) VALUES ($1, $2)", userBundle.Id, id)
-			if err != nil {
-				log.Println(err)
-			}
-		}
-
-		tx.Commit()
-	}()
 
 	return session, userBundle, nil
 }

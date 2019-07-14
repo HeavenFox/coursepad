@@ -1,12 +1,6 @@
-import { LEVEL } from "../consts/endpoints";
-
 // Facebook Integration
-var FB_APP_ID;
-if (LEVEL > 5) {
-  FB_APP_ID = "399310256873900";
-} else {
-  FB_APP_ID = "399310430207216";
-}
+const FB_APP_ID =
+  process.env.NODE_ENV === "production" ? "399310256873900" : "399310430207216";
 
 var loadAwaitable, initialized;
 
@@ -25,8 +19,9 @@ export async function init() {
           appId: FB_APP_ID,
           xfbml: false,
           cookie: false,
-          version: "v2.2"
+          version: "v3.3"
         });
+        window.FB.AppEvents.logPageView();
         initialized = true;
         resolve(true);
       };
