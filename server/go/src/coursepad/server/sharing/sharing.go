@@ -324,7 +324,14 @@ func SharedPageHandler(c web.C, w http.ResponseWriter, r *http.Request) {
 			<meta name="twitter:site" content="@CoursePadme">`,
 			html.EscapeString(title), html.EscapeString(description), html.EscapeString(image), IMAGE_WIDTH, IMAGE_HEIGHT)
 
-		indexHtml, err := ioutil.ReadFile(path.Join(*common.FRONTEND_LOCATION, "index.html"))
+		resp, err := http.Get(*common.WEBSITE_ROOT)
+		if err != nil {
+			httperror.NotFound(w, "")
+			return
+		}
+		defer resp.Body.Close()
+
+		indexHtml, err := ioutil.ReadAll(resp.Body)
 
 		if err != nil {
 			panic(err)
