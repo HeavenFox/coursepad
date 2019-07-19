@@ -1,1 +1,2 @@
+http://coursepad.me/*    https://coursepad.me/:splat    301!
 /shared/*    /index.html   200
