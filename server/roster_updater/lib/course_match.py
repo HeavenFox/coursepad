@@ -93,7 +93,7 @@ class CourseMatcher(object):
                     # sanity check
                     for i in range(len(matching)):
                         if matching[i] >= 0:
-                            for j in xrange(i+1, len(matching)):
+                            for j in range(i+1, len(matching)):
                                 if matching[i] == matching[j]:
                                     raise Exception('Wrong matching')
                     # if len(matching) != len(set(matching)):

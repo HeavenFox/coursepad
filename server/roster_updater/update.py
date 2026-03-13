@@ -17,8 +17,8 @@ from lib import r2
 print('CoursePad.me Roster Database Generator')
 print('Current time is: %d' % (int(time.time()), ))
 
-STATIC_PREFIX = os.environ.get('R2_STATIC_PREFIX', 'static')
-ROLLBACK_PREFIX = os.environ.get('R2_ROLLBACK_PREFIX', 'rollback')
+STATIC_PREFIX = 'static'
+ROLLBACK_PREFIX = 'rollback'
 OMIT_TERM = set(os.environ.get('OMIT_TERM', '').split(',')) - {''}
 FORCE_TERM = set(os.environ.get('FORCE_TERM', '').split(',')) - {''}
 
