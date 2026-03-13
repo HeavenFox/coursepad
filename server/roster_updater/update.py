@@ -1,28 +1,24 @@
 import gc
 import json
 import sys
-import re
 import os
 import time
-import datetime
 import dateutil.parser
-import copy
 import urllib.parse
 import urllib.request
 import traceback
-import shutil
-from pytz import timezone
 from collections import defaultdict
 
 from lib.course import CourseParserJson
 from lib.course_match import CourseMatcher
 from lib.subject_match import SubjectMatcher
+from lib import r2
 
 print('CoursePad.me Roster Database Generator')
 print('Current time is: %d' % (int(time.time()), ))
 
-ROOT = os.environ['ROSTER_DATA_DIR']
-ROLLBACK_DIR = os.environ['ROLLBACK_DIR']
+STATIC_PREFIX = os.environ.get('R2_STATIC_PREFIX', 'static')
+ROLLBACK_PREFIX = os.environ.get('R2_ROLLBACK_PREFIX', 'rollback')
 OMIT_TERM = set(os.environ.get('OMIT_TERM', '').split(',')) - {''}
 FORCE_TERM = set(os.environ.get('FORCE_TERM', '').split(',')) - {''}
 
@@ -72,44 +68,32 @@ def make_api_call(endpoint, args=None):
         return result['data']
 
 
-
-def data_index_file(fn, path=None):
-    return os.path.join(ROOT if path is None else path, 'data_index', fn)
-
-with open(data_index_file('meta.json'), 'r') as f:
-    meta = json.load(f)
-
-with open(data_index_file('version_history.json'), 'r') as f:
-    version_history = json.load(f)
+meta = r2.read_json(STATIC_PREFIX, 'data_index/meta.json')
+version_history = r2.read_json(STATIC_PREFIX, 'data_index/version_history.json')
 
 
 def persist_index():
-    with open(data_index_file('meta.json'), 'w') as f:
-        json.dump(meta, f)
-    with open(data_index_file('version_history.json'), 'w') as f:
-        json.dump(version_history, f)
-
+    r2.write_json(STATIC_PREFIX, 'data_index/meta.json', meta)
+    r2.write_json(STATIC_PREFIX, 'data_index/version_history.json', version_history)
 
 
 # Read Previous Course ID
-course_id_path = os.path.join(ROOT, 'track', 'course_id')
-course_id_max = int(open(course_id_path, 'r').read())
-
-def ensure_dir(path):
-    try:
-        os.makedirs(path)
-    except OSError:
-        pass
+course_id_max = int(r2.read_text(STATIC_PREFIX, 'track/course_id'))
 
 def backup_data_index():
-    rollback_path = os.path.join(ROLLBACK_DIR, str(int(time.time())))
-    for d in ['data_index', 'track']:
-        ensure_dir(os.path.join(rollback_path, d))
+    rollback_path = str(int(time.time()))
 
     for fn in ['meta.json', 'version_history.json']:
-        shutil.copyfile(data_index_file(fn), data_index_file(fn, rollback_path))
+        r2.copy_object(
+            STATIC_PREFIX, 'data_index/' + fn,
+            ROLLBACK_PREFIX, rollback_path + '/data_index/' + fn,
+        )
 
-    open(os.path.join(rollback_path, 'track', 'course_id'), 'w').write(str(course_id_max))
+    r2.write_text(
+        ROLLBACK_PREFIX,
+        rollback_path + '/track/course_id',
+        str(course_id_max),
+    )
 
 
 def print_nolf(content):
@@ -120,8 +104,6 @@ def update_term(term, roster_time):
     global course_id_max
 
     print('Reading subject list...')
-
-    raw_data = {}
 
     # subjectlist
     subjects = []
@@ -165,7 +147,7 @@ def update_term(term, roster_time):
     previous_maxid = course_id_max
 
     if term in meta['roster_time']:
-        previous_db = json.load(open(os.path.join(ROOT, 'data', 'termdb_%s_%d.json' % (term, meta['roster_time'][term]))))
+        previous_db = r2.read_json(STATIC_PREFIX, 'data/termdb_%s_%d.json' % (term, meta['roster_time'][term]))
 
         print('Previous Database Loaded. There are %d courses in total' % len(previous_db['roster']))
         print_nolf('Building Index on Previous DB...')
@@ -232,9 +214,8 @@ def update_term(term, roster_time):
 
 
     print_nolf('Writing term database...')
-    # json.dump(raw_data, open(os.path.join(config.AUDIT_DIR, 'raw_data', '%s_%d.json' % (term, roster_time)), 'wb'))
 
-    json.dump(term_db, open(os.path.join(ROOT, 'data', 'termdb_%s_%d.json' % (term, roster_time)), 'w'))
+    r2.write_json(STATIC_PREFIX, 'data/termdb_%s_%d.json' % (term, roster_time), term_db)
     print('Done.')
 
 
@@ -255,7 +236,7 @@ def update_term(term, roster_time):
             'prev_time' : previous_db['time']
         }
 
-        json.dump(diff_db, open(os.path.join(ROOT, 'data', 'diffs', 'diff_termdb_%s_%d_%d.json' % (term, previous_db['time'], roster_time)), 'w'))
+        r2.write_json(STATIC_PREFIX, 'data/diffs/diff_termdb_%s_%d_%d.json' % (term, previous_db['time'], roster_time), diff_db)
         print('Done.')
 
     meta['generated_at'] = int(time.time())
@@ -272,8 +253,7 @@ def update_term(term, roster_time):
 
     print_nolf('Writing index and course id...')
     persist_index()
-    with open(course_id_path, 'w') as f:
-        f.write(str(course_id_max))
+    r2.write_text(STATIC_PREFIX, 'track/course_id', str(course_id_max))
     print('Done.')
 
 

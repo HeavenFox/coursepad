@@ -19,12 +19,12 @@ class SubjectMatcher(object):
         self.deleted = []
         self.modified = []
 
-        for key, value in subjects_by_key.iteritems():
+        for key, value in subjects_by_key.items():
             if key not in previous_subjects_by_key:
                 self.added.append(value)
             elif previous_subjects_by_key[key] != subjects_by_key[key]:
                 self.modified.append(value)
 
-        for key in previous_subjects_by_key.iterkeys():
+        for key in previous_subjects_by_key:
             if key not in subjects_by_key:
                 self.deleted.append(key)

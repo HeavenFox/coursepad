@@ -161,7 +161,7 @@ class CourseParserXML(CourseParser):
 
         result = re.search(r'\((.+)\)', name)
         if result is None:
-            print "warning: %s dont have netid" % name
+            print("warning: %s dont have netid" % name)
             return name
         else:
             netid = result.group(1)

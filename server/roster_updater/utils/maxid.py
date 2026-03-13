@@ -1,6 +1,6 @@
 import sys
-import simplejson
+import json
 
 f = open(sys.argv[1], 'r')
-json = simplejson.load(f)
-print max(k['id'] for k in json['roster'])
+data = json.load(f)
+print(max(k['id'] for k in data['roster']))
