@@ -1,7 +1,5 @@
-from __future__ import division, print_function
-
 import gc
-import simplejson
+import json
 import sys
 import re
 import os
@@ -9,8 +7,8 @@ import time
 import datetime
 import dateutil.parser
 import copy
-import urllib
-import urllib2
+import urllib.parse
+import urllib.request
 import traceback
 import shutil
 from pytz import timezone
@@ -52,14 +50,14 @@ def make_api_call(endpoint, args=None):
     url = 'https://classes.cornell.edu/api/2.0/' + endpoint
     if args is not None:
         url += '?'
-        url += urllib.urlencode(args)
+        url += urllib.parse.urlencode(args)
 
     retry = 3
     result = None
     while retry > 0:
         retry -= 1
         try:
-            result = simplejson.load(urllib2.urlopen(url))
+            result = json.load(urllib.request.urlopen(url))
             break
         except Exception as e:
             print('Error: %s, retrying...' % e)
@@ -78,17 +76,17 @@ def data_index_file(fn, path=None):
     return os.path.join(ROOT if path is None else path, 'data_index', fn)
 
 with open(data_index_file('meta.json'), 'r') as f:
-    meta = simplejson.load(f)
+    meta = json.load(f)
 
 with open(data_index_file('version_history.json'), 'r') as f:
-    version_history = simplejson.load(f)
+    version_history = json.load(f)
 
 
 def persist_index():
-    with open(data_index_file('meta.json'), 'wb') as f:
-        simplejson.dump(meta, f)
-    with open(data_index_file('version_history.json'), 'wb') as f:
-        simplejson.dump(version_history, f)
+    with open(data_index_file('meta.json'), 'w') as f:
+        json.dump(meta, f)
+    with open(data_index_file('version_history.json'), 'w') as f:
+        json.dump(version_history, f)
 
 
 
@@ -166,7 +164,7 @@ def update_term(term, roster_time):
     previous_maxid = course_id_max
 
     if term in meta['roster_time']:
-        previous_db = simplejson.load(open(os.path.join(ROOT, 'data', 'termdb_%s_%d.json' % (term, meta['roster_time'][term]))))
+        previous_db = json.load(open(os.path.join(ROOT, 'data', 'termdb_%s_%d.json' % (term, meta['roster_time'][term]))))
 
         print('Previous Database Loaded. There are %d courses in total' % len(previous_db['roster']))
         print_nolf('Building Index on Previous DB...')
@@ -233,9 +231,9 @@ def update_term(term, roster_time):
 
 
     print_nolf('Writing term database...')
-    # simplejson.dump(raw_data, open(os.path.join(config.AUDIT_DIR, 'raw_data', '%s_%d.json' % (term, roster_time)), 'wb'))
+    # json.dump(raw_data, open(os.path.join(config.AUDIT_DIR, 'raw_data', '%s_%d.json' % (term, roster_time)), 'wb'))
 
-    simplejson.dump(term_db, open(os.path.join(ROOT, 'data', 'termdb_%s_%d.json' % (term, roster_time)), 'wb'))
+    json.dump(term_db, open(os.path.join(ROOT, 'data', 'termdb_%s_%d.json' % (term, roster_time)), 'w'))
     print('Done.')
 
 
@@ -256,7 +254,7 @@ def update_term(term, roster_time):
             'prev_time' : previous_db['time']
         }
 
-        simplejson.dump(diff_db, open(os.path.join(ROOT, 'data', 'diffs', 'diff_termdb_%s_%d_%d.json' % (term, previous_db['time'], roster_time)), 'wb'))
+        json.dump(diff_db, open(os.path.join(ROOT, 'data', 'diffs', 'diff_termdb_%s_%d_%d.json' % (term, previous_db['time'], roster_time)), 'w'))
         print('Done.')
 
     meta['generated_at'] = int(time.time())
