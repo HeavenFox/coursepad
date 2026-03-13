@@ -16,7 +16,7 @@ export default class App extends React.Component<{}, {}> {
             <div id="logo"></div>
             <div id="topnav">
                 <TermSelector />
-                <User />
+                {process.env.REACT_APP_ALLOW_LOGIN && <User />}
             </div>
             <div id="topsearch">
                 <SearchBar />
