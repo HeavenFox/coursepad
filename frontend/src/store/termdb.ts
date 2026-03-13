@@ -17,16 +17,6 @@ var currentTermDB: TermDatabase = null;
 var currentPreference = DBPreference.PREFER_FASTER;
 
 
-function useLocal() {
-    try {
-        IDBKeyRange.only([1, 2]);
-    } catch (e) {
-        return false;
-    }
-    return window.indexedDB && !(navigator && navigator.userAgent.indexOf('Safari') > -1
-           && navigator.userAgent.indexOf('Chrome') == -1);
-}
-
 function localTermDownloaded(term) {
     return meta.getLocalTerms().hasOwnProperty(term);
 }
@@ -167,7 +157,7 @@ class TermDBStore extends EventEmitter {
             });
         };
 
-        if (useLocal() && preference === DBPreference.PREFER_FASTER) {
+        if (preference === DBPreference.PREFER_FASTER) {
             console.log('Using indexedDB');
             if (localTermDownloaded(term)) {
                 // Downloaded, so we can just use it
