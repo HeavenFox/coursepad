@@ -18,12 +18,13 @@ from lib.course import CourseParserJson
 from lib.course_match import CourseMatcher
 from lib.subject_match import SubjectMatcher
 
-import config
-
 print('CoursePad.me Roster Database Generator')
 print('Current time is: %d' % (int(time.time()), ))
 
-ROOT = config.ROSTER_DATA_DIR
+ROOT = os.environ['ROSTER_DATA_DIR']
+ROLLBACK_DIR = os.environ['ROLLBACK_DIR']
+OMIT_TERM = set(os.environ.get('OMIT_TERM', '').split(',')) - {''}
+FORCE_TERM = set(os.environ.get('FORCE_TERM', '').split(',')) - {''}
 
 class UpdateError(Exception):
     pass
@@ -101,7 +102,7 @@ def ensure_dir(path):
         pass
 
 def backup_data_index():
-    rollback_path = os.path.join(config.ROLLBACK_DIR, str(int(time.time())))
+    rollback_path = os.path.join(ROLLBACK_DIR, str(int(time.time())))
     for d in ['data_index', 'track']:
         ensure_dir(os.path.join(rollback_path, d))
 
@@ -290,12 +291,12 @@ for roster in rosters['rosters']:
     slug = roster['slug']
     term = slug.lower()
 
-    if term in config.OMIT_TERM:
+    if term in OMIT_TERM:
         print('Omitting %s due to config' % (term, ))
         continue
 
     roster_time = isotime_to_unix(roster['lastModifiedDttm'])
-    if term not in config.FORCE_TERM:
+    if term not in FORCE_TERM:
         if roster['archiveMode'] == 'Y':
             print('Omitting %s: archive mode' % (term, ))
             continue
